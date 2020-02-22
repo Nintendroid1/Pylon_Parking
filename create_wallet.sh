@@ -3,6 +3,7 @@
 if [ -z "$1" ]
    then
       echo "No argument supplied"
+      exit 1
 fi
 
 cleos wallet create -f "$1_wallet_key.txt"
