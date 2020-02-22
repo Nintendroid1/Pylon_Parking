@@ -1,0 +1,18 @@
+{
+  "name": "pylon-parking",
+  "version": "1.0.0",
+  "description": "A blockchain solution for reserving parking spots",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://git.cs.vt.edu/nateg98/pylon-parking.git"
+  },
+  "author": "Nathaniel Salazar",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}
