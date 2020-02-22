@@ -6,8 +6,7 @@ if [ -z "$1" ]
       exit 1
 fi
 
-cleos wallet create -f "$1_wallet_key.txt"
-mv default.wallet $1.wallet
+cleos wallet create -n $1.wallet -f "$1_wallet_key.txt"
 
 cleos wallet unlock < $1_wallet_key.txt
 
