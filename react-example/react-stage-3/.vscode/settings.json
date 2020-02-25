@@ -1,0 +1,13 @@
+{
+    "editor.minimap.enabled": false,
+    "workbench.iconTheme": "material-icon-theme",
+    "[javascript]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "editor.autoClosingBrackets": "never",
+    "C_Cpp.autocomplete": "Disabled",
+    "typescript.suggest.enabled": false,
+    "editor.tabCompletion": "onlySnippets",
+    "javascript.suggest.enabled": false,
+    "editor.acceptSuggestionOnCommitCharacter": false
+}
