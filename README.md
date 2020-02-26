@@ -3,4 +3,4 @@
 
 A blockchain solution for reserving parking spots
 
-![Make me a sandwich](.media/sandwich.png)
+![Make me a sandwich](media/sandwich.png)
