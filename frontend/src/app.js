@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import TabChooser from './ui/TabChooser';
-import WelcomeTab from './tabs/welcome';
+import WelcomeTab from './pages/welcome';
 //import RegisterTab from './tabs/register';
 //import LoginTab from './tabs/login';
 import { Route } from 'react-router';
@@ -64,17 +64,6 @@ const App = ({ classes, ...props }) => {
   //localStorage.lastTab = "/";
   // history.push(history.location);
 
-  let tabs = [
-    { text: 'Welcome', path: '/', component: WelcomeTab, hidden: false },
-    {
-      text: 'Surveys',
-      path: '/questions',
-      component: SurveyTab,
-      hidden: false
-    },
-    //{ text: 'Login', path: '/login', component: LoginTab, hidden: true },
-  ];
-
   // eslint-disable-next-line
   // let [currentUser, updateUser] = useState(initialUser);
 
@@ -101,6 +90,16 @@ const App = ({ classes, ...props }) => {
                 hidden={false}
                 reqAdmin={false}
                 reqLogin={false}
+                component={WelcomeTab}
+              />
+              <Route
+                exact
+                path="/profile"
+                label="Profile"
+                key="/profile"
+                reqAdmin={false}
+                reqLogin={true}
+                hidden={false}
                 component={WelcomeTab}
               />
 

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { makeAPICall } from '../api';
-import UserForm from './forms/userinformation';
+import UserForm from './forms/registerform';
 import { Typography, LinearProgress } from '@material-ui/core';
 import {Redirect, withRouter} from 'react-router';
 import apiprefix from './apiprefix';

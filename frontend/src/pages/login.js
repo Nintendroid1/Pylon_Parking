@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { makeAPICall } from '../api';
-import LoginForm from './forms/userloginform';
+import LoginForm from './forms/loginform';
 import { Typography, LinearProgress } from '@material-ui/core';
 import history from '../history';
 import { withStyles, withTheme } from '@material-ui/core/styles';

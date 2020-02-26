@@ -124,6 +124,7 @@ function TabChooser({
   ...props
 }) {
   console.log(props);
+  console.log(children);
 
   //let tabs = children.filter(tab => tab && !tab.props.hidden);
 
