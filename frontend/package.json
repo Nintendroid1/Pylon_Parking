@@ -1,5 +1,5 @@
 {
-  "name": "cs3754-react-stage-1",
+  "name": "pylon-parking",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
@@ -9,17 +9,21 @@
     "array-move": "^2.1.0",
     "axios": "^0.18.1",
     "eslint-plugin-react-hooks": "^1.6.0",
+    "konva": "^4.1.6",
     "query-string": "^6.4.2",
     "react": "^16.8.6",
     "react-dnd": "^7.4.5",
     "react-dnd-html5-backend": "^7.4.4",
     "react-dom": "^16.8.6",
+    "react-images": "^1.1.0-beta.3",
+    "react-konva": "^16.12.0-0",
     "react-router-dom": "^5.0.0",
     "react-scripts": "^3.3.1",
     "react-sortable-hoc": "^1.9.1",
     "react-vis": "^1.11.7",
     "socket.io": "^2.2.0",
-    "socket.io-client": "^2.2.0"
+    "socket.io-client": "^2.2.0",
+    "use-image": "^1.0.5"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -53,5 +57,5 @@
     "eslint-plugin-prettier": "^3.0.1",
     "prettier": "^1.17.0"
   },
-  "homepage": "/projects/ex10"
+  "homepage": "/"
 }

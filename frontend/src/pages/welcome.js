@@ -17,18 +17,7 @@ const WelcomeTab = ({ classes, ...props }) => {
       </Typography>
       <Typography component={'span'} variant="h6">
         <div align="center" style={{ paddingTop: '30px' }}>
-          {'Click to see the available '}
-          <Link
-            className={classes.tabLink}
-            to={{
-              pathname: `/questions`,
-              state: {
-                from: '/'
-              }
-            }}
-          >
-            surveys
-          </Link>
+          {'Parkings spots of the future'}
         </div>
       </Typography>
     </>

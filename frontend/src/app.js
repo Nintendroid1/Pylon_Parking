@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import TabChooser from './ui/TabChooser';
 import WelcomeTab from './pages/welcome';
+import MainMap from './pages/MainMap';
 //import RegisterTab from './tabs/register';
 //import LoginTab from './tabs/login';
 import { Route } from 'react-router';
@@ -10,7 +11,7 @@ import {
   MuiThemeProvider,
   createMuiTheme
 } from '@material-ui/core/styles';
-import { green } from '@material-ui/core/colors';
+import { green, red } from '@material-ui/core/colors';
 import CssBaseline from '@material-ui/core/CssBaseline';
 //import { withRouter, Switch as RRSwitch } from 'react-router';
 //import { Link as RRLink } from 'react-router-dom';
@@ -28,15 +29,20 @@ const styles = theme => ({
   }
 });
 
-const darkTheme = createMuiTheme({
+const defaultTheme = createMuiTheme({
   palette: {
-    primary: green,
-    type: 'dark' // Switching the dark mode on is a single property value change.
+    primary: { main: '#6A2C3E' },
+    secondary: { main: '#CF4520' },
+    type: 'light' // Switching the dark mode on is a single property value change.
   },
   typography: { useNextVariants: true } // avoids deprecated warning
 });
 
-const defaultTheme = createMuiTheme({
+const darkTheme = createMuiTheme({
+  pallete: {
+    primary: { main: '#6A2C3E' },
+    type: 'light'
+  },
   typography: { useNextVariants: true } // avoids deprecated warning
 });
 
@@ -69,7 +75,7 @@ const App = ({ classes, ...props }) => {
 
   return (
     <React.Fragment>
-      <MuiThemeProvider theme={isDark ? darkTheme : defaultTheme}>
+      <MuiThemeProvider theme={defaultTheme}>
         <div className={classes.root}>
           <CssBaseline />
           <Router basename={`${process.env.PUBLIC_URL}`} history={history}>
@@ -94,6 +100,16 @@ const App = ({ classes, ...props }) => {
               />
               <Route
                 exact
+                path="/map"
+                label="Map"
+                key="/map"
+                hidden={false}
+                reqAdmin={false}
+                reqLogin={false}
+                component={MainMap}
+              />
+              <Route
+                exact
                 path="/profile"
                 label="Profile"
                 key="/profile"
@@ -111,22 +127,4 @@ const App = ({ classes, ...props }) => {
   );
 };
 
-/*
-        <TabChooser>
-          <WelcomeTab label="Welcome" name="WelcomeTab" path="/welcome"/>
-          <RegisterTab label="Register" name="RegisterTab" path="/register" updateUser={updateUser} />
-          <LoginTab label="Login" name="LoginTab" path="/login" updateUser={updateUser} />
-          <ProfileTab label="Profile" name="ProfileTab" path="/profile"/>
-          <ListTab label="List Users" name="ListTab" path="/listusers"/>
-        </TabChooser>
-
-
-                    <TabChooser changeTheme={switchThemeFunc} isLoggedIn={isLoggedIn}>
-              {tabs.map(tab => (
-                <Route exact path={tab.path} label={tab.text}>
-                  <tab.component isDark={isDark} updateLogin={updateLogin} />
-                </Route>
-              ))}
-            </TabChooser>
-        */
 export default withStyles(styles)(App);

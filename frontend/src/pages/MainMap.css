@@ -1,0 +1,13 @@
+.container: {
+  display: 'flex';
+  flexgrow: 1;
+  width: 220;
+  height: 420;
+  text-align: center;
+}
+
+.main_map: {
+  width: '100%';
+  height: 'auto';
+  align: 'center';
+}
