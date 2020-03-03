@@ -25,3 +25,4 @@ yarn-error.log*
 # Ignore vim stuff
 *.sw?
 *.vim
+tags
