@@ -9,7 +9,7 @@ router.get('/', (req, res) => {
     res.send("This should be login api");
 });
 
-router.post('/', (req,res) => {
+router.post('/login', (req,res) => {
     //Check database
     const isValidLogin = true;
 
@@ -25,4 +25,9 @@ router.post('/', (req,res) => {
     }
 });
 
+router.post('/register', (req,res) => {
+    //Check database for duplicate username/email
+    //Add into database new user stuff
+    //do login
+});
 module.exports = router;
