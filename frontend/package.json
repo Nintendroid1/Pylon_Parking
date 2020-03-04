@@ -12,6 +12,7 @@
     "konva": "^4.1.6",
     "query-string": "^6.4.2",
     "react": "^16.8.6",
+    "react-css-modules": "^4.7.11",
     "react-dnd": "^7.4.5",
     "react-dnd-html5-backend": "^7.4.4",
     "react-dom": "^16.8.6",

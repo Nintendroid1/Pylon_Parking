@@ -1,8 +1,8 @@
 .container: {
   display: 'flex';
   flexgrow: 1;
-  width: 220;
-  height: 420;
+  width: 120;
+  height: 120;
   text-align: center;
 }
 
@@ -10,4 +10,8 @@
   width: '100%';
   height: 'auto';
   align: 'center';
+}
+
+.eggs: {
+    color: green;
 }

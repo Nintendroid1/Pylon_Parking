@@ -7,6 +7,22 @@ import './MainMap.css';
 const styles = theme => ({
   tabLink: {
     color: theme.palette.secondary.main
+  },
+  container: {
+    display: 'flex',
+    flexgrow: 1,
+    width: 820,
+    height: 420,
+    alignItems: 'center',
+    justifyContent: 'center',
+    textAlign: 'center'
+  },
+  main_map: {
+    width: '100%',
+    height: 'auto'
+  },
+  eggs: {
+    color: 'green'
   }
 });
 
@@ -17,14 +33,19 @@ const MainMap = ({ classes, ...props }) => {
         Parking Map
       </Typography>
       <Typography component={'span'} variant="h6">
-        <div align="center" style={{ paddingTop: '30px' }}>
+        <div
+          className={classes.eggs}
+          align="center"
+          style={{ paddingTop: '30px' }}
+        >
           {'Parkings spots of the future'}
         </div>
       </Typography>
-      <div className="container" id="image_container">
+      <div align="center" className={classes.container}>
         <img
-          className="main_map"
-          id="main-map"
+          className={classes.main_map}
+          align="center"
+          id="main_map"
           src={require('./images/parking-map.png')}
           alt="map"
         />
