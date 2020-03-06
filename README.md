@@ -1,8 +1,6 @@
 # Pylon Parking
 ### Systems and Networking Capstone Spring 2020
 
-![Parking Lots](media/parking-map-cropped.png)
+A blockchain solution for reserving parking spots
 
-
-### Database
-![Crude Database](media/capston_database_schema.png)
+![Make me a sandwich](media/sandwich.png)
