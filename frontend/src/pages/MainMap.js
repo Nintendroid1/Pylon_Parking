@@ -18,9 +18,6 @@ const styles = theme => ({
   main_map: {
     width: '100%',
     height: 'auto'
-  },
-  eggs: {
-    color: 'green'
   }
 });
 
