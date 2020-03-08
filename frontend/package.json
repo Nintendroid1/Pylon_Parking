@@ -1,0 +1,62 @@
+{
+  "name": "pylon-parking",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@material-ui/core": "^3.9.3",
+    "@material-ui/icons": "^3.0.2",
+    "@material/dialog": "^1.1.1",
+    "array-move": "^2.1.0",
+    "axios": "^0.18.1",
+    "eslint-plugin-react-hooks": "^1.6.0",
+    "konva": "^4.1.6",
+    "query-string": "^6.4.2",
+    "react": "^16.8.6",
+    "react-css-modules": "^4.7.11",
+    "react-dnd": "^7.4.5",
+    "react-dnd-html5-backend": "^7.4.4",
+    "react-dom": "^16.8.6",
+    "react-images": "^1.1.0-beta.3",
+    "react-konva": "^16.12.0-0",
+    "react-router-dom": "^5.0.0",
+    "react-scripts": "^3.3.1",
+    "react-sortable-hoc": "^1.9.1",
+    "react-vis": "^1.11.7",
+    "socket.io": "^2.2.0",
+    "socket.io-client": "^2.2.0",
+    "use-image": "^1.0.5"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "plugin:prettier/recommended"
+    ],
+    "plugins": [
+      "react-hooks"
+    ],
+    "rules": {
+      "react-hooks/rules-of-hooks": "error"
+    }
+  },
+  "browserslist": [
+    ">0.2%",
+    "not dead",
+    "not ie <= 11",
+    "not op_mini all"
+  ],
+  "prettier": {
+    "singleQuote": true
+  },
+  "devDependencies": {
+    "eslint-config-prettier": "^4.1.0",
+    "eslint-plugin-prettier": "^3.0.1",
+    "prettier": "^1.17.0"
+  },
+  "homepage": "/"
+}

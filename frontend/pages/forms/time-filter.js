@@ -45,6 +45,8 @@ const TimeFilter = (...props) => {
     date: today,
     startTime: currTime,
     endTime: "24:00",
+    privateKey: "",
+    showPrivateKey: false,
   });
 
   const handleTimeChange = event => {
@@ -56,13 +58,12 @@ const TimeFilter = (...props) => {
     updateTime({ ...time, date: newDate })
   }
 
-  const handleSubmit = event => {
-    event.preventDefault();
+  const handleSubmit = () => {
     onSubmit(time);
   };
 
   <MuiPickersUtilsProvider utils={DateFnsUtils}>
-    <form onSubmit={handleSubmit} >
+    <form>
       <Grid container justify="space-around">
         <KeyboardDatePicker
           disableToolbar
@@ -84,6 +85,7 @@ const TimeFilter = (...props) => {
           updateTime={updateTime} 
           popUpTitle={popUpTitle}
           popUpContent={popUpContent}
+          handleOnConfirm={handleSubmit}
         />
       </Grid>
     </form>

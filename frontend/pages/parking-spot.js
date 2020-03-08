@@ -22,13 +22,20 @@ import history from '../history';
 import { Link } from 'react-router-dom';
 import apiprefix from './apiprefix';
 import TimeFilter from './forms/time-filter';
-import { StartEndTime } from './forms/parking-spot-components';
+import { StartEndTime, CostField } from './forms/parking-spot-components';
 import "date-fns";
 import Grid from "@material-ui/core/Grid";
 import DateFnsUtils from "@date-io/date-fns";
 import {
   MuiPickersUtilsProvider
 } from "@material-ui/pickers";
+
+const calculatePrice = (startTime, endTime) => {
+  let temp = parkingSpotInfo.filter(e => (e.startTime <= startTime && e.endTime > startTime) ||
+                                          e.startTime < endTime && e.endTime >= endTime)
+
+  // Calculate the price for the spot.
+};
 
 const compareTime = (time1, time2) => {
   const t1 = time1.split(':');
@@ -88,6 +95,8 @@ const ParkingSpot = ({ ...props }) => {
   let tempUrl = window.location.pathname;
   let id = Number(tempUrl.substring(tempUrl.lastIndexOf('/') + 1));
 
+  let popUpMessage = `Are you sure you want to rent parking spot ${id} from ${time.startTime} to ${time.endTime} for ${calculatePrice(time.startTime, time.endTime)} hokie tokens?`
+
   const [message, updateMessage] = useState(null);
   const [parkingSpotInfo, updateParkingSpotInfo] = useState(null);
   const [time, updateTime] = useState({
@@ -115,7 +124,9 @@ const ParkingSpot = ({ ...props }) => {
   // Buying option, confirmation message and so forth.
   const handleBuyRequest = async () => {
     // Redirect them to invoice page.
-    const url = `${apiprefix}/parking_spot/${id}/buy/?startTime=${time.startTime}&endTime=${time.endTime}`
+    const url = `${apiprefix}/parking_spot/${id}/buy/?startTime=${time.startTime}&endTime=${time.endTime}`;
+
+    // make smart contract and redirect to invoice.
   }
 
   listParkingSpotTimes();
@@ -131,7 +142,15 @@ const ParkingSpot = ({ ...props }) => {
           ) : <div>
             <MuiPickersUtilsProvider utils={DateFnsUtils}>
               <form onSubmit={handleBuyRequest}>
-                <StartEndTime time={time} updateTime={updateTime} buttonName={"Buy!"} />
+                <StartEndTime 
+                  time={time} 
+                  updateTime={updateTime} 
+                  buttonName={"Buy!"} 
+                  calculateCost={calculatePrice} 
+                  handleOnConfirm={handleBuyRequest}
+                  popUpTitle={"Confirmation"}
+                  popUpContent={popUpMessage}
+                />
               </form>
             </MuiPickersUtilsProvider>
             <MakeTable parkingInfo={parkingSpotInfo} />

@@ -1,0 +1,17 @@
+.container: {
+  display: 'flex';
+  flexgrow: 1;
+  width: 120;
+  height: 120;
+  text-align: center;
+}
+
+.main_map: {
+  width: '100%';
+  height: 'auto';
+  align: 'center';
+}
+
+.eggs: {
+    color: green;
+}
