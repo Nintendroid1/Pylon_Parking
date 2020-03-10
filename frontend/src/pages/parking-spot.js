@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-//import { makeAPICall } from '../api';
+import { makeAPICall } from '../api';
 import PropTypes from 'prop-types';
 import { withStyles, withTheme } from '@material-ui/core/styles';
 import Table from '@material-ui/core/Table';
@@ -17,9 +17,9 @@ import RequireAuthentication from '../RequireAuthentication';
 import queryString from 'query-string';
 import IconButton from '@material-ui/core/IconButton';
 import EditIcon from '@material-ui/icons/Edit';
-//import history from '../../history';
+import history from '../history';
 import { Link } from 'react-router-dom';
-//import apiprefix from './apiprefix';
+import apiprefix from './apiprefix';
 import TimeFilter from './forms/time-filter';
 import { StartEndTime, CostField } from './forms/parking-spot-components';
 import "date-fns";
@@ -35,14 +35,6 @@ const TempInput = [
   { startTime: '13:00', endTime: '14:00', cost: '2' },
   { startTime: '14:00', endTime: '21:00', cost: '1' },
 ];
-
-const calculatePrice = (startTime, endTime) => {
-  //let temp = parkingSpotInfo.filter(e => (e.startTime <= startTime && e.endTime > startTime) ||
-   //                                       e.startTime < endTime && e.endTime >= endTime)
-
-   return 1;
-  // Calculate the price for the spot.
-};
 
 const compareTime = (time1, time2) => {
   const t1 = time1.split(':');
@@ -138,6 +130,13 @@ const ParkingSpot = ({ ...props }) => {
     updateMessage(null);
     updateParkingSpotInfo(TempInput);
   }
+
+  const calculatePrice = (startTime, endTime) => {
+    let temp = parkingSpotInfo.filter(e => (e.startTime <= startTime && e.endTime > startTime) ||
+                                            e.startTime < endTime && e.endTime >= endTime)
+  
+    // Calculate the price for the spot.
+  };
 
   // Buying option, confirmation message and so forth.
   const handleBuyRequest = async () => {
