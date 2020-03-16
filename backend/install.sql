@@ -1,8 +1,6 @@
 drop table if exists users cascade;
-drop table if exists transactions cascade;
-drop table if exists time_slots cascade;
+drop table if exists zones cascade;
 drop table if exists parking_spots cascade;
-drop table if exists wallets cascade;
 
 CREATE TABLE users
 (
