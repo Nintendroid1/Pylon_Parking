@@ -61,7 +61,9 @@ const LoginTab = ({
       }
 
       history.replace(nextLocation.pathname);
-      window.location.href = `${process.env.PUBLIC_URL}${nextLocation.pathname}`;
+      window.location.href = `${process.env.PUBLIC_URL}${
+        nextLocation.pathname
+      }`;
       //history.goForward();
       /*} else {
         history.push('/');

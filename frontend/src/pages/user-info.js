@@ -22,36 +22,29 @@ import history from '../../history';
 import { Link } from 'react-router-dom';
 import apiprefix from './apiprefix';
 
-const UserInfo = (props) => {
-
+const UserInfo = props => {
   const [message, updateMessage] = useState(null);
 
   let getUserInfo = async () => {
     let id = localStorage.blockchain_id; // change if necessary.
 
-    let url = `${apiprefix}/user/${id}`
+    let url = `${apiprefix}/user/${id}`;
     let response = await makeAPICall('GET', url);
     let respbody = await response.json();
 
     if (response.status === 200) {
       // do something.
     } else {
-      updateMessage(
-        <div>
-          Failed to get user.
-        </div>
-      );
+      updateMessage(<div>Failed to get user.</div>);
     }
-  }
+  };
 
   // Change to something more meaningful.
   return (
     <>
       <div>
-        <Typography>
-          {message}
-        </Typography>
+        <Typography>{message}</Typography>
       </div>
     </>
   );
-}
+};

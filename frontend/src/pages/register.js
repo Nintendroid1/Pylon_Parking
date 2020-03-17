@@ -3,9 +3,8 @@ import PropTypes from 'prop-types';
 import { makeAPICall } from '../api';
 import UserForm from './forms/registerform';
 import { Typography, LinearProgress } from '@material-ui/core';
-import {Redirect, withRouter} from 'react-router';
+import { Redirect, withRouter } from 'react-router';
 import apiprefix from './apiprefix';
-
 
 const styles = theme => ({
   main: {
@@ -43,7 +42,6 @@ const RegisterTab = ({ isDark, updateLogin, updateUser, updateAdmin }) => {
   const [isLoad, setLoading] = useState(false);
   const [messageColor, setMsgColor] = useState(isDark ? '#FFFFFF' : '#000000');
   const [isOk, updateOk] = useState(false);
- 
 
   // handle user registeration
   const addNewUser = async values => {
@@ -68,17 +66,16 @@ const RegisterTab = ({ isDark, updateLogin, updateUser, updateAdmin }) => {
       updateAdmin(body.user.admin);
 
       updateLogin(true);
-    }
-    else {
+    } else {
       updateOk(false);
-      setMsgColor('#fc3c3c')
+      setMsgColor('#fc3c3c');
     }
   };
 
   if (isOk) {
-    return <Redirect to={"/"} />
+    return <Redirect to={'/'} />;
   }
-  
+
   return (
     <>
       <Typography align="center" variant="h5" gutterBottom>

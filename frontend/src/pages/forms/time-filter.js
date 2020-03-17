@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import "date-fns";
-import Grid from "@material-ui/core/Grid";
-import DateFnsUtils from "@date-io/date-fns";
+import 'date-fns';
+import Grid from '@material-ui/core/Grid';
+import DateFnsUtils from '@date-io/date-fns';
 import {
   MuiPickersUtilsProvider,
   KeyboardDatePicker
-} from "@material-ui/pickers";
+} from '@material-ui/pickers';
 import { StartEndTime } from './parking-spot-components.js';
 
 /*
@@ -104,21 +104,20 @@ const TimeFilter = props => {
   const { onSubmit, popUpTitle, popUpContent } = props;
 
   let today = new Date();
-  let timeSplit = today.toTimeString().split(":");
-  let currTime = timeSplit[0].concat(":", timeSplit[1]);
-  
+  let timeSplit = today.toTimeString().split(':');
+  let currTime = timeSplit[0].concat(':', timeSplit[1]);
+
   const [time, updateTime] = useState({
     date: today,
     startTime: currTime,
-    endTime: "24:00",
-    privateKey: "",
-    showPrivateKey: false,
+    endTime: '24:00',
+    privateKey: '',
+    showPrivateKey: false
   });
 
-
   const handleDateChange = newDate => {
-    updateTime({ ...time, date: newDate })
-  }
+    updateTime({ ...time, date: newDate });
+  };
 
   const handleSubmit = () => {
     onSubmit(time);
@@ -138,15 +137,15 @@ const TimeFilter = props => {
               value={time.date}
               onChange={handleDateChange}
               KeyboardButtonProps={{
-                "aria-label": "change date"
+                'aria-label': 'change date'
               }}
             />
           </Grid>
           <Grid>
-            <StartEndTime  
-              time={time} 
-              buttonName={"Filter"} 
-              updateTime={updateTime} 
+            <StartEndTime
+              time={time}
+              buttonName={'Filter'}
+              updateTime={updateTime}
               popUpTitle={popUpTitle}
               popUpContent={popUpContent}
               handleOnConfirm={handleSubmit}

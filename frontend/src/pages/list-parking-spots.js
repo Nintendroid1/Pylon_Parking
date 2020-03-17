@@ -22,22 +22,21 @@ const TempInput = [
   { id: '3', time: '14:00', cost: 4 },
   { id: '4', time: '1:00', cost: 9 },
   { id: '5', time: '2:00', cost: 12 },
-  { id: '6', time: '6:00', cost: 1 },
+  { id: '6', time: '6:00', cost: 1 }
 ];
 
 const headerCells = [
   { id: 'id', label: 'Spot #' },
   { id: 'time', label: 'Earliest Time Available' },
-  { id: 'cost', label: 'Average Cost/15 minutes' },
+  { id: 'cost', label: 'Average Cost/15 minutes' }
 ];
-
 
 function TableData(props) {
   const data = props.parkingInfo.map(e => ({
     ...e,
-    id: e.id.replace("/.", "-"),
-  }))
-  return data.map((parkingSpot) => {
+    id: e.id.replace('/.', '-')
+  }));
+  return data.map(parkingSpot => {
     return (
       <>
         <TableRow>
@@ -50,9 +49,7 @@ function TableData(props) {
                 }
               }}
             >
-              <Button type="button">
-                View
-              </Button>
+              <Button type="button">View</Button>
             </Link>
           </TableCell>
           <TableCell>{parkingSpot.id}</TableCell>
@@ -61,7 +58,7 @@ function TableData(props) {
         </TableRow>
       </>
     );
-  })
+  });
 }
 
 function MakeTable(props) {
@@ -76,11 +73,11 @@ function MakeTable(props) {
           </TableCell>
           {headerCells.map(headerCell => (
             <TableCell
-              sortDirection={ columnToSort === headerCell.id ? order : false }
+              sortDirection={columnToSort === headerCell.id ? order : false}
             >
               <TableSortLabel
                 active={columnToSort === headerCell.id}
-                direction={columnToSort === headerCell.id ? order : 'asc' }
+                direction={columnToSort === headerCell.id ? order : 'asc'}
                 onClick={() => onSortClick(headerCell.id)}
               >
                 {headerCell.label}
@@ -90,17 +87,11 @@ function MakeTable(props) {
         </TableRow>
       </TableHead>
       <TableBody>
-        <TableData parkingInfo={
-          orderBy(
-            parkingInfo,
-            columnToSort,
-            order
-          )} />
+        <TableData parkingInfo={orderBy(parkingInfo, columnToSort, order)} />
       </TableBody>
     </Table>
   );
 }
-
 
 const ListParkingSpots = () => {
   // To be used if paging
@@ -115,14 +106,14 @@ const ListParkingSpots = () => {
   const [order, updateOrder] = useState('asc');
   const [columnToSort, updatecolumnToSort] = useState('id');
 
-  const url = `${apiprefix}/list_parking_spots`
+  const url = `${apiprefix}/list_parking_spots`;
 
   const handleSortRequest = property => {
     const isAsc = columnToSort === property && order === 'asc';
     updateOrder(isAsc ? 'desc' : 'asc');
     updatecolumnToSort(property);
   };
-  
+
   /*
   const listParkingSpots = async () => {
     let response = await makeAPICall('GET', url);
@@ -143,9 +134,9 @@ const ListParkingSpots = () => {
   const listParkingSpots = () => {
     updateParkingSpotInfo(TempInput);
     updateMessage(null);
-  }
+  };
 
-  const handleFiltering = async (values) => {
+  const handleFiltering = async values => {
     const { date, startTime, endTime } = values;
     const year = date.getFullYear();
     const month = date.getMonth() + 1;
@@ -159,11 +150,7 @@ const ListParkingSpots = () => {
       updateParkingSpotInfo(resbody.parkingInfo);
       updateMessage(null);
     } else {
-      updateMessage(
-        <div>
-          Fail
-        </div>
-      );
+      updateMessage(<div>Fail</div>);
     }
   };
 
@@ -176,23 +163,22 @@ const ListParkingSpots = () => {
       <div>
         <Typography>
           {message ? (
+            <div>{message}</div>
+          ) : (
             <div>
-              {message}
+              <TimeFilter onSubmit={handleFiltering} />
+              <MakeTable
+                parkingInfo={parkingSpotInfo}
+                onSortClick={handleSortRequest}
+                columnToSort={columnToSort}
+                order={order}
+              />
             </div>
-          ) : <div>
-            <TimeFilter onSubmit={handleFiltering} />
-            <MakeTable 
-              parkingInfo={parkingSpotInfo} 
-              onSortClick={handleSortRequest} 
-              columnToSort={columnToSort} 
-              order={order} 
-            />
-          </div>
-          }
+          )}
         </Typography>
       </div>
     </>
   );
-}
+};
 
 export default ListParkingSpots;
