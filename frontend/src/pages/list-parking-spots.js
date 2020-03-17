@@ -1,39 +1,28 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { makeAPICall } from '../api';
-import PropTypes from 'prop-types';
-import { withStyles, withTheme } from '@material-ui/core/styles';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
 import TableHead from '@material-ui/core/TableHead';
-import TableFooter from '@material-ui/core/TableFooter';
 import TableRow from '@material-ui/core/TableRow';
 import TableSortLabel from '@material-ui/core/TableSortLabel';
-import TablePagination from '@material-ui/core/TablePagination';
-import Check from '@material-ui/icons/Check';
-import NavigateLeftIcon from '@material-ui/icons/NavigateBefore';
-import NavigateRightIcon from '@material-ui/icons/NavigateNext';
-import { Typography, CircularProgress } from '@material-ui/core';
-//import RequireAuthentication from '../RequireAuthentication';
-import queryString from 'query-string';
-import IconButton from '@material-ui/core/IconButton';
-import EditIcon from '@material-ui/icons/Edit';
-import Grid from '@material-ui/core/Grid';
+import { Typography } from '@material-ui/core';
 import history from '../history';
 import { Link } from 'react-router-dom';
 import apiprefix from './apiprefix';
-import QueueIcon from '@material-ui/icons/Queue';
 import orderBy from 'lodash/orderBy';
 import TimeFilter from './forms/time-filter';
 import Button from '@material-ui/core/Button';
 
+// The time input is wrong format for lodash to sort in.
+// Can code custom sorter for this if needed.
 const TempInput = [
-  { id: '1', time: '12:00', cost: '1' },
-  { id: '2', time: '13:00', cost: '1' },
-  { id: '3', time: '14:00', cost: '4' },
-  { id: '4', time: '1:00', cost: '9' },
-  { id: '5', time: '2:00', cost: '12' },
-  { id: '6', time: '6:00', cost: '1' },
+  { id: '1', time: '12:00', cost: 1 },
+  { id: '2', time: '13:00', cost: 1 },
+  { id: '3', time: '14:00', cost: 4 },
+  { id: '4', time: '1:00', cost: 9 },
+  { id: '5', time: '2:00', cost: 12 },
+  { id: '6', time: '6:00', cost: 1 },
 ];
 
 const headerCells = [
@@ -48,7 +37,7 @@ function TableData(props) {
     ...e,
     id: e.id.replace("/.", "-"),
   }))
-  return data.map((parkingSpot, index) => {
+  return data.map((parkingSpot) => {
     return (
       <>
         <TableRow>
@@ -79,7 +68,7 @@ function MakeTable(props) {
   const { columnToSort, order, onSortClick, parkingInfo } = props;
 
   return (
-    <Table>
+    <Table stickyHeader>
       <TableHead>
         <TableRow>
           <TableCell>
@@ -95,11 +84,6 @@ function MakeTable(props) {
                 onClick={() => onSortClick(headerCell.id)}
               >
                 {headerCell.label}
-                {columnToSort === headerCell.id ? (
-                  <span>
-                    {order === 'desc' ? 'sorted descending' : 'sorted ascending' }
-                  </span>
-                ) : null}
               </TableSortLabel>
             </TableCell>
           ))}
@@ -118,7 +102,7 @@ function MakeTable(props) {
 }
 
 
-const ListParkingSpots = ({ ...props }) => {
+const ListParkingSpots = () => {
   // To be used if paging
   /*
   const findCurrentPageBasedOnPath = (location) => {
@@ -183,7 +167,9 @@ const ListParkingSpots = ({ ...props }) => {
     }
   };
 
-  listParkingSpots();
+  useEffect(() => {
+    listParkingSpots();
+  });
 
   return (
     <>

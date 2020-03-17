@@ -1,29 +1,12 @@
 import React, { useState } from 'react';
-import { makeAPICall } from '../api';
-import PropTypes from 'prop-types';
-import { withStyles, withTheme } from '@material-ui/core/styles';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
 import TableHead from '@material-ui/core/TableHead';
-import TableFooter from '@material-ui/core/TableFooter';
 import TableRow from '@material-ui/core/TableRow';
-import TablePagination from '@material-ui/core/TablePagination';
-import Check from '@material-ui/icons/Check';
-import NavigateLeftIcon from '@material-ui/icons/NavigateBefore';
-import NavigateRightIcon from '@material-ui/icons/NavigateNext';
-import { Typography, CircularProgress } from '@material-ui/core';
-import RequireAuthentication from '../RequireAuthentication';
-import queryString from 'query-string';
-import IconButton from '@material-ui/core/IconButton';
-import EditIcon from '@material-ui/icons/Edit';
-import history from '../history';
-import { Link } from 'react-router-dom';
-import apiprefix from './apiprefix';
-import TimeFilter from './forms/time-filter';
-import { StartEndTime, CostField } from './forms/parking-spot-components';
+import { Typography } from '@material-ui/core';
+import { StartEndTime } from './forms/parking-spot-components';
 import "date-fns";
-import Grid from "@material-ui/core/Grid";
 import DateFnsUtils from "@date-io/date-fns";
 import {
   MuiPickersUtilsProvider
@@ -36,23 +19,31 @@ const TempInput = [
   { startTime: '14:00', endTime: '21:00', cost: '1' },
 ];
 
-const compareTime = (time1, time2) => {
-  const t1 = time1.split(':');
-  const t2 = time2.split(':');
 
-  if (time1 === time2) {
-    return 0;
-  } else if (t1[0] > t2[0]) {
-    return 1;
-  } else if (t1[0] === t2[0] && t1[1] > t2[1]) {
-    return 1;
-  }
+/*
+const TableData = props => {
 
-  return -1;
+  if (props.parkingInfo !== null){
+  return props.parkingInfo.map(parkingSpot => {
+    return (
+      <>
+        <TableRow>
+          <TableCell>{parkingSpot.startTime}</TableCell>
+          <TableCell>{parkingSpot.endTime}</TableCell>
+          <TableCell>{parkingSpot.cost}</TableCell>
+        </TableRow>
+      </>
+    );
+  });
 }
 
+return (<></>);
+};
+*/
+
+// Issue where props.parkingInfo is null, meaning useEffect has not been called yet and error returns.
 const TableData = (props) => {
-  return props.parkingInfo.map((parkingSpot, index) => {
+  return props.parkingInfo.map((parkingSpot) => {
     return (
       <>
         <TableRow>
@@ -67,7 +58,7 @@ const TableData = (props) => {
 
 const MakeTable = (props) => {
   return (
-    <Table>
+    <Table stickyHeader>
       <TableHead>
         <TableRow>
           <TableCell>Start Time</TableCell>
@@ -84,7 +75,7 @@ const MakeTable = (props) => {
 }
 
 
-const ParkingSpot = ({ ...props }) => {
+const ParkingSpot = () => {
   // To be used if paging
   /*
   const findCurrentPageBasedOnPath = (location) => {
@@ -132,8 +123,6 @@ const ParkingSpot = ({ ...props }) => {
   }
 
   const calculatePrice = (startTime, endTime) => {
-    let temp = parkingSpotInfo.filter(e => (e.startTime <= startTime && e.endTime > startTime) ||
-                                            e.startTime < endTime && e.endTime >= endTime)
   
     // Calculate the price for the spot.
   };
