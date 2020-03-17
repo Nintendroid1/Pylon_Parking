@@ -3,4 +3,7 @@
 
 A blockchain solution for reserving parking spots
 
+ERD (media/ERD.png)
+Relational(media/Relational.png)
+
 ![Make me a sandwich](media/sandwich.png)
