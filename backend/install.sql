@@ -25,7 +25,9 @@ CREATE TABLE parking_spots
 	spot_ID INT NOT NULL,
 	zone_ID INT,
 	availability boolean,
+	user_PID VARCHAR(100),
 	PRIMARY KEY (spot_ID),
-	FOREIGN KEY (zone_ID) REFERENCES zones(zone_ID)
+	FOREIGN KEY (zone_ID) REFERENCES zones(zone_ID),
+	FOREIGN KEY (user_PID) REFERENCES users(PID)
 );
 
