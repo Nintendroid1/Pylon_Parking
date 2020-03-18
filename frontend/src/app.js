@@ -21,7 +21,6 @@ import ParkingSpot from './pages/parking-spot';
 
 import Typography from '@material-ui/core/Typography';
 
-
 import history from './history';
 
 const styles = theme => ({
@@ -110,14 +109,14 @@ const App = ({ classes, ...props }) => {
                 reqLogin={false}
                 component={MainMap}
               />
-              <Route 
+              <Route
                 path="/list_parking_spots/:parking_id/parking_spot/:spot_id"
                 hidden={true}
                 reqAdmin={false}
                 reqLogin={false}
                 component={ParkingSpot}
               />
-              <Route 
+              <Route
                 path="/list_parking_spots/:parking_id"
                 label="List Parking Spots"
                 key="/list_parking_spots"
@@ -136,7 +135,7 @@ const App = ({ classes, ...props }) => {
                 hidden={false}
                 component={WelcomeTab}
               />
-              <Route 
+              <Route
                 path="/"
                 reqAdmin={false}
                 reqLogin={false}

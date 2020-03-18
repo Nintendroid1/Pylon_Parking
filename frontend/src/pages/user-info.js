@@ -67,29 +67,23 @@ const UserInfo = (props) => {
   let getUserInfo = async () => {
     let id = localStorage.blockchain_id; // change if necessary.
 
-    let url = `${apiprefix}/user/${id}`
+    let url = `${apiprefix}/user/${id}`;
     let response = await makeAPICall('GET', url);
     let respbody = await response.json();
 
     if (response.status === 200) {
       updateUserInfo(respbody.userInfo);
     } else {
-      updateMessage(
-        <div>
-          Failed to get user.
-        </div>
-      );
+      updateMessage(<div>Failed to get user.</div>);
     }
-  }
+  };
 
   // Change to something more meaningful.
   return (
     <>
       <div>
-        <Typography>
-          {message}
-        </Typography>
+        <Typography>{message}</Typography>
       </div>
     </>
   );
-}
+};

@@ -8,7 +8,7 @@ import TableFooter from '@material-ui/core/TableFooter';
 import TableRow from '@material-ui/core/TableRow';
 import TablePagination from '@material-ui/core/TablePagination';
 import apiprefix from './apiprefix';
-import "date-fns";
+import 'date-fns';
 import { Typography } from '@material-ui/core';
 import queryStrings from 'query-string';
 import TextField from '@material-ui/core/TextField';
@@ -23,17 +23,14 @@ const FilterSelectField = props => {
   // displays the menu item with the same value as the current filterOption.
   return (
     <>
-      <Select
-        value={filterOption}
-        onChange={handleChange}
-      >
+      <Select value={filterOption} onChange={handleChange}>
         {listOfFilterOptions.map(e => {
-          <MenuItem value={e}>{e}</MenuItem>
+          <MenuItem value={e}>{e}</MenuItem>;
         })}
       </Select>
     </>
   );
-}
+};
 
 // Does not return anything.
 // Updates the current list of transaction to display.
@@ -56,7 +53,6 @@ const getEntriesForPage = (page, numEntriesPerPage, listOfTransactions) => {
   return listOfTransactions.slice(startIndex, endIndex);
 };
 
-
 const TransactionTableHeader = props => {
   const { tableHeaders } = props;
 
@@ -65,7 +61,7 @@ const TransactionTableHeader = props => {
       <TableHead>
         <TableRow>
           <TableCell>{tableHeaders.parkingId}</TableCell>
-          <TableCell></TableCell>
+          <TableCell />
         </TableRow>
       </TableHead>
     </>
@@ -82,22 +78,22 @@ const TransactionsTableBody = props => {
         {rows.map(row => {
           <TableRow>
             <TableCell>{row.parkingId}</TableCell>
-            <TableCell></TableCell>
-          </TableRow>
+            <TableCell />
+          </TableRow>;
         })}
       </TableBody>
     </>
   );
-}
+};
 
 const TransactionTable = props => {
-  const { 
-    listOfTransactions, 
-    page, 
-    updatePage, 
-    numEntriesPerPage, 
-    updateNumEntriesPerPage, 
-    tableHeaders 
+  const {
+    listOfTransactions,
+    page,
+    updatePage,
+    numEntriesPerPage,
+    updateNumEntriesPerPage,
+    tableHeaders
   } = props;
 
   const listOfFilterOptions = ['Parking ID', 'Buyer ID', 'Seller ID'];
@@ -107,21 +103,23 @@ const TransactionTable = props => {
 
   const handleChangePage = (event, newPage) => {
     updatePage(newPage);
-  }
+  };
 
   const handleChangeNumEntriesPerPage = event => {
     updateNumEntriesPerPage(parseInt(event.target.value, 10));
     updatePage(0);
-  }
+  };
 
   const handleTextFieldChange = event => {
     updateTextFieldValue(event.target.value);
-  }
+  };
 
   const handleClickFilter = event => {
-    const temp = listOfTransactions.filter(e => e[filterOption] === textFieldValue);
+    const temp = listOfTransactions.filter(
+      e => e[filterOption] === textFieldValue
+    );
     updateDisplayList(temp);
-  }
+  };
 
   //Not sure what it does.
 
@@ -137,27 +135,21 @@ SelectProps={{
   return (
     <>
       <div>
-        <FilterSelectField 
+        <FilterSelectField
           listOfFilterOptions={listOfFilterOptions}
           filterOption={filterOption}
           updateFilterOption={updateFilterOption}
         />
-        <TextField 
+        <TextField
           label={`Enter a ${filterOption}`}
           value={textFieldValue}
           onChange={handleTextFieldChange}
         />
-        <Button
-          onClick={handleClickFilter}
-        >
-          Filter!
-        </Button>
+        <Button onClick={handleClickFilter}>Filter!</Button>
       </div>
       <Table stickyHeader>
-        <TransactionTableHeader
-          tableHeaders={tableHeaders} 
-        />
-        <TransactionsTableBody 
+        <TransactionTableHeader tableHeaders={tableHeaders} />
+        <TransactionsTableBody
           listOfTransactions={displayList}
           page={page}
           numEntriesPerPage={numEntriesPerPage}
@@ -177,7 +169,9 @@ SelectProps={{
 };
 
 const TransactionHistory = () => {
-  const [listOfTransactions, updateListOfTransactions] = useState(getTransactionHistory());
+  const [listOfTransactions, updateListOfTransactions] = useState(
+    getTransactionHistory()
+  );
   const [page, updatePage] = useState(0);
   const [numEntriesPerPage, updateNumEntriesPerPage] = useState(10);
 
@@ -185,8 +179,8 @@ const TransactionHistory = () => {
   const tableHeaders = {
     parkingId: 'Parking ID',
     sellerId: 'Seller ID',
-    buyerId: 'Buyer ID',
-  }
+    buyerId: 'Buyer ID'
+  };
 
   const url = `${apiprefix}/transaction_history`;
 
@@ -197,11 +191,19 @@ const TransactionHistory = () => {
     if (response.status === 200) {
       const queryParams = queryStrings.parse(window.location.search);
 
-      if (queryParams.page !== undefined && isNaN(queryParams.page) !== false && Number(queryParams.page) !== page) {
+      if (
+        queryParams.page !== undefined &&
+        isNaN(queryParams.page) !== false &&
+        Number(queryParams.page) !== page
+      ) {
         updatePage(Number(queryParams.page));
       }
-    
-      if (queryParams.numEntries !== undefined && isNaN(queryParams.numEntries) !== false && Number(queryParams.numEntries) !== numEntriesPerPage) {
+
+      if (
+        queryParams.numEntries !== undefined &&
+        isNaN(queryParams.numEntries) !== false &&
+        Number(queryParams.numEntries) !== numEntriesPerPage
+      ) {
         updateNumEntriesPerPage(Number(queryParams.numEntries));
       }
 
@@ -223,6 +225,6 @@ const TransactionHistory = () => {
       />
     </Typography>
   );
-}
+};
 
 export default TransactionHistory;

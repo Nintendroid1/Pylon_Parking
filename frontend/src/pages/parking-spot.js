@@ -6,19 +6,16 @@ import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import { Typography } from '@material-ui/core';
 import { StartEndTime } from './forms/parking-spot-components';
-import "date-fns";
-import DateFnsUtils from "@date-io/date-fns";
-import {
-  MuiPickersUtilsProvider
-} from "@material-ui/pickers";
+import 'date-fns';
+import DateFnsUtils from '@date-io/date-fns';
+import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 
 const TempInput = [
   { startTime: '7:00', endTime: '12:00', cost: '2' },
   { startTime: '12:00', endTime: '13:00', cost: '3' },
   { startTime: '13:00', endTime: '14:00', cost: '2' },
-  { startTime: '14:00', endTime: '21:00', cost: '1' },
+  { startTime: '14:00', endTime: '21:00', cost: '1' }
 ];
-
 
 const TableData = props => {
 
@@ -41,8 +38,8 @@ return (<></>);
 
 /*
 // Issue where props.parkingInfo is null, meaning useEffect has not been called yet and error returns.
-const TableData = (props) => {
-  return props.parkingInfo.map((parkingSpot) => {
+const TableData = props => {
+  return props.parkingInfo.map(parkingSpot => {
     return (
       <>
         <TableRow>
@@ -56,7 +53,7 @@ const TableData = (props) => {
 }
 */
 
-const MakeTable = (props) => {
+const MakeTable = props => {
   return (
     <Table stickyHeader>
       <TableHead>
@@ -64,7 +61,9 @@ const MakeTable = (props) => {
           <TableCell>Start Time</TableCell>
           <TableCell>End Time</TableCell>
           <TableCell>Cost/15 minutes</TableCell>
-          <TableCell><span /></TableCell>
+          <TableCell>
+            <span />
+          </TableCell>
         </TableRow>
       </TableHead>
       <TableBody>
@@ -72,8 +71,7 @@ const MakeTable = (props) => {
       </TableBody>
     </Table>
   );
-}
-
+};
 
 const ParkingSpot = () => {
   // To be used if paging
@@ -84,20 +82,25 @@ const ParkingSpot = () => {
   }*/
 
   let today = new Date();
-  let timeSplit = today.toTimeString().split(":");
-  let currTime = timeSplit[0].concat(":", timeSplit[1]);
+  let timeSplit = today.toTimeString().split(':');
+  let currTime = timeSplit[0].concat(':', timeSplit[1]);
   let tempUrl = window.location.pathname;
   let id = Number(tempUrl.substring(tempUrl.lastIndexOf('/') + 1));
 
-  let popUpMessage = `Are you sure you want to rent parking spot ${id} from ${time.startTime} to ${time.endTime} for ${calculatePrice(time.startTime, time.endTime)} hokie tokens?`
+  let popUpMessage = `Are you sure you want to rent parking spot ${id} from ${
+    time.startTime
+  } to ${time.endTime} for ${calculatePrice(
+    time.startTime,
+    time.endTime
+  )} hokie tokens?`;
 
   const [message, updateMessage] = useState(null);
   const [parkingSpotInfo, updateParkingSpotInfo] = useState(null);
   const [time, updateTime] = useState({
     startTime: currTime,
-    endTime: "24:00",
+    endTime: '24:00'
   });
-  
+
   /*
   const listParkingSpotTimes = async () => {
     const url = `${apiprefix}/parking_spot/${id}`;
@@ -120,14 +123,9 @@ const ParkingSpot = () => {
   const listParkingSpotTimes = () => {
     updateMessage(null);
     updateParkingSpotInfo(TempInput);
-  }
-
-  useEffect(() => {
-    listParkingSpotTimes();
-  });
+  };
 
   const calculatePrice = (startTime, endTime) => {
-  
     // Calculate the price for the spot.
   };
 
@@ -138,39 +136,40 @@ const ParkingSpot = () => {
 
     // make smart contract and redirect to invoice.
     return 1;
-  }
+  };
 
-  listParkingSpotTimes();
+  useEffect(() => {
+    listParkingSpotTimes();
+  });
 
   return (
     <>
       <div>
         <Typography>
           {message ? (
+            <div>{message}</div>
+          ) : (
             <div>
-              {message}
+              <MuiPickersUtilsProvider utils={DateFnsUtils}>
+                <form onSubmit={handleBuyRequest}>
+                  <StartEndTime
+                    time={time}
+                    updateTime={updateTime}
+                    buttonName={'Buy!'}
+                    calculateCost={calculatePrice}
+                    handleOnConfirm={handleBuyRequest}
+                    popUpTitle={'Confirmation'}
+                    popUpContent={popUpMessage}
+                  />
+                </form>
+              </MuiPickersUtilsProvider>
+              <MakeTable parkingInfo={parkingSpotInfo} />
             </div>
-          ) : <div>
-            <MuiPickersUtilsProvider utils={DateFnsUtils}>
-              <form onSubmit={handleBuyRequest}>
-                <StartEndTime 
-                  time={time} 
-                  updateTime={updateTime} 
-                  buttonName={"Buy!"} 
-                  calculateCost={calculatePrice} 
-                  handleOnConfirm={handleBuyRequest}
-                  popUpTitle={"Confirmation"}
-                  popUpContent={popUpMessage}
-                />
-              </form>
-            </MuiPickersUtilsProvider>
-            <MakeTable parkingInfo={parkingSpotInfo} />
-          </div>
-          }
+          )}
         </Typography>
       </div>
     </>
   );
-}
+};
 
 export default ParkingSpot;

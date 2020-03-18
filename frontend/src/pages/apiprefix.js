@@ -1,1 +1,1 @@
-export default `${process.env.PUBLIC_URL}/api`
+export default `${process.env.PUBLIC_URL}/api`;

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import IconButton from '@material-ui/core/IconButton';
-import "date-fns";
-import Grid from "@material-ui/core/Grid";
+import 'date-fns';
+import Grid from '@material-ui/core/Grid';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
@@ -15,7 +15,7 @@ import VisibilityOff from '@material-ui/icons/VisibilityOff';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 
-const CostField = (props) => {
+const CostField = props => {
   const { cost } = props;
 
   return (
@@ -32,7 +32,7 @@ const CostField = (props) => {
   );
 };
 
-const PrivateKeyField = (props) => {
+const PrivateKeyField = props => {
   const { privateKey, updatePrivateKey } = props;
 
   const handleChange = prop => event => {
@@ -40,15 +40,16 @@ const PrivateKeyField = (props) => {
   };
 
   const handleClickShowKey = () => {
-    updatePrivateKey({ ...privateKey, showPrivateKey: !privateKey.showPrivateKey })
+    updatePrivateKey({
+      ...privateKey,
+      showPrivateKey: !privateKey.showPrivateKey
+    });
   };
 
   return (
     <>
       <FormControl variant="outlined">
-        <InputLabel>
-          Private Key
-        </InputLabel>
+        <InputLabel>Private Key</InputLabel>
         <OutlinedInput
           id="private-key"
           type={privateKey.showPrivateKey ? 'text' : 'password'}
@@ -70,10 +71,10 @@ const PrivateKeyField = (props) => {
       </FormControl>
     </>
   );
-}
+};
 
-const TimePicker = (props) => {
-  const{ handleTimeChange, time, name, label } = props;
+const TimePicker = props => {
+  const { handleTimeChange, time, name, label } = props;
 
   return (
     <TextField
@@ -83,24 +84,31 @@ const TimePicker = (props) => {
       value={time.startTime}
       onChange={handleTimeChange}
       InputLabelProps={{
-        shrink: true,
+        shrink: true
       }}
       inputProps={{
-        step: 900,
+        step: 900
       }}
     />
-  )
-}
+  );
+};
 
-const ConfirmationDialogFieldButton = (props) => {
-  const { buttonMessage, messageTitle, messageContent, handleOnConfirm, privateKey, updatePrivateKey } = props;
+const ConfirmationDialogFieldButton = props => {
+  const {
+    buttonMessage,
+    messageTitle,
+    messageContent,
+    handleOnConfirm,
+    privateKey,
+    updatePrivateKey
+  } = props;
   const [open, setOpen] = useState(false);
 
   const handleClickOpen = () => {
     setOpen(true);
   };
 
-  const handleClose = (isAgree) => {
+  const handleClose = isAgree => {
     setOpen(false);
 
     if (isAgree) {
@@ -110,71 +118,64 @@ const ConfirmationDialogFieldButton = (props) => {
 
   return (
     <div>
-      <Button 
-        variant="outlined" 
-        color="primary" 
-        onClick={handleClickOpen}
-      >
+      <Button variant="outlined" color="primary" onClick={handleClickOpen}>
         {buttonMessage}
       </Button>
-      <Dialog
-        open={open}
-        onClose={() => handleClose(false)}
-      >
-        <DialogTitle>
-          {messageTitle}
-        </DialogTitle>
+      <Dialog open={open} onClose={() => handleClose(false)}>
+        <DialogTitle>{messageTitle}</DialogTitle>
         <DialogContent>
           {messageContent}
-          <PrivateKeyField 
+          <PrivateKeyField
             privateKey={privateKey}
             updatePrivateKey={updatePrivateKey}
           />
         </DialogContent>
         <DialogActions>
-          <Button 
-            onClick={() => handleClose(false)} 
-            color="primary"
-          >
+          <Button onClick={() => handleClose(false)} color="primary">
             Cancel
           </Button>
-          <Button 
-            onClick={() => handleClose(true)}
-            color="primary"
-          >
+          <Button onClick={() => handleClose(true)} color="primary">
             Confirm
           </Button>
         </DialogActions>
       </Dialog>
     </div>
   );
-}
+};
 
-const StartEndTime = (props) => {
-  const { time, buttonName, updateTime, popUpTitle, popUpContent, handleOnConfirm, calculateCost } = props;
+const StartEndTime = props => {
+  const {
+    time,
+    buttonName,
+    updateTime,
+    popUpTitle,
+    popUpContent,
+    handleOnConfirm,
+    calculateCost
+  } = props;
 
-  const [cost, updateCost] = useState("N/A");
+  const [cost, updateCost] = useState('N/A');
 
   const handleTimeChange = event => {
     let { name, value } = event.target;
     updateTime({ ...time, [name]: value });
-    updateCost(calculateCost(time.startTime, time.endTime))
+    updateCost(calculateCost(time.startTime, time.endTime));
   };
 
   return (
     <>
-    <Grid>
-      <TimePicker 
-          handleTimeChange={handleTimeChange} 
-          time={time} 
-          name={"startTime"} 
-          label={"Start Time"} 
+      <Grid>
+        <TimePicker
+          handleTimeChange={handleTimeChange}
+          time={time}
+          name={'startTime'}
+          label={'Start Time'}
         />
-        <TimePicker 
-          handleTimeChange={handleTimeChange} 
-          time={time} 
-          name={"endTime"} 
-          label={"End Time"} 
+        <TimePicker
+          handleTimeChange={handleTimeChange}
+          time={time}
+          name={'endTime'}
+          label={'End Time'}
         />
         <ConfirmationDialogFieldButton
           buttonMessage={buttonName}
@@ -184,17 +185,17 @@ const StartEndTime = (props) => {
           privateKey={time}
           updatePrivateKey={updateTime}
         />
-    </Grid>
-    <Grid>
-      <CostField cost={cost} />
-    </Grid>
+      </Grid>
+      <Grid>
+        <CostField cost={cost} />
+      </Grid>
     </>
   );
-}
+};
 
 export {
   StartEndTime,
   ConfirmationDialogFieldButton,
   PrivateKeyField,
-  CostField,
-}
+  CostField
+};
