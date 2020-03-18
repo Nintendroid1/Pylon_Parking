@@ -17,6 +17,7 @@ const TempInput = [
   { startTime: '14:00', endTime: '21:00', cost: '1' }
 ];
 
+/*
 const TableData = props => {
 
   if (props.parkingInfo !== null){
@@ -35,8 +36,8 @@ const TableData = props => {
 
 return (<></>);
 };
+*/
 
-/*
 // Issue where props.parkingInfo is null, meaning useEffect has not been called yet and error returns.
 const TableData = props => {
   return props.parkingInfo.map(parkingSpot => {
@@ -51,7 +52,7 @@ const TableData = props => {
     );
   })
 }
-*/
+
 
 const MakeTable = props => {
   return (
@@ -94,7 +95,7 @@ const ParkingSpot = () => {
     time.endTime
   )} hokie tokens?`;
 
-  const [message, updateMessage] = useState(null);
+  const [message, updateMessage] = useState('Loading'); // Initial message cannot be null. See useEffect() for reason.
   const [parkingSpotInfo, updateParkingSpotInfo] = useState(null);
   const [time, updateTime] = useState({
     startTime: currTime,
@@ -121,8 +122,8 @@ const ParkingSpot = () => {
   */
 
   const listParkingSpotTimes = () => {
-    updateMessage(null);
     updateParkingSpotInfo(TempInput);
+    updateMessage(null);
   };
 
   const calculatePrice = (startTime, endTime) => {
@@ -138,6 +139,7 @@ const ParkingSpot = () => {
     return 1;
   };
 
+  // Renders after first render.
   useEffect(() => {
     listParkingSpotTimes();
   });
