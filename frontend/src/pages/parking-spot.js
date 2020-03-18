@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
@@ -20,7 +20,6 @@ const TempInput = [
 ];
 
 
-/*
 const TableData = props => {
 
   if (props.parkingInfo !== null){
@@ -39,8 +38,8 @@ const TableData = props => {
 
 return (<></>);
 };
-*/
 
+/*
 // Issue where props.parkingInfo is null, meaning useEffect has not been called yet and error returns.
 const TableData = (props) => {
   return props.parkingInfo.map((parkingSpot) => {
@@ -55,6 +54,7 @@ const TableData = (props) => {
     );
   })
 }
+*/
 
 const MakeTable = (props) => {
   return (
@@ -121,6 +121,10 @@ const ParkingSpot = () => {
     updateMessage(null);
     updateParkingSpotInfo(TempInput);
   }
+
+  useEffect(() => {
+    listParkingSpotTimes();
+  });
 
   const calculatePrice = (startTime, endTime) => {
   

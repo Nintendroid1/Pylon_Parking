@@ -22,9 +22,47 @@ import history from '../../history';
 import { Link } from 'react-router-dom';
 import apiprefix from './apiprefix';
 
+const SellingParkingSpotTableBody = props => {
+  const {} = props;
+
+  return (
+    <>
+      <TableBody>
+
+      </TableBody>
+    </>
+  );
+};
+
+const SellingParkingSpotTableHeader = props => {
+  const {} = props;
+
+  return (
+    <>
+      <TableHead>
+
+      </TableHead>
+    </>
+  );
+};
+
+const SellingParkingSpotTable = props => {
+  const {} = props;
+
+  return (
+    <>
+      <Table stickyHeader>
+        <SellingParkingSpotTableHeader />
+        <SellingParkingSpotTableBody />
+      </Table>
+    </>
+  );
+};
+
 const UserInfo = (props) => {
 
   const [message, updateMessage] = useState(null);
+  const [userInfo, updateUserInfo] = useState(null);
 
   let getUserInfo = async () => {
     let id = localStorage.blockchain_id; // change if necessary.
@@ -34,7 +72,7 @@ const UserInfo = (props) => {
     let respbody = await response.json();
 
     if (response.status === 200) {
-      // do something.
+      updateUserInfo(respbody.userInfo);
     } else {
       updateMessage(
         <div>
