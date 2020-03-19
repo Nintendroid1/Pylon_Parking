@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { makeAPICall } from '../api';
 import PropTypes from 'prop-types';
 import { withStyles, withTheme } from '@material-ui/core/styles';
@@ -23,6 +23,7 @@ import { Link } from 'react-router-dom';
 import apiprefix from './apiprefix';
 import { TimePicker } from './forms/parking-spot-components';
 import { compareMilitaryTime } from './forms/time-filter';
+import Box from '@material-ui/core/Box';
 import { ConfirmationDialogFieldButton } from './forms/parking-spot-components';
 
 const SellingMessageContent = (
@@ -191,7 +192,7 @@ const SellingParkingSpotTable = props => {
 
 const UserInfo = (props) => {
 
-  const [message, updateMessage] = useState(null);
+  const [message, updateMessage] = useState('Loading');
   const [userInfo, updateUserInfo] = useState(null);
 
   let getUserInfo = async () => {
@@ -213,18 +214,31 @@ const UserInfo = (props) => {
     // Make api request.
   }
 
+  useEffect(() => {
+    getUserInfo();
+  })
+
   // Change to something more meaningful.
   return (
     <>
       <div>
         {message ?
           <Typography>{message}</Typography> :
-          <SellingParkingSpotTable 
-            parkingSpotsInfo={userInfo.parkingSpotsInfo}
-            handleSellRequest={handleSellRequest}
-          />
+          <>
+            <SellingParkingSpotTable 
+              parkingSpotsInfo={userInfo.parkingSpotsInfo}
+              handleSellRequest={handleSellRequest}
+            />
+            <Typography>
+              <Box>{`Username: ${userInfo.username}`}</Box>
+              <Box>{`Email: ${userInfo.email}`}</Box>
+              <Box>{`Hokie Coins: ${userInfo.money}`}</Box>
+            </Typography>
+          </>
         }
       </div>
     </>
   );
 };
+
+export default UserInfo;
