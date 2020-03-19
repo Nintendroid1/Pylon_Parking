@@ -9,6 +9,23 @@ import {
 import { TimePicker } from "./parking-spot-components.js";
 import Button from '@material-ui/core/Button';
 
+const compareMilitaryTime = (time1, time2) => {
+  time1 = time1.split(':');
+  time2 = time2.split(':');
+
+  if (time1[0] < time2[0]) {
+    return -1;
+  } else if (time1[0] > time2[0]) {
+    return 1;
+  } else if (time1[1] < time2[1]) {
+    return -1;
+  } else if (time1[1] > time2[1]) {
+    return 1;
+  }
+
+  return 0;
+}
+
 const TimeFilter = props => {
   const { onSubmit, popUpTitle, popUpContent } = props;
 
@@ -85,7 +102,10 @@ const TimeFilter = props => {
   );
 };
 
-export default TimeFilter;
+export {
+  TimeFilter,
+  compareMilitaryTime,
+};
 
 /*
 

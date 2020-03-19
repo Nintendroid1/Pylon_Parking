@@ -74,15 +74,25 @@ const PrivateKeyField = props => {
 };
 
 const TimePicker = props => {
-  const { handleTimeChange, time, name, label } = props;
+  const { handleTimeChange, time, name, label, hasError, errorMessage } = props;
+
+  if (hasError === undefined) {
+    hasError = false;
+  }
+
+  if (errorMessage === undefined) {
+    errorMessage = '';
+  }
 
   return (
     <TextField
+      error={hasError}
       label={label}
       name={name}
       type="time"
-      value={time.startTime}
+      value={time}
       onChange={handleTimeChange}
+      helperText={errorMessage}
       InputLabelProps={{
         shrink: true
       }}
@@ -100,7 +110,8 @@ const ConfirmationDialogFieldButton = props => {
     messageContent,
     handleOnConfirm,
     privateKey,
-    updatePrivateKey
+    updatePrivateKey,
+    buttonColor
   } = props;
   const [open, setOpen] = useState(false);
 
@@ -118,7 +129,7 @@ const ConfirmationDialogFieldButton = props => {
 
   return (
     <div>
-      <Button variant="outlined" color="primary" onClick={handleClickOpen}>
+      <Button variant="outlined" color={buttonColor} onClick={handleClickOpen}>
         {buttonMessage}
       </Button>
       <Dialog open={open} onClose={() => handleClose(false)}>
@@ -167,13 +178,13 @@ const StartEndTime = props => {
       <Grid>
         <TimePicker
           handleTimeChange={handleTimeChange}
-          time={time}
+          time={time.startTime}
           name={'startTime'}
           label={'Start Time'}
         />
         <TimePicker
           handleTimeChange={handleTimeChange}
-          time={time}
+          time={time.endTime}
           name={'endTime'}
           label={'End Time'}
         />
@@ -184,6 +195,7 @@ const StartEndTime = props => {
           handleOnConfirm={handleOnConfirm}
           privateKey={time}
           updatePrivateKey={updateTime}
+          buttonColor='primary'
         />
       </Grid>
       <Grid>
@@ -197,5 +209,6 @@ export {
   StartEndTime,
   ConfirmationDialogFieldButton,
   PrivateKeyField,
-  CostField
+  CostField,
+  TimePicker,
 };
