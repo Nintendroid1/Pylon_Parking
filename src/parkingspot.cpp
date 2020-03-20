@@ -35,11 +35,37 @@ public:
                 row.available = true;
             });
             print("Parking Spot: ", spot_id, " in Zone: ", zone_id, " is created on: ", current_time_point().sec_since_epoch());
+            send_summary(user, " successfully inserted parking spot");
         }
         else {
             //The parking spot is in the table
             print("ALREADY EXISTS! Parking Spot: ", spot_id, " in Zone: ", zone_id);
         }
+  }
+
+  //Erases parking spot 
+  //TODO Change only to admin access
+  [[eosio::action]]
+  void erase(name user, uint64_t spot_id, uint64_t zone_id) {
+    require_auth(user);
+
+    park_index parkdeck(get_self(), get_first_receiver().value);
+
+    //Iterator for parking spots using spot_id as key
+    auto iterator = parkdeck.find(spot_id);
+
+    if( iterator == parkdeck.end() ) {
+          //The parking spot isn't in the table
+          //    check(iterator != addresses.end(), "Record does not exist");
+          print("DOES NOT EXIST! Parking Spot: ", spot_id, " in Zone: ", zone_id);
+      }
+      else {
+          parkdeck.erase(iterator);
+          print("REMOVED Parking Spot: ", spot_id, " in Zone: ", zone_id, " on: ", current_time_point().sec_since_epoch());
+          send_summary(user, " successfully removed parking spot");
+
+      }
+    
   }
 
   //Updates parking spot available
@@ -76,7 +102,16 @@ public:
               status_str = "not occupied";
             }
             print("Parking Spot: ", spot_id, " in Zone: ", zone_id, " is ", status_str, " on: ", current_time_point().sec_since_epoch());
+            send_summary(user, " successfully changed parking spot availability");
         }
+  }
+
+  [[eosio::action]]
+  void notify(name user, std::string msg) {
+    //Only authorization is the contract itself
+    require_auth(get_self());
+    //Ensures the accounts receive the notificaiton of the action being executed (carbon copy)
+    require_recipient(user);
   }
 
 private:
@@ -88,6 +123,21 @@ private:
 
     //Sets primary key to be the spot id
     uint64_t primary_key() const {return spot_id;}
+  };
+
+  void send_summary(name user, std::string message) {
+    /*
+    * Permision level = authorized is the active authority of the contract
+    * Code = account where contract is deployed
+    * Action we want to perform
+    * Data to pass to the action
+    */
+    action (
+      permission_level{get_self(),"active"_n},
+      get_self(),
+      "notify"_n,
+      std::make_tuple(user, name{user}.to_string() + message)
+    ).send();
   };
   
   /*_n is the name of the table
