@@ -18,6 +18,7 @@ import CssBaseline from '@material-ui/core/CssBaseline';
 import queryString from 'query-string';
 import ListParkingSpots from './pages/list-parking-spots';
 import ParkingSpot from './pages/parking-spot';
+import socketIOClient from 'socket.io-client';
 
 import Typography from '@material-ui/core/Typography';
 
@@ -67,6 +68,14 @@ const App = ({ classes, ...props }) => {
     }
   });
   const [isAdmin, updateAdmin] = useState(0);
+
+  
+  // Endpoint for the websocket.
+  const endpoint = "http://localhost:3000/";
+
+  // Creating a websocket to backend.
+  const socket = socketIOClient(endpoint);
+
   //console.log(localStorage.olivia_id);
   //localStorage.lastTab = "/";
   // history.push(history.location);
@@ -114,7 +123,7 @@ const App = ({ classes, ...props }) => {
                 hidden={true}
                 reqAdmin={false}
                 reqLogin={false}
-                component={ParkingSpot}
+                render={() => <ParkingSpot socket={socket} />}
               />
               <Route
                 path="/list_parking_spots/:parking_id"
@@ -123,7 +132,7 @@ const App = ({ classes, ...props }) => {
                 hidden={false}
                 reqAdmin={false}
                 reqLogin={false}
-                component={ListParkingSpots}
+                component={() => <ListParkingSpots socket={socket} />}
               />
               <Route
                 exact

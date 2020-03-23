@@ -9,6 +9,18 @@ import {
 import { TimePicker } from "./parking-spot-components.js";
 import Button from '@material-ui/core/Button';
 
+const convertMilitaryTimeToNormal = time => {
+  let [hour, minutes] = time.split(':');
+  let period = 'AM';
+
+  if (hour > 12) {
+    period = 'PM';
+    hour -= 12;
+  }
+
+  return hour + ':' + minutes + ' ' + period;
+};
+
 const compareMilitaryTime = (time1, time2) => {
   time1 = time1.split(':');
   time2 = time2.split(':');
@@ -105,6 +117,7 @@ const TimeFilter = props => {
 export {
   TimeFilter,
   compareMilitaryTime,
+  convertMilitaryTimeToNormal,
 };
 
 /*

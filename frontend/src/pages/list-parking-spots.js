@@ -13,6 +13,7 @@ import apiprefix from './apiprefix';
 import orderBy from 'lodash/orderBy';
 import TimeFilter from './forms/time-filter';
 import Button from '@material-ui/core/Button';
+import { convertMilitaryTimeToNormal } from './forms/time-filter';
 
 // The time input is wrong format for lodash to sort in.
 // Can code custom sorter for this if needed.
@@ -53,7 +54,7 @@ function TableData(props) {
             </Link>
           </TableCell>
           <TableCell>{parkingSpot.id}</TableCell>
-          <TableCell>{parkingSpot.time}</TableCell>
+          <TableCell>{convertMilitaryTimeToNormal(parkingSpot.time)}</TableCell>
           <TableCell>{parkingSpot.cost}</TableCell>
         </TableRow>
       </>
@@ -93,7 +94,13 @@ function MakeTable(props) {
   );
 }
 
-const ListParkingSpots = () => {
+const handleParkingSpotTimeChange = (parkingSpotsInfo, updateparkingSpotsInfo, parkingInfo) => {
+  const index = parkingSpotsInfo.findIndex(e => e.parking_id === parkingInfo.parking_id);
+  parkingSpotsInfo[index] = parkingInfo;
+  updateparkingSpotsInfo(parkingSpotsInfo);
+};
+
+const ListParkingSpots = (props) => {
   // To be used if paging
   /*
   const findCurrentPageBasedOnPath = (location) => {
@@ -101,8 +108,10 @@ const ListParkingSpots = () => {
     return isNaN(Number(tempQuery.page)) ? 0 : Number(tempQuery.page);
   }*/
 
+  const { socket } = props;
+
   const [message, updateMessage] = useState(null);
-  const [parkingSpotInfo, updateParkingSpotInfo] = useState(null);
+  const [parkingSpotsInfo, updateparkingSpotsInfo] = useState(null);
   const [order, updateOrder] = useState('asc');
   const [columnToSort, updatecolumnToSort] = useState('id');
 
@@ -120,7 +129,7 @@ const ListParkingSpots = () => {
     let resbody = await response.json();
 
     if (response.status === 200) {
-      updateParkingSpotInfo(resbody.parkingInfo);
+      updateparkingSpotsInfo(resbody.parkingInfo);
       updateMessage(null);
     } else {
       updateMessage(
@@ -132,7 +141,7 @@ const ListParkingSpots = () => {
   };*/
 
   const listParkingSpots = () => {
-    updateParkingSpotInfo(TempInput);
+    updateparkingSpotsInfo(TempInput);
     updateMessage(null);
   };
 
@@ -147,7 +156,7 @@ const ListParkingSpots = () => {
     let resbody = await response.json();
 
     if (response.status === 200) {
-      updateParkingSpotInfo(resbody.parkingInfo);
+      updateparkingSpotsInfo(resbody.parkingInfo);
       updateMessage(null);
     } else {
       updateMessage(<div>Fail</div>);
@@ -156,6 +165,7 @@ const ListParkingSpots = () => {
 
   useEffect(() => {
     listParkingSpots();
+    socket.on('list_parking_spot_change', (data) => handleParkingSpotTimeChange(parkingSpotsInfo, updateparkingSpotsInfo, data));
   });
 
   return (
@@ -168,7 +178,7 @@ const ListParkingSpots = () => {
             <div>
               <TimeFilter onSubmit={handleFiltering} />
               <MakeTable
-                parkingInfo={parkingSpotInfo}
+                parkingInfo={parkingSpotsInfo}
                 onSortClick={handleSortRequest}
                 columnToSort={columnToSort}
                 order={order}

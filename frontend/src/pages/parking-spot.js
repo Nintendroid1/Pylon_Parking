@@ -74,13 +74,19 @@ const MakeTable = props => {
   );
 };
 
-const ParkingSpot = () => {
+const handleParkingInfoChanges = (updateparkingSpotInfo, newParkingSpotInfo) => {
+  updateparkingSpotInfo(newParkingSpotInfo);
+};
+
+const ParkingSpot = (props) => {
   // To be used if paging
   /*
   const findCurrentPageBasedOnPath = (location) => {
     let tempQuery = queryString.parse(location.search);
     return isNaN(Number(tempQuery.page)) ? 0 : Number(tempQuery.page);
   }*/
+
+  const { socket } = props;
 
   let today = new Date();
   let timeSplit = today.toTimeString().split(':');
@@ -96,7 +102,7 @@ const ParkingSpot = () => {
   )} hokie tokens?`;
 
   const [message, updateMessage] = useState('Loading'); // Initial message cannot be null. See useEffect() for reason.
-  const [parkingSpotInfo, updateParkingSpotInfo] = useState(null);
+  const [parkingSpotInfo, updateparkingSpotInfo] = useState(null);
   const [time, updateTime] = useState({
     startTime: currTime,
     endTime: '24:00'
@@ -110,7 +116,7 @@ const ParkingSpot = () => {
 
     if (response.status === 200) {
       updateMessage(null);
-      updateParkingSpotInfo(resbody.parkingInfo);
+      updateparkingSpotInfo(resbody.parkingInfo);
     } else {
       updateMessage(
         <div>
@@ -122,7 +128,7 @@ const ParkingSpot = () => {
   */
 
   const listParkingSpotTimes = () => {
-    updateParkingSpotInfo(TempInput);
+    updateparkingSpotInfo(TempInput);
     updateMessage(null);
   };
 
@@ -142,6 +148,7 @@ const ParkingSpot = () => {
   // Renders after first render.
   useEffect(() => {
     listParkingSpotTimes();
+    socket.on('parking_spot', (data) => handleParkingInfoChanges(updateparkingSpotInfo, data));
   });
 
   return (
