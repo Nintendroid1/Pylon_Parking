@@ -43,4 +43,4 @@ const MainMap = ({ classes, ...props }) => {
   );
 };
 
-export default withTheme()(withStyles(styles)(MainMap));
+export default withTheme(withStyles(styles)(MainMap));

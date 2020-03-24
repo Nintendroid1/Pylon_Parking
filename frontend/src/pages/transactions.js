@@ -12,8 +12,20 @@ import 'date-fns';
 import { Typography } from '@material-ui/core';
 import queryStrings from 'query-string';
 import TextField from '@material-ui/core/TextField';
+import {
+  withStyles,
+  MuiThemeProvider,
+  createMuiTheme
+} from '@material-ui/core/styles';
 
-const FilterSelectField = props => {
+const styles = theme => ({
+  root: {
+    display: 'flex',
+    flexGrow: 1
+  }
+});
+
+const FilterSelectField = ({ classes, ...props }) => {
   const { listOfFilterOptions, filterOption, updateFilterOption } = props;
 
   const handleChange = event => {
@@ -227,4 +239,4 @@ const TransactionHistory = () => {
   );
 };
 
-export default TransactionHistory;
+export default withStyles(styles)(TransactionHistory);

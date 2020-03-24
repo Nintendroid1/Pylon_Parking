@@ -25,6 +25,18 @@ import { TimePicker } from './forms/parking-spot-components';
 import { compareMilitaryTime } from './forms/time-filter';
 import Box from '@material-ui/core/Box';
 import { ConfirmationDialogFieldButton } from './forms/parking-spot-components';
+import {
+  withStyles,
+  MuiThemeProvider,
+  createMuiTheme
+} from '@material-ui/core/styles';
+
+const styles = theme => ({
+  root: {
+    display: 'flex',
+    flexGrow: 1
+  }
+});
 
 const SellingMessageContent = (
   parkingSpotStartTime,
@@ -241,4 +253,4 @@ const UserInfo = (props) => {
   );
 };
 
-export default UserInfo;
+export default withStyles(styles)(UserInfo);

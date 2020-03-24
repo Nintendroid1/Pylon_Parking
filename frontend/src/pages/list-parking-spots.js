@@ -13,7 +13,25 @@ import apiprefix from './apiprefix';
 import orderBy from 'lodash/orderBy';
 import TimeFilter from './forms/time-filter';
 import Button from '@material-ui/core/Button';
+import {
+  withStyles,
+  withTheme,
+  MuiThemeProvider,
+  createMuiTheme
+} from '@material-ui/core/styles';
 
+const styles = theme => ({
+  tabLink: {
+    color: theme.palette.secondary.main
+  }
+});
+
+// const styles = theme => ({
+//   root: {
+//     display: 'flex',
+//     flexGrow: 1
+//   }
+// });
 // The time input is wrong format for lodash to sort in.
 // Can code custom sorter for this if needed.
 const TempInput = [
@@ -131,7 +149,7 @@ const ListParkingSpots = () => {
     }
   };*/
 
-  const listParkingSpots = () => {
+  const listParkingSpots = ({ classes, ...props }) => {
     updateParkingSpotInfo(TempInput);
     updateMessage(null);
   };
@@ -181,4 +199,4 @@ const ListParkingSpots = () => {
   );
 };
 
-export default ListParkingSpots;
+export default withTheme(withStyles(styles)(ListParkingSpots))

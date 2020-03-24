@@ -8,6 +8,18 @@ import {
 } from "@material-ui/pickers";
 import { TimePicker } from "./parking-spot-components.js";
 import Button from '@material-ui/core/Button';
+import {
+  withStyles,
+  MuiThemeProvider,
+  createMuiTheme
+} from '@material-ui/core/styles';
+
+const styles = theme => ({
+  root: {
+    display: 'flex',
+    flexGrow: 1
+  }
+});
 
 const compareMilitaryTime = (time1, time2) => {
   time1 = time1.split(':');
@@ -102,10 +114,10 @@ const TimeFilter = props => {
   );
 };
 
-export {
+export default withStyles(styles)({
   TimeFilter,
-  compareMilitaryTime,
-};
+  compareMilitaryTime
+});
 
 /*
 

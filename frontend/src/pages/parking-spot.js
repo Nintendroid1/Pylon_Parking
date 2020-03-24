@@ -9,6 +9,18 @@ import { StartEndTime } from './forms/parking-spot-components';
 import 'date-fns';
 import DateFnsUtils from '@date-io/date-fns';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
+import {
+  withStyles,
+  MuiThemeProvider,
+  createMuiTheme
+} from '@material-ui/core/styles';
+
+const styles = theme => ({
+  root: {
+    display: 'flex',
+    flexGrow: 1
+  }
+});
 
 const TempInput = [
   { startTime: '7:00', endTime: '12:00', cost: '2' },
@@ -174,4 +186,4 @@ const ParkingSpot = () => {
   );
 };
 
-export default ParkingSpot;
+export default withStyles(styles)(ParkingSpot);

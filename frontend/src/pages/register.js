@@ -5,6 +5,11 @@ import UserForm from './forms/registerform';
 import { Typography, LinearProgress } from '@material-ui/core';
 import { Redirect, withRouter } from 'react-router';
 import apiprefix from './apiprefix';
+import {
+  withStyles,
+  MuiThemeProvider,
+  createMuiTheme
+} from '@material-ui/core/styles';
 
 const styles = theme => ({
   main: {
@@ -99,4 +104,4 @@ RegisterTab.propTypes = {
   updateLogin: PropTypes.func.isRequired
 };
 
-export default RegisterTab;
+export default withStyles(styles)(RegisterTab);
