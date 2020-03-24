@@ -2,9 +2,6 @@ const morgan = require('morgan');
 const express = require('express');
 const port = 3000;
 
-const { Client } = require('pg');
-const client = new Client();
-
 const app = express();
 const indexRouter =  require('./api/index');
 const usersRouter = require('./api/users');
