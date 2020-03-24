@@ -2,9 +2,6 @@ const express = require('express');
 const router = express.Router();
 const jwt = require('./jwt');
 
-const { Client } = require('pg');
-const client = new Client();
-
 router.get('/', (req, res) => {
     res.send("This should be login api");
 });

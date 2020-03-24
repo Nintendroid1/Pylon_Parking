@@ -6,4 +6,10 @@ A blockchain solution for reserving parking spots
 ![ERD](media/ERD.png)
 ![Relational](media/Relational.png)
 
-![Make me a sandwich](media/sandwich.png)
+![Make me a sandwich](media/sandwich.png)  
+
+## How to create postgres server:
+1. Make sure postgres is installed
+2. Start the server, on Linux: `service postgresql start`
+3. Create the database, 'createdb PylonParking' *note: you have to be on the correct postgres user, https://docs.microsoft.com/en-us/windows/nodejs/databases#postgresql-user-setup*
+4. Assuming the admin user is postgres, load the sql: `sudo -u postgres psql -d PylonParking -a -f install.sql`
