@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { makeAPICall } from '../api';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
@@ -168,7 +168,13 @@ SelectProps={{
   );
 };
 
-const TransactionHistory = () => {
+const handleNewTransaction = (listOfTransactions, updateListOfTransactions, newTransaction) => {
+  updateListOfTransactions(listOfTransactions.unshift(data));
+};
+
+const TransactionHistory = (props) => {
+  const { socket } = props;
+
   const [listOfTransactions, updateListOfTransactions] = useState(
     getTransactionHistory()
   );
@@ -212,6 +218,10 @@ const TransactionHistory = () => {
 
     return null;
   };
+
+  useEffect(() => {
+    socket.on('transaction_history', (data) => handleNewTransaction(listOfTransactions, updateListOfTransactions, data));
+  });
 
   return (
     <Typography>

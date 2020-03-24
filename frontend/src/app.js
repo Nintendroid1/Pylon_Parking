@@ -18,6 +18,7 @@ import CssBaseline from '@material-ui/core/CssBaseline';
 import queryString from 'query-string';
 import ListParkingSpots from './pages/list-parking-spots';
 import ParkingSpot from './pages/parking-spot';
+import TransactionHistory from './pages/transactions';
 import socketIOClient from 'socket.io-client';
 
 import Typography from '@material-ui/core/Typography';
@@ -143,6 +144,16 @@ const App = ({ classes, ...props }) => {
                 reqLogin={true}
                 hidden={false}
                 component={WelcomeTab}
+              />
+              <Route 
+                exact
+                path="/transaction_history"
+                label="Transaction History"
+                key="/transaction_history"
+                reqAdmin={false}
+                reqLogin={false}
+                hidden={false}
+                render={() => <TransactionHistory socket={socket} />}
               />
               <Route
                 path="/"
