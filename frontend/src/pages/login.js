@@ -111,4 +111,4 @@ LoginTab.propTypes = {
   updateLogin: PropTypes.func.isRequired
 };
 
-export default withTheme()(withStyles(styles)(LoginTab));
+export default withTheme(withStyles(styles)(LoginTab));

@@ -18,9 +18,6 @@ const styles = theme => ({
   main_map: {
     width: '100%',
     height: 'auto'
-  },
-  eggs: {
-    color: 'green'
   }
 });
 
@@ -46,4 +43,4 @@ const MainMap = ({ classes, ...props }) => {
   );
 };
 
-export default withTheme()(withStyles(styles)(MainMap));
+export default withTheme(withStyles(styles)(MainMap));

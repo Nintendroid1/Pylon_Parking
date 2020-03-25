@@ -19,7 +19,7 @@ function get_latest_frontend() {
     local latestTag
     latestTag=$(git describe --tags --abbrev=0 $BRANCH)
     echo "Latest FE Tag: $latestTag"
-    git checkout $latestTag $DIR
+    git checkout $latestTag -- $DIR
 }
 
 function get_latest_backend() {
@@ -31,7 +31,7 @@ function get_latest_backend() {
     local latestTag
     latestTag=$(git describe --tags --abbrev=0 $BRANCH)
     echo "Latest BE Tag: $latestTag"
-    git checkout $latestTag $DIR
+    git checkout $latestTag -- $DIR
 }
 
 get_latest_backend

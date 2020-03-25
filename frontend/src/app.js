@@ -16,9 +16,10 @@ import CssBaseline from '@material-ui/core/CssBaseline';
 //import { withRouter, Switch as RRSwitch } from 'react-router';
 //import { Link as RRLink } from 'react-router-dom';
 import queryString from 'query-string';
+import ListParkingSpots from './pages/list-parking-spots';
+import ParkingSpot from './pages/parking-spot';
 
 import Typography from '@material-ui/core/Typography';
-
 
 import history from './history';
 
@@ -109,6 +110,22 @@ const App = ({ classes, ...props }) => {
                 component={MainMap}
               />
               <Route
+                path="/list_parking_spots/:parking_id/parking_spot/:spot_id"
+                hidden={true}
+                reqAdmin={false}
+                reqLogin={false}
+                component={ParkingSpot}
+              />
+              <Route
+                path="/list_parking_spots/:parking_id"
+                label="List Parking Spots"
+                key="/list_parking_spots"
+                hidden={false}
+                reqAdmin={false}
+                reqLogin={false}
+                component={ListParkingSpots}
+              />
+              <Route
                 exact
                 path="/profile"
                 label="Profile"
@@ -118,7 +135,13 @@ const App = ({ classes, ...props }) => {
                 hidden={false}
                 component={WelcomeTab}
               />
-
+              <Route
+                path="/"
+                reqAdmin={false}
+                reqLogin={false}
+                hidden={true}
+                component={WelcomeTab}
+              />
             </TabChooser>
           </Router>
         </div>
