@@ -71,6 +71,7 @@ function broadcastTransactionHistoryInfo(data) {
 }
 
 module.exports= {
+  initSocket,
   broadcastParkingLotInfo,
   broadcastParkingSpotInfo,
   broadcastTransactionHistoryInfo,
