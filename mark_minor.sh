@@ -18,6 +18,7 @@ function mark_minor_tag() {
     echo "Next Minor: $next_minor"
     echo "New Tag: $NEW_TAG"
     git tag $NEW_TAG
+    git push origin $NEW_TAG
 }
 
 #Get current hash and see if it already has a tag
