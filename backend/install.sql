@@ -37,6 +37,5 @@ CREATE TABLE parking_times
 	time_code VARCHAR(100),
 	availability boolean,
 	PRIMARY KEY (spot_ID, zone_ID, time_code),
-	FOREIGN KEY (spot_ID) REFERENCES parking_spots(spot_ID),
-	FOREIGN KEY (zone_ID) REFERENCES parking_spots(zone_ID)
+	FOREIGN KEY (spot_ID, zone_ID) REFERENCES parking_spots(spot_ID, zone_ID)
 );
