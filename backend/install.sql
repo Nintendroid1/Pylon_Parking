@@ -5,7 +5,7 @@ drop table if exists parking_spots cascade;
 CREATE TABLE users
 (
 	PID VARCHAR(100) NOT NULL,
-	pin INT,
+	pass VARCHAR(256),
 	email VARCHAR(256),
 	first_name VARCHAR(100),
 	last_name VARCHAR(100),
@@ -31,3 +31,10 @@ CREATE TABLE parking_spots
 	FOREIGN KEY (user_PID) REFERENCES users(PID)
 );
 
+CREATE TABLE parking_times
+(
+	spot_ID INT NOT NULL,
+	time_code VARCHAR(100),
+	PRIMARY KEY (spot_ID, time_code),
+	FOREIGN KEY (spot_ID) REFERENCES parking_spots(spot_ID)
+);
