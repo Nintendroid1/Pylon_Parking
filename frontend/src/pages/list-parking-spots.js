@@ -114,7 +114,15 @@ function MakeTable(props) {
   );
 }
 
-const ListParkingSpots = () => {
+const Zone = ({
+  isDark,
+  updateLogin,
+  selectTab,
+  classes,
+  updateUser,
+  updateAdmin,
+  ...props
+}) => {
   // To be used if paging
   /*
   const findCurrentPageBasedOnPath = (location) => {
@@ -127,7 +135,7 @@ const ListParkingSpots = () => {
   const [order, updateOrder] = useState('asc');
   const [columnToSort, updatecolumnToSort] = useState('id');
 
-  const url = `${apiprefix}/zones`;
+  const url = `${apiprefix}/zones/1`;
 
   const handleSortRequest = property => {
     const isAsc = columnToSort === property && order === 'asc';
@@ -135,7 +143,6 @@ const ListParkingSpots = () => {
     updatecolumnToSort(property);
   };
 
-  /*
   const listParkingSpots = async () => {
     let response = await makeAPICall('GET', url);
     let resbody = await response.json();
@@ -144,18 +151,14 @@ const ListParkingSpots = () => {
       updateParkingSpotInfo(resbody.parkingInfo);
       updateMessage(null);
     } else {
-      updateMessage(
-        <div>
-          Fail
-        </div>
-      );
+      updateMessage(<div>Fail</div>);
     }
-  };*/
-
-  const listParkingSpots = ({ classes, ...props }) => {
-    updateParkingSpotInfo(TempInput);
-    updateMessage(null);
   };
+
+  // const listParkingSpots = ({ ...props }) => {
+  //   updateParkingSpotInfo(TempInput);
+  //   updateMessage(null);
+  // };
 
   const handleFiltering = async values => {
     const { date, startTime, endTime } = values;
@@ -202,4 +205,4 @@ const ListParkingSpots = () => {
   );
 };
 
-export default ListParkingSpots;
+export default Zone;
