@@ -110,16 +110,16 @@ const App = ({ classes, ...props }) => {
                 component={MainMap}
               />
               <Route
-                path="/list_parking_spots/:parking_id/parking_spot/:spot_id"
+                path="/zones/:zone_id/parking_spot/:spot_id"
                 hidden={true}
                 reqAdmin={false}
                 reqLogin={false}
                 component={ParkingSpot}
               />
               <Route
-                path="/list_parking_spots/:parking_id"
+                path="/zones/:zone_id"
                 label="List Parking Spots"
-                key="/list_parking_spots"
+                key="/zones"
                 hidden={false}
                 reqAdmin={false}
                 reqLogin={false}
