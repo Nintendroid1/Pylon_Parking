@@ -25,8 +25,7 @@ CREATE TABLE parking_spots
 	spot_ID INT NOT NULL,
 	zone_ID INT NOT NULL,
 	PRIMARY KEY (spot_ID, zone_ID),
-	FOREIGN KEY (zone_ID) REFERENCES zones(zone_ID),
-	FOREIGN KEY (user_PID) REFERENCES users(PID)
+	FOREIGN KEY (zone_ID) REFERENCES zones(zone_ID)
 );
 
 CREATE TABLE parking_times
@@ -37,5 +36,6 @@ CREATE TABLE parking_times
 	user_PID VARCHAR(100),
 	availability boolean,
 	PRIMARY KEY (spot_ID, zone_ID, time_code),
-	FOREIGN KEY (spot_ID, zone_ID) REFERENCES parking_spots(spot_ID, zone_ID)
+	FOREIGN KEY (spot_ID, zone_ID) REFERENCES parking_spots(spot_ID, zone_ID),
+	FOREIGN KEY (user_PID) REFERENCES users(PID)
 );

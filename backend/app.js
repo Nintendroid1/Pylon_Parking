@@ -5,10 +5,12 @@ const port = 3000;
 const app = express();
 const indexRouter =  require('./api/index');
 const usersRouter = require('./api/users');
+const zonesRouter = require('./api/zones');
 
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms'));
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
+app.use('/zones', zonesRouter);
 app.use(express.json());
 
 app.use(function (req, res, next) {
