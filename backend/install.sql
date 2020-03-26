@@ -16,7 +16,7 @@ CREATE TABLE users
 CREATE TABLE zones
 (
 	zone_ID INT NOT NULL,
-	name VARCHAR(256),
+	zone_name VARCHAR(256),
 	PRIMARY KEY (zone_ID)
 );
 
