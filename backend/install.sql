@@ -1,6 +1,7 @@
 drop table if exists users cascade;
 drop table if exists zones cascade;
 drop table if exists parking_spots cascade;
+drop table if exists parking_times cascade;
 
 CREATE TABLE users
 (
