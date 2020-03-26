@@ -220,8 +220,8 @@ const TransactionHistory = (props) => {
   };
 
   useEffect(() => {
-    socket.on('transaction_history', (data) => handleNewTransaction(listOfTransactions, updateListOfTransactions, data));
-  });
+    socket.on('transactionHistory', (data) => handleNewTransaction(listOfTransactions, updateListOfTransactions, data));
+  }, []);
 
   return (
     <Typography>

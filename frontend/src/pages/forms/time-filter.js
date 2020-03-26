@@ -9,6 +9,19 @@ import {
 import { TimePicker } from "./parking-spot-components.js";
 import Button from '@material-ui/core/Button';
 
+const militaryTimeDifference = (startTime, endTime) => {
+  const [startTimeHour, startTimeMinute] = startTime.split(':').map(e => Number(e));
+  const [endTimeHour, endTimeMinute] = endTime.split(':').map(e => Number(e));
+  
+  let timeDiff = 60 - startTimeMinute;
+  startTimeMinute = 0;
+  startTimeHour += 1;
+
+  timeDiff += (endTimeHour - startTimeHour) + (endTimeMinute - startTimeMinute);
+
+  return timeDiff;
+};
+
 const convertMilitaryTimeToNormal = time => {
   let [hour, minutes] = time.split(':');
   let period = 'AM';
@@ -21,6 +34,16 @@ const convertMilitaryTimeToNormal = time => {
   return hour + ':' + minutes + ' ' + period;
 };
 
+// sortDirection === 'asc' means earliest to latest
+// sortDirection === 'desc' means latest to earliest.
+const sortByMilitaryTime = (data, sortDirection) => {
+  const sortedData = data.sort(compareMilitaryTime);
+  return sortDirection === 'asc' ? sortedData : sortedData.reverse();
+};
+
+
+// If time1 earlier than time2, then return -1.
+// If time2 earlier than time1, then return 1.
 const compareMilitaryTime = (time1, time2) => {
   time1 = time1.split(':');
   time2 = time2.split(':');
@@ -118,6 +141,8 @@ export {
   TimeFilter,
   compareMilitaryTime,
   convertMilitaryTimeToNormal,
+  sortByMilitaryTime,
+  militaryTimeDifference,
 };
 
 /*

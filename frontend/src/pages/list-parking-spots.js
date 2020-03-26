@@ -13,7 +13,7 @@ import apiprefix from './apiprefix';
 import orderBy from 'lodash/orderBy';
 import TimeFilter from './forms/time-filter';
 import Button from '@material-ui/core/Button';
-import { convertMilitaryTimeToNormal } from './forms/time-filter';
+import { convertMilitaryTimeToNormal, sortByMilitaryTime } from './forms/time-filter';
 
 // The time input is wrong format for lodash to sort in.
 // Can code custom sorter for this if needed.
@@ -88,12 +88,20 @@ function MakeTable(props) {
         </TableRow>
       </TableHead>
       <TableBody>
-        <TableData parkingInfo={orderBy(parkingInfo, columnToSort, order)} />
+        <TableData 
+          parkingInfo={
+            columnToSort === 'time' ? 
+            sortByMilitaryTime(parkingInfo, order) : 
+            orderBy(parkingInfo, columnToSort, order)
+          } 
+        />
       </TableBody>
     </Table>
   );
 }
 
+// Should cause a rerender to occur because of state change, so do not need to worry
+// about sorting in this function.
 const handleParkingSpotTimeChange = (parkingSpotsInfo, updateparkingSpotsInfo, parkingInfo) => {
   const index = parkingSpotsInfo.findIndex(e => e.parking_id === parkingInfo.parking_id);
   parkingSpotsInfo[index] = parkingInfo;
@@ -115,7 +123,10 @@ const ListParkingSpots = (props) => {
   const [order, updateOrder] = useState('asc');
   const [columnToSort, updatecolumnToSort] = useState('id');
 
+  // Expected url: ./list_parking_spots/:parkingLotId
   const url = `${apiprefix}/list_parking_spots`;
+  let tempUrl = window.location.pathname;
+  let parkingLotId = Number(tempUrl.substring(tempUrl.lastIndexOf('/') + 1));
 
   const handleSortRequest = property => {
     const isAsc = columnToSort === property && order === 'asc';
@@ -125,7 +136,8 @@ const ListParkingSpots = (props) => {
 
   /*
   const listParkingSpots = async () => {
-    let response = await makeAPICall('GET', url);
+    let temp = url + '/' + parkingLotId;
+    let response = await makeAPICall('GET', temp);
     let resbody = await response.json();
 
     if (response.status === 200) {
@@ -165,8 +177,11 @@ const ListParkingSpots = (props) => {
 
   useEffect(() => {
     listParkingSpots();
-    socket.on('list_parking_spot_change', (data) => handleParkingSpotTimeChange(parkingSpotsInfo, updateparkingSpotsInfo, data));
-  });
+  }, []);
+
+  useEffect(() => {
+    socket.on(`parkingLot-${parkingLotId}`, (data) => handleParkingSpotTimeChange(parkingSpotsInfo, updateparkingSpotsInfo, data));
+  }, []);
 
   return (
     <>

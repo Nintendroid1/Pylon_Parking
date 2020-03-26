@@ -19,7 +19,7 @@ import queryString from 'query-string';
 import ListParkingSpots from './pages/list-parking-spots';
 import ParkingSpot from './pages/parking-spot';
 import TransactionHistory from './pages/transactions';
-import socketIOClient from 'socket.io-client';
+import io from 'socket.io-client';
 
 import Typography from '@material-ui/core/Typography';
 
@@ -72,10 +72,13 @@ const App = ({ classes, ...props }) => {
 
   
   // Endpoint for the websocket.
+  // Base url.
   const endpoint = "http://localhost:3000/";
 
-  // Creating a websocket to backend.
-  const socket = socketIOClient(endpoint);
+  // Creating websockets to backend.
+  const parkingLotSocket = io(`${endpoint}/parkingLot`);
+  const parkingSpotSocket = io(`${endpoint}/parkingSpot`);
+  const transactionHistorySocket = io(endpoint);
 
   //console.log(localStorage.olivia_id);
   //localStorage.lastTab = "/";
@@ -124,7 +127,7 @@ const App = ({ classes, ...props }) => {
                 hidden={true}
                 reqAdmin={false}
                 reqLogin={false}
-                render={() => <ParkingSpot socket={socket} />}
+                render={() => <ParkingSpot socket={parkingSpotSocket} />}
               />
               <Route
                 path="/list_parking_spots/:parking_id"
@@ -133,7 +136,7 @@ const App = ({ classes, ...props }) => {
                 hidden={false}
                 reqAdmin={false}
                 reqLogin={false}
-                component={() => <ListParkingSpots socket={socket} />}
+                component={() => <ListParkingSpots socket={parkingLotSocket} />}
               />
               <Route
                 exact
@@ -153,7 +156,7 @@ const App = ({ classes, ...props }) => {
                 reqAdmin={false}
                 reqLogin={false}
                 hidden={false}
-                render={() => <TransactionHistory socket={socket} />}
+                render={() => <TransactionHistory socket={transactionHistorySocket} />}
               />
               <Route
                 path="/"

@@ -32,11 +32,13 @@ const CostField = props => {
   );
 };
 
+// The private key is stored in the 'key' property of the privateKey object,
+// which is a state and is the time state originally.
 const PrivateKeyField = props => {
   const { privateKey, updatePrivateKey } = props;
 
-  const handleChange = prop => event => {
-    updatePrivateKey({ ...privateKey, [prop]: event.target.value });
+  const handleChange = () => event => {
+    updatePrivateKey({ ...privateKey, privateKey: event.target.value });
   };
 
   const handleClickShowKey = () => {
@@ -54,7 +56,7 @@ const PrivateKeyField = props => {
           id="private-key"
           type={privateKey.showPrivateKey ? 'text' : 'password'}
           value={privateKey.privateKey}
-          onChange={handleChange('key')}
+          onChange={handleChange()}
           endAdornment={
             <InputAdornment position="end">
               <IconButton
@@ -122,8 +124,15 @@ const ConfirmationDialogFieldButton = props => {
   const handleClose = isAgree => {
     setOpen(false);
 
+    // privateKey is the time state
+    // time state has start time and end time.
     if (isAgree) {
-      handleOnConfirm();
+      handleOnConfirm(privateKey.privateKey);
+    } else {
+      updatePrivateKey({
+        privateKey: '',
+        showPrivateKey: false,
+      })
     }
   };
 
@@ -135,11 +144,15 @@ const ConfirmationDialogFieldButton = props => {
       <Dialog open={open} onClose={() => handleClose(false)}>
         <DialogTitle>{messageTitle}</DialogTitle>
         <DialogContent>
-          {messageContent}
-          <PrivateKeyField
-            privateKey={privateKey}
-            updatePrivateKey={updatePrivateKey}
-          />
+          <Grid>
+            {messageContent}
+          </Grid>
+          <Grid>
+            <PrivateKeyField
+              privateKey={privateKey}
+              updatePrivateKey={updatePrivateKey}
+            />
+          </Grid>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => handleClose(false)} color="primary">
@@ -166,6 +179,10 @@ const StartEndTime = props => {
   } = props;
 
   const [cost, updateCost] = useState('N/A');
+  const [privateKey, updatePrivateKey] = useState({
+    privateKey: '',
+    showPrivateKey: false,
+  })
 
   const handleTimeChange = event => {
     let { name, value } = event.target;
@@ -193,8 +210,8 @@ const StartEndTime = props => {
           messageTitle={popUpTitle}
           messageContent={popUpContent}
           handleOnConfirm={handleOnConfirm}
-          privateKey={time}
-          updatePrivateKey={updateTime}
+          privateKey={privateKey}
+          updatePrivateKey={updatePrivateKey}
           buttonColor='primary'
         />
       </Grid>
