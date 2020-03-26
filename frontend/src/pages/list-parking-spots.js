@@ -21,6 +21,9 @@ import {
 } from '@material-ui/core/styles';
 
 const styles = theme => ({
+  root: {
+    color: theme.palette.secondary.main
+  },
   tabLink: {
     color: theme.palette.secondary.main
   }
@@ -124,7 +127,7 @@ const ListParkingSpots = () => {
   const [order, updateOrder] = useState('asc');
   const [columnToSort, updatecolumnToSort] = useState('id');
 
-  const url = `${apiprefix}/list_parking_spots`;
+  const url = `${apiprefix}/zones`;
 
   const handleSortRequest = property => {
     const isAsc = columnToSort === property && order === 'asc';
@@ -160,7 +163,7 @@ const ListParkingSpots = () => {
     const month = date.getMonth() + 1;
     const day = date.getDate();
 
-    const newURL = `${url}/?month=${month}&day=${day}&year=${year}&startTime=${startTime}&endTime=${endTime}`;
+    const newURL = `${url}/all/?month=${month}&day=${day}&year=${year}&startTime=${startTime}&endTime=${endTime}`;
     let response = await makeAPICall('GET', newURL);
     let resbody = await response.json();
 
@@ -199,4 +202,4 @@ const ListParkingSpots = () => {
   );
 };
 
-export default withTheme(withStyles(styles)(ListParkingSpots))
+export default ListParkingSpots;
