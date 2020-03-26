@@ -1,12 +1,12 @@
-import React, { useState } from "react";
-import "date-fns";
-import Grid from "@material-ui/core/Grid";
-import DateFnsUtils from "@date-io/date-fns";
+import React, { useState } from 'react';
+import 'date-fns';
+import Grid from '@material-ui/core/Grid';
+import DateFnsUtils from '@date-io/date-fns';
 import {
   MuiPickersUtilsProvider,
   KeyboardDatePicker
-} from "@material-ui/pickers";
-import { TimePicker } from "./parking-spot-components.js";
+} from '@material-ui/pickers';
+import { TimePicker } from './parking-spot-components.js';
 import Button from '@material-ui/core/Button';
 import {
   withStyles,
@@ -36,20 +36,28 @@ const compareMilitaryTime = (time1, time2) => {
   }
 
   return 0;
-}
+};
 
-const TimeFilter = props => {
+const TimeFilter = ({
+  isDark,
+  updateLogin,
+  selectTab,
+  classes,
+  updateUser,
+  updateAdmin,
+  ...props
+}) => {
   const { onSubmit, popUpTitle, popUpContent } = props;
 
   let today = new Date();
-  let timeSplit = today.toTimeString().split(":");
-  let currTime = timeSplit[0].concat(":", timeSplit[1]);
+  let timeSplit = today.toTimeString().split(':');
+  let currTime = timeSplit[0].concat(':', timeSplit[1]);
 
   const [time, updateTime] = useState({
     date: today,
     startTime: currTime,
-    endTime: "24:00",
-    privateKey: "",
+    endTime: '24:00',
+    privateKey: '',
     showPrivateKey: false
   });
 
@@ -58,7 +66,7 @@ const TimeFilter = props => {
   };
 
   const handleSubmit = event => {
-    console.log(typeof onSubmit)
+    console.log(typeof onSubmit);
     console.log(time);
     onSubmit(time);
   };
@@ -83,7 +91,7 @@ const TimeFilter = props => {
               value={time.date}
               onChange={handleDateChange}
               KeyboardButtonProps={{
-                "aria-label": "change date"
+                'aria-label': 'change date'
               }}
             />
           </Grid>
@@ -91,20 +99,16 @@ const TimeFilter = props => {
             <TimePicker
               handleTimeChange={handleTimeChange}
               time={time.startTime}
-              name={"startTime"}
-              label={"Start Time"}
+              name={'startTime'}
+              label={'Start Time'}
             />
             <TimePicker
               handleTimeChange={handleTimeChange}
               time={time.endTime}
-              name={"endTime"}
-              label={"End Time"}
+              name={'endTime'}
+              label={'End Time'}
             />
-            <Button
-            variant='contained'
-            color='primary'
-            onClick={handleSubmit}
-            >
+            <Button variant="contained" color="primary" onClick={handleSubmit}>
               Filter!
             </Button>
           </Grid>
@@ -114,10 +118,11 @@ const TimeFilter = props => {
   );
 };
 
-export default withStyles(styles)({
-  TimeFilter,
-  compareMilitaryTime
-});
+// export default {
+//   TimeFilter,
+//   compareMilitaryTime
+// };
+export default withStyles(styles)(TimeFilter);
 
 /*
 
