@@ -24,8 +24,8 @@ function mark_minor_tag() {
     NEW_TAG="v$latestMajor.$next_minor-$BRANCH_NAME"
     # echo "Current Tag: $latestTag"
     echo "New Tag: $NEW_TAG (Ignoring fatal:cannot describe - this means commit is untagged) "
-    # git tag $NEW_TAG
-    # git push origin $NEW_TAG
+    git tag $NEW_TAG
+    git push origin $NEW_TAG
 }
 
 function mark_major_tag() {
@@ -54,8 +54,8 @@ function mark_major_tag() {
     NEW_TAG="v$next_major.$next_minor-$BRANCH_NAME"
     # echo "Current Tag: $latestTag"
     echo "New Tag: $NEW_TAG (Ignoring fatal:cannot describe - this means commit is untagged) "
-    # git tag $NEW_TAG
-    # git push origin $NEW_TAG
+    git tag $NEW_TAG
+    git push origin $NEW_TAG
 }
 
 function mark_rev() {
