@@ -37,7 +37,10 @@ const LoginTab = ({
   // handle user login
   const userLogin = async values => {
     setLoading(true);
-    let res = await makeAPICall('POST', `${apiprefix}/login`, values);
+    console.log(`Making POST request to: ${apiprefix}/users/login`)
+    console.log('Using values:')
+    console.log(values)
+    let res = await makeAPICall('POST', `${apiprefix}/users/login`, values);
     let body = await res.json();
 
     setLoading(false);
@@ -61,9 +64,7 @@ const LoginTab = ({
       }
 
       history.replace(nextLocation.pathname);
-      window.location.href = `${process.env.PUBLIC_URL}${
-        nextLocation.pathname
-      }`;
+      window.location.href = `${process.env.PUBLIC_URL}${nextLocation.pathname}`;
       //history.goForward();
       /*} else {
         history.push('/');
@@ -113,4 +114,4 @@ LoginTab.propTypes = {
   updateLogin: PropTypes.func.isRequired
 };
 
-export default withTheme()(withStyles(styles)(LoginTab));
+export default withTheme(withStyles(styles)(LoginTab));

@@ -15,28 +15,56 @@ import { TimeFilter } from './forms/time-filter';
 import Button from '@material-ui/core/Button';
 import { convertMilitaryTimeToNormal, sortByMilitaryTime } from './forms/time-filter';
 
+import {
+  withStyles,
+  withTheme,
+  MuiThemeProvider,
+  createMuiTheme
+} from '@material-ui/core/styles';
+
+const styles = theme => ({
+  root: {
+    color: theme.palette.secondary.main
+  },
+  tabLink: {
+    color: theme.palette.secondary.main
+  }
+});
+
+// const styles = theme => ({
+//   root: {
+//     display: 'flex',
+//     flexGrow: 1
+//   }
+// });
 // The time input is wrong format for lodash to sort in.
 // Can code custom sorter for this if needed.
-const TempInput = [
-  { id: '1', time: '12:00', cost: 1 },
-  { id: '2', time: '13:00', cost: 1 },
-  { id: '3', time: '14:00', cost: 4 },
-  { id: '4', time: '1:00', cost: 9 },
-  { id: '5', time: '2:00', cost: 12 },
-  { id: '6', time: '6:00', cost: 1 }
-];
+// const TempInput = [
+//   { id: '1', time: '12:00', cost: 1 },
+//   { id: '2', time: '13:00', cost: 1 },
+//   { id: '3', time: '14:00', cost: 4 },
+//   { id: '4', time: '1:00', cost: 9 },
+//   { id: '5', time: '2:00', cost: 12 },
+//   { id: '6', time: '6:00', cost: 1 }
+// ];
 
 const headerCells = [
   { id: 'id', label: 'Spot #' },
-  { id: 'time', label: 'Earliest Time Available' },
-  { id: 'cost', label: 'Average Cost/15 minutes' }
+  { id: 'time', label: 'Next Available Time' }
+  // { id: 'available', label: 'Is Available' }
+  // { id: 'cost', label: 'Average Cost/15 minutes' }
 ];
 
 function TableData(props) {
   const data = props.parkingInfo.map(e => ({
-    ...e,
-    id: e.id.replace('/.', '-')
+    ...e
   }));
+  const pretty_date = epoch => {
+    let temp_date = new Date(epoch * 1000);
+    let date_str = `${temp_date.toLocaleString()}`;
+    return date_str;
+  };
+
   return data.map(parkingSpot => {
     return (
       <>
@@ -44,7 +72,7 @@ function TableData(props) {
           <TableCell>
             <Link
               to={{
-                pathname: `/parking_spot/${parkingSpot.id}`,
+                pathname: `zones/${parkingSpot.zone_id}/spot/${parkingSpot.spot_id}`,
                 state: {
                   from: history.location
                 }
@@ -53,9 +81,8 @@ function TableData(props) {
               <Button type="button">View</Button>
             </Link>
           </TableCell>
-          <TableCell>{parkingSpot.id}</TableCell>
-          <TableCell>{convertMilitaryTimeToNormal(parkingSpot.time)}</TableCell>
-          <TableCell>{parkingSpot.cost}</TableCell>
+          <TableCell>{parkingSpot.spot_id}</TableCell>
+          <TableCell>{pretty_date(parkingSpot.next_avail)}</TableCell>
         </TableRow>
       </>
     );
@@ -108,7 +135,15 @@ const handleParkingSpotTimeChange = (parkingSpotsInfo, updateparkingSpotsInfo, p
   updateparkingSpotsInfo(parkingSpotsInfo);
 };
 
-const ListParkingSpots = (props) => {
+const Zone = ({
+  isDark,
+  updateLogin,
+  selectTab,
+  classes,
+  updateUser,
+  updateAdmin,
+  ...props
+}) => {
   // To be used if paging
   /*
   const findCurrentPageBasedOnPath = (location) => {
@@ -124,9 +159,8 @@ const ListParkingSpots = (props) => {
   const [columnToSort, updatecolumnToSort] = useState('id');
 
   // Expected url: ./list_parking_spots/:parkingLotId
-  const url = `${apiprefix}/list_parking_spots`;
   let tempUrl = window.location.pathname;
-  let parkingLotId = Number(tempUrl.substring(tempUrl.lastIndexOf('/') + 1));
+  let zoneId = Number(tempUrl.substring(tempUrl.lastIndexOf('/') + 1));
 
   const handleSortRequest = property => {
     const isAsc = columnToSort === property && order === 'asc';
@@ -134,28 +168,26 @@ const ListParkingSpots = (props) => {
     updatecolumnToSort(property);
   };
 
-  /*
+  // GET   /api/zones/:zone_id
   const listParkingSpots = async () => {
-    let temp = url + '/' + parkingLotId;
-    let response = await makeAPICall('GET', temp);
+    const url = `${apiprefix}/zones/${zoneId}`;
+    let response = await makeAPICall('GET', url);
     let resbody = await response.json();
+    console.log("RESPPPPP");
+    console.log(resbody.parkingInfo);
 
     if (response.status === 200) {
       updateparkingSpotsInfo(resbody.parkingInfo);
       updateMessage(null);
     } else {
-      updateMessage(
-        <div>
-          Fail
-        </div>
-      );
+      updateMessage(<div>Fail</div>);
     }
-  };*/
-
-  const listParkingSpots = () => {
-    updateparkingSpotsInfo(TempInput);
-    updateMessage(null);
   };
+
+  // const listParkingSpots = ({ ...props }) => {
+  //   updateParkingSpotInfo(TempInput);
+  //   updateMessage(null);
+  // };
 
   const handleFiltering = async values => {
     const { date, startTime, endTime } = values;
@@ -163,7 +195,7 @@ const ListParkingSpots = (props) => {
     const month = date.getMonth() + 1;
     const day = date.getDate();
 
-    const newURL = `${url}/?month=${month}&day=${day}&year=${year}&startTime=${startTime}&endTime=${endTime}`;
+    const newURL = `${url}/all/?month=${month}&day=${day}&year=${year}&startTime=${startTime}&endTime=${endTime}`;
     let response = await makeAPICall('GET', newURL);
     let resbody = await response.json();
 
@@ -180,7 +212,7 @@ const ListParkingSpots = (props) => {
   }, []);
 
   useEffect(() => {
-    socket.on(`parkingLot-${parkingLotId}`, (data) => handleParkingSpotTimeChange(parkingSpotsInfo, updateparkingSpotsInfo, data));
+    socket.on(`parkingLot-${zoneId}`, (data) => handleParkingSpotTimeChange(parkingSpotsInfo, updateparkingSpotsInfo, data));
   }, []);
 
   return (
@@ -206,4 +238,4 @@ const ListParkingSpots = (props) => {
   );
 };
 
-export default ListParkingSpots;
+export default Zone;

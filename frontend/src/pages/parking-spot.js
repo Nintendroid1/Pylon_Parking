@@ -10,6 +10,18 @@ import 'date-fns';
 import DateFnsUtils from '@date-io/date-fns';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import { compareMilitaryTime, militaryTimeDifference, convertMilitaryTimeToNormal } from './forms/time-filter';
+import {
+  withStyles,
+  MuiThemeProvider,
+  createMuiTheme
+} from '@material-ui/core/styles';
+
+const styles = theme => ({
+  root: {
+    display: 'flex',
+    flexGrow: 1
+  }
+});
 
 const TempInput = [
   { startTime: '7:00', endTime: '12:00', cost: '2' },
@@ -79,7 +91,15 @@ const handleParkingInfoChanges = (updateparkingSpotInfo, newParkingSpotInfo) => 
   updateparkingSpotInfo(newParkingSpotInfo);
 };
 
-const ParkingSpot = (props) => {
+const ParkingSpot = ({
+  isDark,
+  updateLogin,
+  selectTab,
+  classes,
+  updateUser,
+  updateAdmin,
+  ...props
+}) => {
   // To be used if paging
   /*
   const findCurrentPageBasedOnPath = (location) => {
@@ -220,4 +240,4 @@ const ParkingSpot = (props) => {
   );
 };
 
-export default ParkingSpot;
+export default withStyles(styles)(ParkingSpot);

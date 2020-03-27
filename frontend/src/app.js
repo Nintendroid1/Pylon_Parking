@@ -16,7 +16,7 @@ import CssBaseline from '@material-ui/core/CssBaseline';
 //import { withRouter, Switch as RRSwitch } from 'react-router';
 //import { Link as RRLink } from 'react-router-dom';
 import queryString from 'query-string';
-import ListParkingSpots from './pages/list-parking-spots';
+import Zone from './pages/list-parking-spots';
 import ParkingSpot from './pages/parking-spot';
 import TransactionHistory from './pages/transactions';
 import io from 'socket.io-client';
@@ -123,20 +123,20 @@ const App = ({ classes, ...props }) => {
                 component={MainMap}
               />
               <Route
-                path="/list_parking_spots/:parking_id/parking_spot/:spot_id"
+                path="/zones/:zone_id/parking_spot/:spot_id"
                 hidden={true}
                 reqAdmin={false}
                 reqLogin={false}
                 render={() => <ParkingSpot socket={parkingSpotSocket} />}
               />
               <Route
-                path="/list_parking_spots/:parking_id"
+                path="/zones/:zone_id"
                 label="List Parking Spots"
-                key="/list_parking_spots"
+                key="/zones"
                 hidden={false}
                 reqAdmin={false}
                 reqLogin={false}
-                component={() => <ListParkingSpots socket={parkingLotSocket} />}
+                render={() => <Zone socket={parkingLotSocket} />}
               />
               <Route
                 exact

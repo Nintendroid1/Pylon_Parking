@@ -15,6 +15,18 @@ import VisibilityOff from '@material-ui/icons/VisibilityOff';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 import { isTimeMultipleOf15, roundUpToNearest15 } from './time-filter';
+import {
+  withStyles,
+  MuiThemeProvider,
+  createMuiTheme
+} from '@material-ui/core/styles';
+
+const styles = theme => ({
+  root: {
+    display: 'flex',
+    flexGrow: 1
+  }
+});
 
 const CostField = props => {
   const { cost } = props;
@@ -242,5 +254,5 @@ export {
   ConfirmationDialogFieldButton,
   PrivateKeyField,
   CostField,
-  TimePicker,
+  TimePicker
 };

@@ -24,4 +24,4 @@ const WelcomeTab = ({ classes, ...props }) => {
   );
 };
 
-export default withTheme()(withStyles(styles)(WelcomeTab));
+export default withTheme(withStyles(styles)(WelcomeTab));
