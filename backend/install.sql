@@ -16,7 +16,7 @@ CREATE TABLE users
 
 CREATE TABLE zones
 (
-	zone_ID INT NOT NULL,
+	zone_ID SERIAL,
 	zone_name VARCHAR(256),
 	PRIMARY KEY (zone_ID)
 );
@@ -31,11 +31,12 @@ CREATE TABLE parking_spots
 
 CREATE TABLE parking_times
 (
-	spot_ID INT NOT NULL,
 	zone_ID INT NOT NULL,
-	time_code VARCHAR(100),
+	spot_ID INT NOT NULL,
+	time_code INT,
 	user_PID VARCHAR(100),
 	availability boolean,
+    price DECIMAL(16, 10) DEFAULT 4.20,
 	PRIMARY KEY (spot_ID, zone_ID, time_code),
 	FOREIGN KEY (spot_ID, zone_ID) REFERENCES parking_spots(spot_ID, zone_ID),
 	FOREIGN KEY (user_PID) REFERENCES users(PID)
