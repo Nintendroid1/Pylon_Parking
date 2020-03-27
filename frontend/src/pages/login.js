@@ -37,7 +37,10 @@ const LoginTab = ({
   // handle user login
   const userLogin = async values => {
     setLoading(true);
-    let res = await makeAPICall('POST', `${apiprefix}/login`, values);
+    console.log(`Making POST request to: ${apiprefix}/users/login`)
+    console.log('Using values:')
+    console.log(values)
+    let res = await makeAPICall('POST', `${apiprefix}/users/login`, values);
     let body = await res.json();
 
     setLoading(false);
