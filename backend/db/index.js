@@ -5,7 +5,7 @@ const pool = new Pool({
   password: 'superman',
 });
 module.exports = {
-  query: (text, params, callback) => {
+  query: async function(text, params, callback) {
     return pool.query(text, params, callback)
   },
 }
