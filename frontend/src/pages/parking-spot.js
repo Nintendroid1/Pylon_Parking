@@ -86,7 +86,15 @@ const MakeTable = props => {
   );
 };
 
-const ParkingSpot = () => {
+const ParkingSpot = ({
+  isDark,
+  updateLogin,
+  selectTab,
+  classes,
+  updateUser,
+  updateAdmin,
+  ...props
+}) => {
   // To be used if paging
   /*
   const findCurrentPageBasedOnPath = (location) => {

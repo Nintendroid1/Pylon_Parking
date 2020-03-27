@@ -37,26 +37,32 @@ const styles = theme => ({
 // });
 // The time input is wrong format for lodash to sort in.
 // Can code custom sorter for this if needed.
-const TempInput = [
-  { id: '1', time: '12:00', cost: 1 },
-  { id: '2', time: '13:00', cost: 1 },
-  { id: '3', time: '14:00', cost: 4 },
-  { id: '4', time: '1:00', cost: 9 },
-  { id: '5', time: '2:00', cost: 12 },
-  { id: '6', time: '6:00', cost: 1 }
-];
+// const TempInput = [
+//   { id: '1', time: '12:00', cost: 1 },
+//   { id: '2', time: '13:00', cost: 1 },
+//   { id: '3', time: '14:00', cost: 4 },
+//   { id: '4', time: '1:00', cost: 9 },
+//   { id: '5', time: '2:00', cost: 12 },
+//   { id: '6', time: '6:00', cost: 1 }
+// ];
 
 const headerCells = [
   { id: 'id', label: 'Spot #' },
-  { id: 'time', label: 'Earliest Time Available' },
-  { id: 'cost', label: 'Average Cost/15 minutes' }
+  { id: 'time', label: 'Next Available Time' }
+  // { id: 'available', label: 'Is Available' }
+  // { id: 'cost', label: 'Average Cost/15 minutes' }
 ];
 
 function TableData(props) {
   const data = props.parkingInfo.map(e => ({
-    ...e,
-    id: e.id.replace('/.', '-')
+    ...e
   }));
+  const pretty_date = epoch => {
+    let temp_date = new Date(epoch * 1000);
+    let date_str = `${temp_date.toLocaleString()}`;
+    return date_str;
+  };
+
   return data.map(parkingSpot => {
     return (
       <>
@@ -64,7 +70,7 @@ function TableData(props) {
           <TableCell>
             <Link
               to={{
-                pathname: `/parking_spot/${parkingSpot.id}`,
+                pathname: `zones/${parkingSpot.zone_id}/spot/${parkingSpot.spot_id}`,
                 state: {
                   from: history.location
                 }
@@ -73,9 +79,8 @@ function TableData(props) {
               <Button type="button">View</Button>
             </Link>
           </TableCell>
-          <TableCell>{parkingSpot.id}</TableCell>
-          <TableCell>{parkingSpot.time}</TableCell>
-          <TableCell>{parkingSpot.cost}</TableCell>
+          <TableCell>{parkingSpot.spot_id}</TableCell>
+          <TableCell>{pretty_date(parkingSpot.next_avail)}</TableCell>
         </TableRow>
       </>
     );
@@ -114,7 +119,15 @@ function MakeTable(props) {
   );
 }
 
-const ListParkingSpots = () => {
+const Zone = ({
+  isDark,
+  updateLogin,
+  selectTab,
+  classes,
+  updateUser,
+  updateAdmin,
+  ...props
+}) => {
   // To be used if paging
   /*
   const findCurrentPageBasedOnPath = (location) => {
@@ -127,7 +140,7 @@ const ListParkingSpots = () => {
   const [order, updateOrder] = useState('asc');
   const [columnToSort, updatecolumnToSort] = useState('id');
 
-  const url = `${apiprefix}/zones`;
+  const url = `${apiprefix}/zones/1`;
 
   const handleSortRequest = property => {
     const isAsc = columnToSort === property && order === 'asc';
@@ -135,27 +148,28 @@ const ListParkingSpots = () => {
     updatecolumnToSort(property);
   };
 
-  /*
+  // GET   /api/zones/:zone_id
   const listParkingSpots = async () => {
+    var murl = window.location.pathname;
+    var id = Number(murl.substring(murl.lastIndexOf('/') + 1));
+    const url = `${apiprefix}/zones/${id}`;
     let response = await makeAPICall('GET', url);
     let resbody = await response.json();
+    console.log("RESPPPPP");
+    console.log(resbody.parkingInfo);
 
     if (response.status === 200) {
       updateParkingSpotInfo(resbody.parkingInfo);
       updateMessage(null);
     } else {
-      updateMessage(
-        <div>
-          Fail
-        </div>
-      );
+      updateMessage(<div>Fail</div>);
     }
-  };*/
-
-  const listParkingSpots = ({ classes, ...props }) => {
-    updateParkingSpotInfo(TempInput);
-    updateMessage(null);
   };
+
+  // const listParkingSpots = ({ ...props }) => {
+  //   updateParkingSpotInfo(TempInput);
+  //   updateMessage(null);
+  // };
 
   const handleFiltering = async values => {
     const { date, startTime, endTime } = values;
@@ -177,7 +191,7 @@ const ListParkingSpots = () => {
 
   useEffect(() => {
     listParkingSpots();
-  });
+  }, []);
 
   return (
     <>
@@ -202,4 +216,4 @@ const ListParkingSpots = () => {
   );
 };
 
-export default ListParkingSpots;
+export default Zone;

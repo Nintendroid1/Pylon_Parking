@@ -85,8 +85,16 @@ const PrivateKeyField = props => {
   );
 };
 
-const TimePicker = props => {
-  const { handleTimeChange, time, name, label, hasError, errorMessage } = props;
+const TimePicker = ({
+  handleTimeChange,
+  time,
+  name,
+  label,
+  hasError,
+  errorMessage,
+  ...props
+}) => {
+  // const { handleTimeChange, time, name, label, hasError, errorMessage } = props;
 
   if (hasError === undefined) {
     hasError = false;
@@ -207,7 +215,7 @@ const StartEndTime = props => {
           handleOnConfirm={handleOnConfirm}
           privateKey={time}
           updatePrivateKey={updateTime}
-          buttonColor='primary'
+          buttonColor="primary"
         />
       </Grid>
       <Grid>
