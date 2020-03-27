@@ -14,6 +14,7 @@ import Visibility from '@material-ui/icons/Visibility';
 import VisibilityOff from '@material-ui/icons/VisibilityOff';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
+import { isTimeMultipleOf15, roundUpToNearest15 } from './time-filter';
 
 const CostField = props => {
   const { cost } = props;
@@ -37,7 +38,7 @@ const CostField = props => {
 const PrivateKeyField = props => {
   const { privateKey, updatePrivateKey } = props;
 
-  const handleChange = () => event => {
+  const handleChange = event => {
     updatePrivateKey({ ...privateKey, privateKey: event.target.value });
   };
 
@@ -50,13 +51,16 @@ const PrivateKeyField = props => {
 
   return (
     <>
-      <FormControl variant="outlined">
+      <FormControl 
+        required
+        variant="outlined"
+      >
         <InputLabel>Private Key</InputLabel>
         <OutlinedInput
           id="private-key"
           type={privateKey.showPrivateKey ? 'text' : 'password'}
           value={privateKey.privateKey}
-          onChange={handleChange()}
+          onChange={handleChange}
           endAdornment={
             <InputAdornment position="end">
               <IconButton
@@ -76,7 +80,7 @@ const PrivateKeyField = props => {
 };
 
 const TimePicker = props => {
-  const { handleTimeChange, time, name, label, hasError, errorMessage } = props;
+  const { handleTimeChange, time, name, label, hasError, errorMessage, isRequired } = props;
 
   if (hasError === undefined) {
     hasError = false;
@@ -86,8 +90,13 @@ const TimePicker = props => {
     errorMessage = '';
   }
 
+  if (isRequired === undefined) {
+    isRequired = false;
+  }
+
   return (
     <TextField
+      required={isRequired}
       error={hasError}
       label={label}
       name={name}
@@ -121,48 +130,49 @@ const ConfirmationDialogFieldButton = props => {
     setOpen(true);
   };
 
-  const handleClose = isAgree => {
+  const handleClose = () => {
     setOpen(false);
 
-    // privateKey is the time state
-    // time state has start time and end time.
-    if (isAgree) {
-      handleOnConfirm(privateKey.privateKey);
-    } else {
-      updatePrivateKey({
-        privateKey: '',
-        showPrivateKey: false,
-      })
-    }
+    updatePrivateKey({
+      privateKey: '',
+      showPrivateKey: false,
+    })
   };
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    handleOnConfirm(privateKey.privateKey);
+  }
 
   return (
     <div>
       <Button variant="outlined" color={buttonColor} onClick={handleClickOpen}>
         {buttonMessage}
       </Button>
-      <Dialog open={open} onClose={() => handleClose(false)}>
-        <DialogTitle>{messageTitle}</DialogTitle>
-        <DialogContent>
-          <Grid>
-            {messageContent}
-          </Grid>
-          <Grid>
-            <PrivateKeyField
-              privateKey={privateKey}
-              updatePrivateKey={updatePrivateKey}
-            />
-          </Grid>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => handleClose(false)} color="primary">
-            Cancel
-          </Button>
-          <Button onClick={() => handleClose(true)} color="primary">
-            Confirm
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <form onSubmit={handleSubmit}>
+        <Dialog open={open} onClose={handleClose}>
+          <DialogTitle>{messageTitle}</DialogTitle>
+          <DialogContent>
+            <Grid>
+              {messageContent}
+            </Grid>
+            <Grid>
+              <PrivateKeyField
+                privateKey={privateKey}
+                updatePrivateKey={updatePrivateKey}
+              />
+            </Grid>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleClose} color="primary">
+              Cancel
+            </Button>
+            <Button type='submit' color="primary">
+              Confirm
+            </Button>
+          </DialogActions>
+        </Dialog>
+      </form>
     </div>
   );
 };
@@ -186,6 +196,11 @@ const StartEndTime = props => {
 
   const handleTimeChange = event => {
     let { name, value } = event.target;
+
+    if (!isTimeMultipleOf15(value)) {
+      value = roundUpToNearest15(value);
+    }
+
     updateTime({ ...time, [name]: value });
     updateCost(calculateCost(time.startTime, time.endTime));
   };

@@ -153,7 +153,7 @@ const ParkingSpot = (props) => {
     const listOfTimes = parkingSpotInfo.filter((e) => compareMilitaryTime(startTime, e.startTime) >= 0 && compareMilitaryTime(endTime, e.startTime) <= 0);
 
     const totalCost = listOfTimes.reduce((accumulator, currTimeSlot) => {
-      accumulator + calculatePricePerTimeSlot(currTimeSlot, startTime, endTime);
+      return accumulator + calculatePricePerTimeSlot(currTimeSlot, startTime, endTime);
     })
 
     return totalCost;

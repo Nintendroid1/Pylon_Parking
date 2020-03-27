@@ -22,9 +22,31 @@ import history from '../../history';
 import { Link } from 'react-router-dom';
 import apiprefix from './apiprefix';
 import { TimePicker } from './forms/parking-spot-components';
-import { compareMilitaryTime } from './forms/time-filter';
+import { compareMilitaryTime, isTimeMultipleOf15, roundUpToNearest15 } from './forms/time-filter';
 import Box from '@material-ui/core/Box';
 import { ConfirmationDialogFieldButton } from './forms/parking-spot-components';
+
+const tempParkingSpots = [
+  {
+    id: '1',
+    startTime: '13:00',
+    endTime: '15:00',
+    cost: 3
+  },
+  {
+    id: '2',
+    startTime: '4:00',
+    endTime: '5:00',
+    cost: 3
+  }
+];
+
+const tempInput = {
+  username: 'Bob',
+  email: 'Bob@vt.edu',
+  money: 15,
+  parkingSpotsInfo: tempParkingSpots
+}
 
 const SellingMessageContent = (
   parkingSpotStartTime,
@@ -48,6 +70,11 @@ const SellingMessageContent = (
   // Need to include error handling for time.
   const handleTimeChange = event => {
     let { name, value } = event.target;
+
+    if (!isTimeMultipleOf15(value)) {
+      value = roundUpToNearest15(value);
+    }
+
     updateSellInfo({ ...sellInfo, [name]: value });
 
     let today = new Date();
@@ -55,7 +82,7 @@ const SellingMessageContent = (
     let currTime = timeSplit[0].concat(':', timeSplit[1]);
 
     // chosen start time is before parking spot start time.
-    if (compareMilitaryTime(currTime, parkingSpotStartTime) < 0) {
+    if (name === 'startTime' && compareMilitaryTime(value, currTime) < 0) {
       updateValidTime({ 
         ...validTime, 
         startTimeHasError: true,
@@ -64,7 +91,7 @@ const SellingMessageContent = (
     } 
     
     // chosen end time is after parking spot end time.
-    else if (compareMilitaryTime(sellInfo.endTime, parkingSpotEndTime) > 0) {
+    else if (name === 'endTime' && compareMilitaryTime(value, parkingSpotEndTime) > 0) {
       updateValidTime({ 
         ...validTime, 
         endTimeHasError: true,
@@ -94,12 +121,14 @@ const SellingMessageContent = (
   return (
     <>
       <TimePicker 
+        isRequired={true}
         handleTimeChange={handleTimeChange}
         time={sellInfo.startTime}
         name={'startTime'}
         label={'Start Time'}
       />
       <TimePicker 
+        isRequired={true}
         handleTimeChange={handleTimeChange}
         time={sellInfo.endTime}
         name={'endTime'}
@@ -125,34 +154,39 @@ const SellingParkingSpotTableBody = props => {
     endTime: '24:00',
     cost: 0,
     privateKey: '',
+    showPrivateKey: false,
   });
 
   return (
     <>
       <TableBody>
         {parkingSpotsInfo.map((parkingSpot, i) => {
-          <TableRow>
-            <TableCell>{parkingSpot.id}</TableCell>
-            <TableCell>{parkingSpot.startTime}</TableCell>
-            <TableCell>{parkingSpot.endTime}</TableCell>
-            <TableCell>{parkingSpot.cost}</TableCell>
-            <TableCell>
-              <ConfirmationDialogFieldButton 
-                buttonMessage='Sell'
-                messageTitle={`Sell Parking Spot ${parkingSpot.id}`}
-                messageContent={SellingMessageContent(
-                  parkingSpot.startTime,
-                  parkingSpot.endTime,
-                  sellInfo,
-                  updateSellInfo
-                )}
-                handleOnConfirm={handleSellRequest}
-                privateKey={sellInfo}
-                updatePrivateKey={updateSellInfo}
-                buttonColor='secondary'
-              />
-            </TableCell>
-          </TableRow>
+          return (
+            <>
+              <TableRow>
+              <TableCell>{parkingSpot.id}</TableCell>
+              <TableCell>{parkingSpot.startTime}</TableCell>
+              <TableCell>{parkingSpot.endTime}</TableCell>
+              <TableCell>{parkingSpot.cost}</TableCell>
+              <TableCell>
+                <ConfirmationDialogFieldButton 
+                  buttonMessage='Sell'
+                  messageTitle={`Sell Parking Spot ${parkingSpot.id}`}
+                  messageContent={SellingMessageContent(
+                    parkingSpot.startTime,
+                    parkingSpot.endTime,
+                    sellInfo,
+                    updateSellInfo
+                  )}
+                  handleOnConfirm={handleSellRequest}
+                  privateKey={sellInfo}
+                  updatePrivateKey={updateSellInfo}
+                  buttonColor='secondary'
+                />
+              </TableCell>
+            </TableRow>
+            </>
+          )
         })}
       </TableBody>
     </>
@@ -176,7 +210,7 @@ const SellingParkingSpotTableHeader = () => {
 };
 
 const SellingParkingSpotTable = props => {
-  const { parkingSpotsInfo } = props;
+  const { parkingSpotsInfo, handleSellRequest } = props;
 
   return (
     <>
@@ -184,6 +218,7 @@ const SellingParkingSpotTable = props => {
         <SellingParkingSpotTableHeader />
         <SellingParkingSpotTableBody 
           parkingSpotsInfo={parkingSpotsInfo}
+          handleSellRequest={handleSellRequest}
         />
       </Table>
     </>
@@ -195,6 +230,7 @@ const UserInfo = (props) => {
   const [message, updateMessage] = useState('Loading');
   const [userInfo, updateUserInfo] = useState(null);
 
+  /*
   let getUserInfo = async () => {
     let id = localStorage.blockchain_id; // change if necessary.
 
@@ -208,15 +244,22 @@ const UserInfo = (props) => {
       updateMessage(<div>Failed to get user.</div>);
     }
   };
+  */
+
+  const getUserInfo = () => {
+    updateUserInfo(tempInput);
+    updateMessage(null);
+  }
 
   const handleSellRequest = (sellInfo) => {
 
     // Make api request.
   }
 
+  // Need another socket event for when parking spot is sold.
   useEffect(() => {
     getUserInfo();
-  })
+  }, [])
 
   // Change to something more meaningful.
   return (

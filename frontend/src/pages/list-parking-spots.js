@@ -11,7 +11,7 @@ import history from '../history';
 import { Link } from 'react-router-dom';
 import apiprefix from './apiprefix';
 import orderBy from 'lodash/orderBy';
-import TimeFilter from './forms/time-filter';
+import { TimeFilter } from './forms/time-filter';
 import Button from '@material-ui/core/Button';
 import { convertMilitaryTimeToNormal, sortByMilitaryTime } from './forms/time-filter';
 

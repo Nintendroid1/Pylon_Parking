@@ -10,8 +10,8 @@ import { TimePicker } from "./parking-spot-components.js";
 import Button from '@material-ui/core/Button';
 
 const militaryTimeDifference = (startTime, endTime) => {
-  const [startTimeHour, startTimeMinute] = startTime.split(':').map(e => Number(e));
-  const [endTimeHour, endTimeMinute] = endTime.split(':').map(e => Number(e));
+  let [startTimeHour, startTimeMinute] = startTime.split(':').map(e => Number(e));
+  let [endTimeHour, endTimeMinute] = endTime.split(':').map(e => Number(e));
   
   let timeDiff = 60 - startTimeMinute;
   startTimeMinute = 0;
@@ -21,6 +21,19 @@ const militaryTimeDifference = (startTime, endTime) => {
 
   return timeDiff;
 };
+
+const isTimeMultipleOf15 = time => {
+  const [ , minute] = time.split(':').map(e => Number(e));
+
+  return minute % 15 === 0;
+};
+
+const roundUpToNearest15 = time => {
+  const [hour, minute] = time.split(':').map(e => Number(e));
+  const newTime = hour.toString() + ':' + ((15 - (minute % 15)) + minute).toString();
+
+  return newTime;
+}
 
 const convertMilitaryTimeToNormal = time => {
   let [hour, minutes] = time.split(':');
@@ -143,6 +156,8 @@ export {
   convertMilitaryTimeToNormal,
   sortByMilitaryTime,
   militaryTimeDifference,
+  isTimeMultipleOf15,
+  roundUpToNearest15
 };
 
 /*
