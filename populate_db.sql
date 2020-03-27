@@ -14,6 +14,13 @@ VALUES
      (2, 1),
      (3, 1);
 
+INSERT INTO parking_times(spot_id, zone_id, time_code, user_pid, availability)
+VALUES
+     (0, 1, 1587340800, NULL, True),
+     (1, 1, 1587340800, NULL, True),
+     (2, 1, 1587340800, NULL, True),
+     (3, 1, 1587340800, NULL, True);
+
 INSERT INTO users(pid, pass, email, first_name, last_name, admin_status)
 VALUES
     ('admin','adminpass','admin@vt.edu','The','Admin','1'),
