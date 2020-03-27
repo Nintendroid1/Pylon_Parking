@@ -9,28 +9,34 @@ router.get('/', (req, res) => {
     res.send("This should be login api");
 });
 
-router.post('/login', (req,res) => {
-    //Check database
-    let isValidLogin = false;
-    db.query('SELECT pass FROM users WHERE PID = $1', [req.body.userName])
-    .then(dbres => {
-        if(dbres.rows[0]) {
-            isValidLogin = dbres.rows[0].pass === req.body.pass;
-        }
-    })
-    .then(()=> {
-        if(isValidLogin) {
-            res.status(200).json({
-                token : jwt.createJWT(req.body.userName),
-                user : req.body.userName,
-                message: `Successfuly logged in`
-            });
-        }
-        else {
-            res.status(401).json({message:'Invalid Login'});
-        }
-    })
-
+router.post('/login', async function(req,res) {
+    try {
+        //Check database
+        let isValidLogin = false;
+        console.log(req.body);
+        db.query('SELECT pass FROM users WHERE PID = $1', [req.body.username])
+        .then(dbres => {
+            if(dbres.rows[0]) {
+            console.log(dbres.rows[0].pass);
+            console.log(req.body.password);
+                isValidLogin = dbres.rows[0].pass === req.body.password;
+            }
+        })
+        .then(()=> {
+            if(isValidLogin) {
+                res.status(200).json({
+                    token : jwt.createJWT(req.body.username),
+                    user : req.body.username,
+                    message: `Successfuly logged in`
+                });
+            }
+            else {
+                res.status(401).json({message:'Invalid Login'});
+            }
+        })
+    } catch(err) {
+        console.log(err)
+    }
 });
 
 router.post('/register', (req,res) => {
@@ -47,7 +53,7 @@ router.post('/register', (req,res) => {
             } else {
                 //Add into database new user stuff
                 const text = 'INSERT INTO users(PID, pass, email, first_name, last_name, admin_status) VALUES($1, $2, $3, $4, $5, false) RETURNING *';
-                const values = [req.body.user.pid, req.body.user.pass, req.body.user.email, req.body.user.first_name, req.body.user.last_name];
+                const values = [req.body.user.pid, req.body.user.password, req.body.user.email, req.body.user.first_name, req.body.user.last_name];
                 db.query(text, values, (err,dbres) => {
                     if (err) {
                         console.log(err.stack);
