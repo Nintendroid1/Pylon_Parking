@@ -13,7 +13,10 @@ import apiprefix from './apiprefix';
 import orderBy from 'lodash/orderBy';
 import { TimeFilter } from './forms/time-filter';
 import Button from '@material-ui/core/Button';
-import { convertMilitaryTimeToNormal, sortByMilitaryTime } from './forms/time-filter';
+import {
+  convertMilitaryTimeToNormal,
+  sortByMilitaryTime
+} from './forms/time-filter';
 
 import {
   withStyles,
@@ -28,6 +31,10 @@ const styles = theme => ({
   },
   tabLink: {
     color: theme.palette.secondary.main
+  },
+  viewButton: {
+    color: '#FF0000',
+    textDecoration: 'none'
   }
 });
 
@@ -55,7 +62,7 @@ const headerCells = [
   // { id: 'cost', label: 'Average Cost/15 minutes' }
 ];
 
-function TableData(props) {
+function TableData({ classes, ...props }) {
   const data = props.parkingInfo.map(e => ({
     ...e
   }));
@@ -71,14 +78,17 @@ function TableData(props) {
         <TableRow>
           <TableCell>
             <Link
+              className={classes.viewButton}
               to={{
-                pathname: `zones/${parkingSpot.zone_id}/spot/${parkingSpot.spot_id}`,
+                pathname: `/zones/${parkingSpot.zone_id}/spot/${parkingSpot.spot_id}`,
                 state: {
                   from: history.location
                 }
               }}
             >
-              <Button type="button">View</Button>
+              <Button variant="contained" color="primary" type="button">
+                View
+              </Button>
             </Link>
           </TableCell>
           <TableCell>{parkingSpot.spot_id}</TableCell>
@@ -89,9 +99,14 @@ function TableData(props) {
   });
 }
 
-function MakeTable(props) {
-  const { columnToSort, order, onSortClick, parkingInfo } = props;
-
+function MakeTable({
+  columnToSort,
+  order,
+  onSortClick,
+  parkingInfo,
+  classes,
+  ...props
+}) {
   return (
     <Table stickyHeader>
       <TableHead>
@@ -115,12 +130,13 @@ function MakeTable(props) {
         </TableRow>
       </TableHead>
       <TableBody>
-        <TableData 
+        <TableData
+          classes={classes}
           parkingInfo={
-            columnToSort === 'time' ? 
-            sortByMilitaryTime(parkingInfo, order) : 
-            orderBy(parkingInfo, columnToSort, order)
-          } 
+            columnToSort === 'time'
+              ? sortByMilitaryTime(parkingInfo, order)
+              : orderBy(parkingInfo, columnToSort, order)
+          }
         />
       </TableBody>
     </Table>
@@ -129,8 +145,14 @@ function MakeTable(props) {
 
 // Should cause a rerender to occur because of state change, so do not need to worry
 // about sorting in this function.
-const handleParkingSpotTimeChange = (parkingSpotsInfo, updateparkingSpotsInfo, parkingInfo) => {
-  const index = parkingSpotsInfo.findIndex(e => e.parking_id === parkingInfo.parking_id);
+const handleParkingSpotTimeChange = (
+  parkingSpotsInfo,
+  updateparkingSpotsInfo,
+  parkingInfo
+) => {
+  const index = parkingSpotsInfo.findIndex(
+    e => e.parking_id === parkingInfo.parking_id
+  );
   parkingSpotsInfo[index] = parkingInfo;
   updateparkingSpotsInfo(parkingSpotsInfo);
 };
@@ -142,6 +164,7 @@ const Zone = ({
   classes,
   updateUser,
   updateAdmin,
+  socket,
   ...props
 }) => {
   // To be used if paging
@@ -150,8 +173,6 @@ const Zone = ({
     let tempQuery = queryString.parse(location.search);
     return isNaN(Number(tempQuery.page)) ? 0 : Number(tempQuery.page);
   }*/
-
-  const { socket } = props;
 
   const [message, updateMessage] = useState(null);
   const [parkingSpotsInfo, updateparkingSpotsInfo] = useState(null);
@@ -173,7 +194,7 @@ const Zone = ({
     const url = `${apiprefix}/zones/${zoneId}`;
     let response = await makeAPICall('GET', url);
     let resbody = await response.json();
-    console.log("RESPPPPP");
+    console.log('RESPPPPP');
     console.log(resbody.parkingInfo);
 
     if (response.status === 200) {
@@ -195,6 +216,7 @@ const Zone = ({
     const month = date.getMonth() + 1;
     const day = date.getDate();
 
+    const url = 'zones/';
     const newURL = `${url}/all/?month=${month}&day=${day}&year=${year}&startTime=${startTime}&endTime=${endTime}`;
     let response = await makeAPICall('GET', newURL);
     let resbody = await response.json();
@@ -212,7 +234,13 @@ const Zone = ({
   }, []);
 
   useEffect(() => {
-    socket.on(`parkingLot-${zoneId}`, (data) => handleParkingSpotTimeChange(parkingSpotsInfo, updateparkingSpotsInfo, data));
+    socket.on(`parkingLot-${zoneId}`, data =>
+      handleParkingSpotTimeChange(
+        parkingSpotsInfo,
+        updateparkingSpotsInfo,
+        data
+      )
+    );
   }, []);
 
   return (
@@ -229,6 +257,7 @@ const Zone = ({
                 onSortClick={handleSortRequest}
                 columnToSort={columnToSort}
                 order={order}
+                classes={classes}
               />
             </div>
           )}
@@ -238,4 +267,4 @@ const Zone = ({
   );
 };
 
-export default Zone;
+export default withTheme(withStyles(styles)(Zone));

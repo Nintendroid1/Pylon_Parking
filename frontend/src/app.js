@@ -23,7 +23,6 @@ import io from 'socket.io-client';
 import UserInfo from './pages/user-info';
 
 import Typography from '@material-ui/core/Typography';
-
 import history from './history';
 
 const styles = theme => ({
@@ -33,35 +32,68 @@ const styles = theme => ({
   }
 });
 
-const defaultTheme = createMuiTheme({
+const lightTheme = createMuiTheme({
   palette: {
-    primary: { main: '#6A2C3E' },
-    secondary: { main: '#CF4520' },
-    type: 'light' // Switching the dark mode on is a single property value change.
+    primary: {
+      // light: will be calculated from palette.primary.main,
+      main: '#6A2C3E'
+      // dark: will be calculated from palette.primary.main,
+      // contrastText: will be calculated to contrast with palette.primary.main
+    },
+    secondary: {
+      light: '#0066ff',
+      main: '#CF4520',
+      // dark: will be calculated from palette.secondary.main,
+      contrastText: '#ffcc00'
+    },
+    type: 'light',
+    // Used by `getContrastText()` to maximize the contrast between
+    // the background and the text.
+    contrastThreshold: 3,
+    // Used by the functions below to shift a color's luminance by approximately
+    // two indexes within its tonal palette.
+    // E.g., shift from Red 500 to Red 300 or Red 700.
+    tonalOffset: 0.2
   },
   typography: { useNextVariants: true } // avoids deprecated warning
 });
-
 const darkTheme = createMuiTheme({
-  pallete: {
-    primary: { main: '#6A2C3E' },
-    type: 'light'
+  palette: {
+    primary: {
+      // light: will be calculated from palette.primary.main,
+      main: '#6A2C3E'
+      // dark: will be calculated from palette.primary.main,
+      // contrastText: will be calculated to contrast with palette.primary.main
+    },
+    secondary: {
+      light: '#0066ff',
+      main: '#CF4520',
+      // dark: will be calculated from palette.secondary.main,
+      contrastText: '#ffcc00'
+    },
+    type: 'dark',
+    // Used by `getContrastText()` to maximize the contrast between
+    // the background and the text.
+    contrastThreshold: 3,
+    // Used by the functions below to shift a color's luminance by approximately
+    // two indexes within its tonal palette.
+    // E.g., shift from Red 500 to Red 300 or Red 700.
+    tonalOffset: 0.2
   },
   typography: { useNextVariants: true } // avoids deprecated warning
 });
 
 const App = ({ classes, ...props }) => {
-  let [isDark, switchThemeFunc] = useState(localStorage.isDark === true);
-  let [isLoggedIn, updateLogin] = useState(localStorage.olivia_id > 0);
+  let [isDark, switchThemeFunc] = useState(localStorage.isDark === false);
+  let [isLoggedIn, updateLogin] = useState(localStorage.olivia_pid !== '');
   let [currentUser, updateUser] = useState(() => {
     try {
       const token = localStorage.getItem('olivia_token');
       const [, payload] = token.split(/\./);
       const decodedpayload = atob(payload); // base64 decode
-      let { id, username, admin } = JSON.parse(decodedpayload);
+      let { pid, admin } = JSON.parse(decodedpayload);
       return {
-        id,
-        username,
+        pid,
         admin,
         authenticated: true
       };
@@ -71,10 +103,9 @@ const App = ({ classes, ...props }) => {
   });
   const [isAdmin, updateAdmin] = useState(0);
 
-  
   // Endpoint for the websocket.
   // Base url.
-  const endpoint = "http://localhost:3000/";
+  const endpoint = 'http://localhost:3000/';
 
   // Creating websockets to backend.
   const parkingLotSocket = io(`${endpoint}/parkingLot`);
@@ -91,7 +122,7 @@ const App = ({ classes, ...props }) => {
 
   return (
     <React.Fragment>
-      <MuiThemeProvider theme={defaultTheme}>
+      <MuiThemeProvider theme={isDark ? darkTheme : lightTheme}>
         <div className={classes.root}>
           <CssBaseline />
           <Router basename={`${process.env.PUBLIC_URL}`} history={history}>
@@ -125,17 +156,10 @@ const App = ({ classes, ...props }) => {
                 component={MainMap}
               />
               <Route
-                path="/zones/:zone_id/parking_spot/:spot_id"
-                hidden={true}
-                reqAdmin={false}
-                reqLogin={false}
-                render={() => <ParkingSpot socket={parkingSpotSocket} />}
-              />
-              <Route
                 path="/zones/:zone_id"
                 label="List Parking Spots"
                 key="/zones"
-                hidden={false}
+                hidden={true}
                 reqAdmin={false}
                 reqLogin={false}
                 render={() => <Zone socket={parkingLotSocket} />}
@@ -150,7 +174,7 @@ const App = ({ classes, ...props }) => {
                 hidden={false}
                 render={() => <UserInfo socket={userSocket} />}
               />
-              <Route 
+              <Route
                 exact
                 path="/transaction_history"
                 label="Transaction History"
@@ -158,14 +182,18 @@ const App = ({ classes, ...props }) => {
                 reqAdmin={false}
                 reqLogin={false}
                 hidden={false}
-                render={() => <TransactionHistory socket={transactionHistorySocket} />}
+                render={() => (
+                  <TransactionHistory socket={transactionHistorySocket} />
+                )}
               />
               <Route
-                path="/"
+                path="/zones/:zone_id/spot/:spot_id"
+                key="/zones/:zone_id/spot/:spot_id"
+                hidden={true}
+                label="Spot Page"
                 reqAdmin={false}
                 reqLogin={false}
-                hidden={true}
-                component={WelcomeTab}
+                render={() => <ParkingSpot socket={parkingSpotSocket} />}
               />
             </TabChooser>
           </Router>

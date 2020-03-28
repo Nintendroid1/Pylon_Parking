@@ -9,7 +9,7 @@ import TableRow from '@material-ui/core/TableRow';
 import TablePagination from '@material-ui/core/TablePagination';
 import apiprefix from './apiprefix';
 import 'date-fns';
-import { Typography } from '@material-ui/core';
+import { Typography, Button, MenuItem, Select } from '@material-ui/core';
 import queryStrings from 'query-string';
 import TextField from '@material-ui/core/TextField';
 import Select from '@material-ui/core/Select';
@@ -17,6 +17,7 @@ import MenuItem from '@material-ui/core/MenuItem';
 import Button from '@material-ui/core/Button';
 import {
   withStyles,
+  withTheme,
   MuiThemeProvider,
   createMuiTheme
 } from '@material-ui/core/styles';
@@ -25,6 +26,9 @@ const styles = theme => ({
   root: {
     display: 'flex',
     flexGrow: 1
+  },
+  tabLink: {
+    color: theme.palette.secondary.main
   }
 });
 
@@ -39,13 +43,9 @@ const FilterSelectField = ({ classes, ...props }) => {
   return (
     <>
       <Select value={filterOption} onChange={handleChange}>
-        {listOfFilterOptions.map(e => {
-          return (
-            <>
-              <MenuItem value={e}>{e}</MenuItem>
-            </>
-          );
-        })}
+        {listOfFilterOptions.map(e => (
+          <MenuItem value={e}>{e}</MenuItem>
+        ))}
       </Select>
     </>
   );
@@ -69,7 +69,8 @@ const getEntriesForPage = (page, numEntriesPerPage, listOfTransactions) => {
     endIndex = listOfTransactions.length;
   }
 
-  return listOfTransactions.slice(startIndex, endIndex);
+  // return listOfTransactions.slice(startIndex, endIndex);
+  return []
 };
 
 const TransactionTableHeader = props => {
@@ -87,23 +88,23 @@ const TransactionTableHeader = props => {
   );
 };
 
-const TransactionsTableBody = props => {
-  const { page, numEntriesPerPage, listOfTransactions } = props;
+const TransactionsTableBody = ({
+  page,
+  numEntriesPerPage,
+  listOfTransactions,
+  ...props
+}) => {
   const rows = getEntriesForPage(page, numEntriesPerPage, listOfTransactions);
 
   return (
     <>
       <TableBody>
-        {rows.map(row => {
-          return (
-            <>
-              <TableRow>
-                <TableCell>{row.parkingId}</TableCell>
-                <TableCell />
-              </TableRow>
-            </>
-          );
-        })}
+        {rows.map(row => (
+          <TableRow>
+            <TableCell>{row.parkingId}</TableCell>
+            <TableCell />
+          </TableRow>
+        ))}
       </TableBody>
     </>
   );
@@ -168,7 +169,7 @@ SelectProps={{
           value={textFieldValue}
           onChange={handleTextFieldChange}
         />
-        <Button onClick={handleClickFilter}>Filter!</Button>
+        <Button variant="contained" color="primary" onClick={handleClickFilter}>Filter!</Button>
       </div>
       <Table stickyHeader>
         <TransactionTableHeader tableHeaders={tableHeaders} />
@@ -191,8 +192,13 @@ SelectProps={{
   );
 };
 
-const handleNewTransaction = (listOfTransactions, updateListOfTransactions, newTransaction) => {
-  updateListOfTransactions(listOfTransactions.unshift(data));
+const handleNewTransaction = (
+  listOfTransactions,
+  updateListOfTransactions,
+  newTransaction
+) => {
+  listOfTransactions.unshift(newTransaction);
+  updateListOfTransactions(listOfTransactions);
 };
 
 const TransactionHistory = (props) => {
@@ -210,7 +216,7 @@ const TransactionHistory = (props) => {
     buyerId: 'Buyer ID'
   };
 
-  const url = `${apiprefix}/transaction_history`;
+  const url = `/transaction_history`;
 
   const getTransactionHistory = async () => {
     const response = await makeAPICall('GET', url);
@@ -241,12 +247,29 @@ const TransactionHistory = (props) => {
     }
   };
 
-  useEffect(() => {
-    getTransactionHistory();
-  })
+  const [listOfTransactions, updateListOfTransactions] = useState(
+    getTransactionHistory()
+  );
+  const [page, updatePage] = useState(0);
+  const [numEntriesPerPage, updateNumEntriesPerPage] = useState(10);
+
+  // Table header.
+  const tableHeaders = {
+    parkingId: 'Parking ID',
+    sellerId: 'Seller ID',
+    buyerId: 'Buyer ID'
+  };
+
+  const url = `${apiprefix}/transaction_history`;
 
   useEffect(() => {
-    socket.on('transactionHistory', (data) => handleNewTransaction(listOfTransactions, updateListOfTransactions, data));
+    getTransactionHistory();
+  }, []);
+
+  useEffect(() => {
+    socket.on('transactionHistory', data =>
+      handleNewTransaction(listOfTransactions, updateListOfTransactions, data)
+    );
   }, []);
 
   return (
@@ -270,4 +293,4 @@ const TransactionHistory = (props) => {
   );
 };
 
-export default withStyles(styles)(TransactionHistory);
+export default withTheme(withStyles(styles)(TransactionHistory));

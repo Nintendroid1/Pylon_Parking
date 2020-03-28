@@ -9,7 +9,11 @@ import { StartEndTime } from './forms/parking-spot-components';
 import 'date-fns';
 import DateFnsUtils from '@date-io/date-fns';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
-import { compareMilitaryTime, militaryTimeDifference, convertMilitaryTimeToNormal } from './forms/time-filter';
+import {
+  compareMilitaryTime,
+  militaryTimeDifference,
+  convertMilitaryTimeToNormal
+} from './forms/time-filter';
 import {
   withStyles,
   MuiThemeProvider,
@@ -63,9 +67,8 @@ const TableData = props => {
         </TableRow>
       </>
     );
-  })
-}
-
+  });
+};
 
 const MakeTable = props => {
   return (
@@ -87,7 +90,10 @@ const MakeTable = props => {
   );
 };
 
-const handleParkingInfoChanges = (updateparkingSpotInfo, newParkingSpotInfo) => {
+const handleParkingInfoChanges = (
+  updateparkingSpotInfo,
+  newParkingSpotInfo
+) => {
   updateparkingSpotInfo(newParkingSpotInfo);
 };
 
@@ -119,7 +125,7 @@ const ParkingSpot = ({
   const [parkingSpotInfo, updateparkingSpotInfo] = useState([]);
   const [time, updateTime] = useState({
     startTime: currTime,
-    endTime: '24:00',
+    endTime: '24:00'
   });
 
   /*
@@ -150,26 +156,39 @@ const ParkingSpot = ({
     // If timeSlot's start time is after the start time the client wants, then use
     // timeSlot's start time, otherwise, the client's start time is taken care of in
     // this timeSlot, so use client's start time.
-    let timeToStartCalc = compareMilitaryTime(timeSlot.startTime, startTime) > 0 ? timeSlot.startTime : startTime;
-    
+    let timeToStartCalc =
+      compareMilitaryTime(timeSlot.startTime, startTime) > 0
+        ? timeSlot.startTime
+        : startTime;
+
     // If timeSlot's end time is before the client's end time, then use timeSlot's
     // end time.
-    let timeToEndCalc = compareMilitaryTime(timeSlot.endTime, endTime) < 0 ? timeSlot.endTime : endTime;
+    let timeToEndCalc =
+      compareMilitaryTime(timeSlot.endTime, endTime) < 0
+        ? timeSlot.endTime
+        : endTime;
 
-    const totalTimeWanted = militaryTimeDifference(timeToStartCalc, timeToEndCalc);
+    const totalTimeWanted = militaryTimeDifference(
+      timeToStartCalc,
+      timeToEndCalc
+    );
 
     return (totalTimeWanted / 15) * timeSlot.cost;
   };
 
   const calculatePrice = (startTime, endTime) => {
     // Calculate the price for the spot.
-    const listOfTimes = parkingSpotInfo.filter((e) => compareMilitaryTime(startTime, e.startTime) >= 0 && compareMilitaryTime(endTime, e.startTime) <= 0);
+    const listOfTimes = parkingSpotInfo.filter(
+      e =>
+        compareMilitaryTime(startTime, e.startTime) >= 0 &&
+        compareMilitaryTime(endTime, e.startTime) <= 0
+    );
 
     const totalCost = listOfTimes.reduce(
-      (accumulator, currTimeSlot) =>
+      (accumulator, currTimeSlot) => (
         accumulator +
-        calculatePricePerTimeSlot(currTimeSlot, startTime, endTime),
-      0
+        calculatePricePerTimeSlot(currTimeSlot, startTime, endTime)
+      ), 0
     );
 
     return totalCost;
@@ -177,7 +196,7 @@ const ParkingSpot = ({
 
   // Buying option, confirmation message and so forth.
   // Make api call to make a transaction.
-  const handleBuyRequest = async (privateKey) => {
+  const handleBuyRequest = async privateKey => {
     // Redirect them to invoice page.
     //const url = `${apiprefix}/parking_spot/${id}/buy/?startTime=${time.startTime}&endTime=${time.endTime}`;
 
@@ -185,7 +204,7 @@ const ParkingSpot = ({
       Start Time: ${time.startTime} \n
       End Time: ${time.endTime} \n
       Private Key: ${privateKey}
-    `)
+    `);
     // make smart contract and redirect to invoice.
     return 1;
   };
@@ -208,7 +227,9 @@ const ParkingSpot = ({
     //
     // expect data to be the entire information, not just the new info.
     // Like if an api get request was made.
-    socket.on(`parkingSpot-${id}`, (data) => handleParkingInfoChanges(updateparkingSpotInfo, data));
+    socket.on(`parkingSpot-${id}`, data =>
+      handleParkingInfoChanges(updateparkingSpotInfo, data)
+    );
 
     return () => {
       socket.disconnect();

@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { withStyles, withTheme } from '@material-ui/core/styles';
 import { makeAPICall } from '../api';
 import apiprefix from './apiprefix';
+import history from '../history';
 // import './MainMap.css';
 
 const styles = theme => ({
@@ -23,7 +24,7 @@ const styles = theme => ({
   },
   zoneLink: {
     fontSize: '20px',
-    color: 'black',
+    color: theme.palette.text.primary,
     textDecoration: 'none',
     '&:hover': {
       textDecoration: 'underline'
@@ -73,9 +74,17 @@ const MainMap = ({ classes, ...props }) => {
 
   var zoneList = zones.map(z => (
     <li style={{ listStyleType: 'none' }}>
-      <a className={classes.zoneLink} href={`zones/${z.zone_id}`}>
+      <Link
+        className={classes.zoneLink}
+        to={{
+          pathname: `zones/${z.zone_id}`,
+          state: {
+            from: history.location
+          }
+        }}
+      >
         {z.zone_name}
-      </a>
+      </Link>
     </li>
   ));
   return (

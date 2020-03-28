@@ -24,7 +24,7 @@ const LoginTab = ({
   updateAdmin,
   ...props
 }) => {
-  // an user message to be displayed, if any
+  // a user message to be displayed, if any
   const [message, updateMessage] = useState(null);
   const [isLoading, setLoading] = useState(false);
   const nextLocation =
@@ -37,23 +37,24 @@ const LoginTab = ({
   // handle user login
   const userLogin = async values => {
     setLoading(true);
-    console.log(`Making POST request to: ${apiprefix}/users/login`)
-    console.log('Using values:')
-    console.log(values)
+    console.log(`Making POST request to: ${apiprefix}/users/login`);
+    console.log('Using values:');
+    console.log(values);
     let res = await makeAPICall('POST', `${apiprefix}/users/login`, values);
     let body = await res.json();
 
     setLoading(false);
     if (res.status === 200) {
       localStorage.olivia_token = body.token;
-      localStorage.olivia_id = body.id;
-      console.log(res);
+      localStorage.olivia_pid = body.pid;
+      console.log("LOGIN");
+      console.log(body);
       updateUser({
-        id: body.id,
-        username: values.username,
+        pid: values.pid,
         admin: res.body.admin,
         authenticated: true
       });
+      console.log(res.body);
       updateAdmin(res.body.admin === 1);
       updateLogin(true);
 
