@@ -108,7 +108,7 @@ const App = ({ classes, ...props }) => {
   const endpoint = 'http://localhost:3000/';
 
   // Creating websockets to backend.
-  const parkingLotSocket = io(`${endpoint}/parkingLot`);
+  const parkingLotSocket = io(`${endpoint}/zone`);
   const parkingSpotSocket = io(`${endpoint}/parkingSpot`);
   const transactionHistorySocket = io(endpoint);
   const userSocket = io(`${endpoint}/user`);

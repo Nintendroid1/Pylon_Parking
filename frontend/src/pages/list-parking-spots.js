@@ -234,7 +234,7 @@ const Zone = ({
   }, []);
 
   useEffect(() => {
-    socket.on(`parkingLot-${zoneId}`, data =>
+    socket.on(`zone-${zoneId}`, data =>
       handleParkingSpotTimeChange(
         parkingSpotsInfo,
         updateparkingSpotsInfo,
