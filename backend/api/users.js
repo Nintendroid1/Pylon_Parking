@@ -11,7 +11,9 @@ router.get("/", (req, res) => {
 
 router.get("/info", (req, res) => {
   if(jwt.verifyJWT(req.body.token, req.body.pid)) {
-    db.query("SELECT * FROM users WHERE PID = req.body.pid");
+    db.query("SELECT * FROM users WHERE PID = $1", [req.body.pid], (err,dbres) => {
+      res.status(200).json({userInfo: dbres.rows[0]});
+    });
   }
   else {
     res.status(403).json({message: "Invalid token"});
