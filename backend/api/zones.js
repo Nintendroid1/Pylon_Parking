@@ -20,20 +20,36 @@ router.get("/all", (req, res) => {
 });
 
 router.get("/:zone_id/spot/:spot_id", (req, res) => {
-  console.log(req.params);
-  db.query(
-    "SELECT * FROM parking_times WHERE spot_ID = $1 AND zone_ID = $2",
-    [req.params.spot_id, req.params.zone_id],
-    (err, dbres) => {
-      if (err) {
-        console.log(err.stack);
-        res.status(500).json({ message: "Internal server error" });
-      } else {
-        console.log(dbres);
-        res.status(200).json({ parkingInfo: dbres.rows });
+  if(req.query.startTime && req.query.endTime) {
+    db.query(
+      "SELECT * FROM parking_times WHERE spot_ID = $1 AND zone_ID = $2 AND time_code > $3 AND time_code < $",
+      [req.params.spot_id, req.params.zone_id, req.query.startTime, req.query.endTime],
+      (err, dbres) => {
+        if (err) {
+          console.log(err.stack);
+          res.status(500).json({ message: "Internal server error" });
+        } else {
+          console.log(dbres);
+          res.status(200).json({ parkingInfo: dbres.rows });
+        }
       }
-    }
-  );
+    );
+  }
+  else {
+    db.query(
+      "SELECT * FROM parking_times WHERE spot_ID = $1 AND zone_ID = $2",
+      [req.params.spot_id, req.params.zone_id],
+      (err, dbres) => {
+        if (err) {
+          console.log(err.stack);
+          res.status(500).json({ message: "Internal server error" });
+        } else {
+          console.log(dbres);
+          res.status(200).json({ parkingInfo: dbres.rows });
+        }
+      }
+    );
+  }
 });
 
 router.get('/:zone_id', (req, res) => {
