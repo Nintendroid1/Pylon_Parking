@@ -21,6 +21,7 @@ import ParkingSpot from './pages/parking-spot';
 import TransactionHistory from './pages/transactions';
 import io from 'socket.io-client';
 import UserInfo from './pages/user-info';
+import apiprefix from './pages/apiprefix';
 
 import Typography from '@material-ui/core/Typography';
 import history from './history';
@@ -105,7 +106,7 @@ const App = ({ classes, ...props }) => {
 
   // Endpoint for the websocket.
   // Base url.
-  const endpoint = 'http://localhost:3000/';
+  const endpoint = apiprefix;
 
   // Creating websockets to backend.
   const parkingLotSocket = io(`${endpoint}/zone`);
