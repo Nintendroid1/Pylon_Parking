@@ -9,6 +9,15 @@ router.get("/", (req, res) => {
   res.send("This should be login api");
 });
 
+router.get("/info", (req, res) => {
+  if(jwt.verifyJWT(req.body.token, req.body.pid)) {
+    db.query("SELECT * FROM users WHERE PID = req.body.pid");
+  }
+  else {
+    res.status(403).json({message: "Invalid token"});
+  }
+});
+
 router.post("/login", async function(req, res) {
   try {
     //Check database
@@ -16,7 +25,7 @@ router.post("/login", async function(req, res) {
     let isAdmin = false;
     console.log(req.body);
     db.query("SELECT pass, admin_status FROM users WHERE PID = $1", [
-      req.body.username
+      req.body.pid
     ])
       .then(dbres => {
         if (dbres.rows[0]) {
@@ -28,8 +37,8 @@ router.post("/login", async function(req, res) {
       .then(() => {
         if (isValidLogin) {
           res.status(200).json({
-            token: jwt.createJWT(req.body.username, isAdmin),
-            pid: req.body.username,
+            token: jwt.createJWT(req.body.pid, isAdmin),
+            pid: req.body.pid,
             admin: isAdmin,
             message: `Successfuly logged in`
           });
