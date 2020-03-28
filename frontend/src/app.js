@@ -20,6 +20,7 @@ import Zone from './pages/list-parking-spots';
 import ParkingSpot from './pages/parking-spot';
 import TransactionHistory from './pages/transactions';
 import io from 'socket.io-client';
+import UserInfo from './pages/user-info';
 
 import Typography from '@material-ui/core/Typography';
 
@@ -79,6 +80,7 @@ const App = ({ classes, ...props }) => {
   const parkingLotSocket = io(`${endpoint}/parkingLot`);
   const parkingSpotSocket = io(`${endpoint}/parkingSpot`);
   const transactionHistorySocket = io(endpoint);
+  const userSocket = io(`${endpoint}/user`);
 
   //console.log(localStorage.olivia_id);
   //localStorage.lastTab = "/";
@@ -146,7 +148,7 @@ const App = ({ classes, ...props }) => {
                 reqAdmin={false}
                 reqLogin={true}
                 hidden={false}
-                component={WelcomeTab}
+                render={() => <UserInfo socket={userSocket} />}
               />
               <Route 
                 exact

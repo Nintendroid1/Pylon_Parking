@@ -242,6 +242,8 @@ const UserInfo = (props) => {
   const [message, updateMessage] = useState('Loading');
   const [userInfo, updateUserInfo] = useState(null);
 
+  const { socket } = props;
+
   /*
   let getUserInfo = async () => {
     let id = localStorage.blockchain_id; // change if necessary.
@@ -271,7 +273,11 @@ const UserInfo = (props) => {
   // Need another socket event for when parking spot is sold.
   useEffect(() => {
     getUserInfo();
-  }, [])
+  }, []);
+
+  useEffect(() => {
+    socket.on(`user-${userInfo.username}`, function() {});
+  }, []);
 
   // Change to something more meaningful.
   return (

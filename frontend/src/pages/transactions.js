@@ -12,6 +12,9 @@ import 'date-fns';
 import { Typography } from '@material-ui/core';
 import queryStrings from 'query-string';
 import TextField from '@material-ui/core/TextField';
+import Select from '@material-ui/core/Select';
+import MenuItem from '@material-ui/core/MenuItem';
+import Button from '@material-ui/core/Button';
 import {
   withStyles,
   MuiThemeProvider,
@@ -37,7 +40,11 @@ const FilterSelectField = ({ classes, ...props }) => {
     <>
       <Select value={filterOption} onChange={handleChange}>
         {listOfFilterOptions.map(e => {
-          <MenuItem value={e}>{e}</MenuItem>;
+          return (
+            <>
+              <MenuItem value={e}>{e}</MenuItem>
+            </>
+          );
         })}
       </Select>
     </>
@@ -88,10 +95,14 @@ const TransactionsTableBody = props => {
     <>
       <TableBody>
         {rows.map(row => {
-          <TableRow>
-            <TableCell>{row.parkingId}</TableCell>
-            <TableCell />
-          </TableRow>;
+          return (
+            <>
+              <TableRow>
+                <TableCell>{row.parkingId}</TableCell>
+                <TableCell />
+              </TableRow>
+            </>
+          );
         })}
       </TableBody>
     </>
@@ -187,9 +198,8 @@ const handleNewTransaction = (listOfTransactions, updateListOfTransactions, newT
 const TransactionHistory = (props) => {
   const { socket } = props;
 
-  const [listOfTransactions, updateListOfTransactions] = useState(
-    getTransactionHistory()
-  );
+  const [message, updateMessage] = useState('Loading');
+  const [listOfTransactions, updateListOfTransactions] = useState([]);
   const [page, updatePage] = useState(0);
   const [numEntriesPerPage, updateNumEntriesPerPage] = useState(10);
 
@@ -225,27 +235,38 @@ const TransactionHistory = (props) => {
         updateNumEntriesPerPage(Number(queryParams.numEntries));
       }
 
-      return respbody.listOfTransactions;
+      updateListOfTransactions(respbody.listOfTransactions);
+    } else {
+      updateMessage('Error has occurred');
     }
-
-    return null;
   };
+
+  useEffect(() => {
+    getTransactionHistory();
+  })
 
   useEffect(() => {
     socket.on('transactionHistory', (data) => handleNewTransaction(listOfTransactions, updateListOfTransactions, data));
   }, []);
 
   return (
-    <Typography>
-      <TransactionTable
-        listOfTransactions={listOfTransactions}
-        page={page}
-        updatePage={updatePage}
-        numEntriesPerPage={numEntriesPerPage}
-        updateNumEntriesPerPage={updateNumEntriesPerPage}
-        tableHeaders={tableHeaders}
-      />
-    </Typography>
+    <>
+      <div>
+        {message ?
+          <Typography>{message}</Typography> :
+          <Typography>
+            <TransactionTable
+              listOfTransactions={listOfTransactions}
+              page={page}
+              updatePage={updatePage}
+              numEntriesPerPage={numEntriesPerPage}
+              updateNumEntriesPerPage={updateNumEntriesPerPage}
+              tableHeaders={tableHeaders}
+            />
+          </Typography>
+        }
+      </div>
+    </>
   );
 };
 

@@ -116,18 +116,11 @@ const ParkingSpot = ({
   let id = Number(tempUrl.substring(tempUrl.lastIndexOf('/') + 1));
 
   const [message, updateMessage] = useState('Loading'); // Initial message cannot be null. See useEffect() for reason.
-  const [parkingSpotInfo, updateparkingSpotInfo] = useState(null);
+  const [parkingSpotInfo, updateparkingSpotInfo] = useState([]);
   const [time, updateTime] = useState({
     startTime: currTime,
     endTime: '24:00',
   });
-
-  let popUpMessage = `Are you sure you want to rent parking spot ${id} from ${
-    convertMilitaryTimeToNormal(time.startTime)
-  } to ${convertMilitaryTimeToNormal(time.endTime)} for ${calculatePrice(
-    time.startTime,
-    time.endTime
-  )} hokie tokens?`;
 
   /*
   const listParkingSpotTimes = async () => {
@@ -172,9 +165,12 @@ const ParkingSpot = ({
     // Calculate the price for the spot.
     const listOfTimes = parkingSpotInfo.filter((e) => compareMilitaryTime(startTime, e.startTime) >= 0 && compareMilitaryTime(endTime, e.startTime) <= 0);
 
-    const totalCost = listOfTimes.reduce((accumulator, currTimeSlot) => {
-      return accumulator + calculatePricePerTimeSlot(currTimeSlot, startTime, endTime);
-    })
+    const totalCost = listOfTimes.reduce(
+      (accumulator, currTimeSlot) =>
+        accumulator +
+        calculatePricePerTimeSlot(currTimeSlot, startTime, endTime),
+      0
+    );
 
     return totalCost;
   };
@@ -193,6 +189,13 @@ const ParkingSpot = ({
     // make smart contract and redirect to invoice.
     return 1;
   };
+
+  let popUpMessage = `Are you sure you want to rent parking spot ${id} from ${
+    convertMilitaryTimeToNormal(time.startTime)
+  } to ${convertMilitaryTimeToNormal(time.endTime)} for ${calculatePrice(
+    time.startTime,
+    time.endTime
+  )} hokie tokens?`;
 
   // Renders after first render.
   useEffect(() => {
