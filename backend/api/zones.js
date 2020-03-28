@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../db');
+const socketAPI = require('../realtime/socket-broadcaster');
 
 router.get('/all', (req, res) => {
     db.query('SELECT zone_id, zone_name FROM zones', (err,dbres) => {
