@@ -1,32 +1,39 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const db = require('../db');
+const db = require("../db");
+const socketAPI = require("../realtime/socket-broadcaster");
 
-router.get('/all', (req, res) => {
-    db.query('SELECT zone_id, zone_name FROM zones', (err,dbres) => {
-        if (err) {
-            console.log(err.stack);
-            res.status(500).json({message: "Internal server error"});
-        }
-        else {
-			console.log(dbres.rows);
-            res.status(200).json({zones: dbres.rows});
-        }
-    })
+router.get("/all", (req, res) => {
+  db.query("SELECT zone_id, zone_name FROM zones", (err, dbres) => {
+    if (err) {
+      console.log(err.stack);
+      res.status(500).json({ message: "Internal server error" });
+    } else {
+      // socket call.
+      const socket = router.get("socket-api");
+      socketAPI.broadcastZoneInfo(socket, 1, "testing things out");
+
+      console.log(dbres.rows);
+      res.status(200).json({ zones: dbres.rows });
+    }
+  });
 });
 
-router.get('/:zone_id/spot/:spot_id', (req, res) => {
-    console.log(req.params)
-    db.query('SELECT * FROM parking_times WHERE spot_ID = $1 AND zone_ID = $2',[ req.params.spot_id, req.params.zone_id ], (err,dbres) => {
-        if (err) {
-            console.log(err.stack);
-            res.status(500).json({message: "Internal server error"});
-        }
-        else {
-            console.log(dbres)
-            res.status(200).json({parkingInfo: dbres.rows});
-        }
-    })
+router.get("/:zone_id/spot/:spot_id", (req, res) => {
+  console.log(req.params);
+  db.query(
+    "SELECT * FROM parking_times WHERE spot_ID = $1 AND zone_ID = $2",
+    [req.params.spot_id, req.params.zone_id],
+    (err, dbres) => {
+      if (err) {
+        console.log(err.stack);
+        res.status(500).json({ message: "Internal server error" });
+      } else {
+        console.log(dbres);
+        res.status(200).json({ parkingInfo: dbres.rows });
+      }
+    }
+  );
 });
 
 router.get('/:zone_id', (req, res) => {
