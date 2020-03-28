@@ -1,6 +1,7 @@
 #include <eosio/eosio.hpp>
 #include <eosio/print.hpp>
 #include <eosio/system.hpp>
+#include <vector>
 
 using namespace eosio;
 
@@ -12,7 +13,7 @@ public:
   
   //Inserts new parking spot
   [[eosio::action]] //Needed for ABI generation
-  void insert(name user, uint64_t spot_id, uint64_t zone_id) {
+  void insert(name user, uint64_t spot_id, uint64_t zone_id, uint32_t time_code, name owner) {
       //Ensures the account executing transaction has proper permissions
       require_auth(user);
 
@@ -33,6 +34,7 @@ public:
                 row.spot_id = spot_id;
                 row.zone_id = zone_id;
                 row.available = true;
+                row.owner = owner;//Should be VT by default
             });
             print("Parking Spot: ", spot_id, " in Zone: ", zone_id, " is created on: ", current_time_point().sec_since_epoch());
             send_summary(user, " successfully inserted parking spot");
@@ -70,7 +72,7 @@ public:
 
   //Updates parking spot available
   [[eosio::action]]
-  void modavail(name user, uint64_t spot_id, uint64_t zone_id) {
+  void modavail(name user, uint64_t spot_id, uint64_t zone_id, uint32_t time_code, name owner) {
       //Ensures the account executing transaction has proper permissions
       require_auth(user);
 
@@ -91,17 +93,35 @@ public:
             print("DOES NOT EXIST! Parking Spot: ", spot_id, " in Zone: ", zone_id);
         }
         else {
-            bool status_bool = false;
-            std::string status_str = "occupied";
-            //The parking spot is in the table
+
+            // bool status_bool = false;
+            // std::string status_str = "occupied";
+            // //The parking spot is in the table
+            // parkdeck.modify(iterator, user, [&](auto& row) {
+            //     row.available = !(row.available);
+            //     status_bool = row.available;
+            // });
+            // if(status_bool) {
+            //   status_str = "not occupied";
+            // }
+
             parkdeck.modify(iterator, user, [&](auto& row) {
-                row.available = !(row.available);
-                status_bool = row.available;
+                bool found = false;
+                for (auto it = begin (row.timeclock); it != end (row.timeclock); ++it) {
+                      if(*it == time_code) {
+                        found = true;
+                      }
+                  }
+                if(!found) {
+                  row.timeclock.push_back(time_code);
+                }
+
+                send_summary(row.owner, " transferring ownership");
+                row.available = false;
+                row.owner = user;
             });
-            if(status_bool) {
-              status_str = "not occupied";
-            }
-            print("Parking Spot: ", spot_id, " in Zone: ", zone_id, " is ", status_str, " on: ", current_time_point().sec_since_epoch());
+
+            print("Parking Spot: ", spot_id, " in Zone: ", zone_id, " is owned by ", user, " for: ", time_code, ". Transaction on ", current_time_point().sec_since_epoch());
             send_summary(user, " successfully changed parking spot availability");
         }
   }
@@ -115,11 +135,22 @@ public:
   }
 
 private:
+  // 
+  // struct [[eosio::table]] ttime {
+  //   uint32_t time_code;
+
+  // //Sets primary key to be the time
+  // uint64_t primary_key() const {return spot_id;}
+  // };
+  // typedef eosio::multi_index<"ttimes"_n, ttime> time_index;
+
   //Parking spot to store the info
   struct [[eosio::table]] pspot {
     uint64_t spot_id; //key
     uint64_t zone_id;
+    std::vector<uint32_t>  timeclock; //Time information in 15 min intervals
     bool available;
+    name owner;
 
     //Sets primary key to be the spot id
     uint64_t primary_key() const {return spot_id;}
@@ -139,7 +170,7 @@ private:
       std::make_tuple(user, name{user}.to_string() + message)
     ).send();
   };
-  
+
   /*_n is the name of the table
   * takes in a pspot value
   */
