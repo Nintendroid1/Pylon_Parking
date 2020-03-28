@@ -52,7 +52,7 @@ const RegisterTab = ({ isDark, updateLogin, updateUser, updateAdmin }) => {
   const addNewUser = async values => {
     updateMessage(<LinearProgress />);
     setLoading(true);
-    let res = await makeAPICall('POST', `${apiprefix}/users`, values);
+    let res = await makeAPICall('POST', `${apiprefix}/users/register`, values);
     let body = await res.json();
     updateMessage(body.message);
     setLoading(false);
@@ -60,11 +60,9 @@ const RegisterTab = ({ isDark, updateLogin, updateUser, updateAdmin }) => {
       setMsgColor(isDark ? '#FFFFFF' : '#000000');
       updateOk(true);
       localStorage.olivia_token = body.token;
-      localStorage.olivia_id = body.user.id;
       console.log(body);
       updateUser({
-        id: body.user.id,
-        username: body.user.username,
+        pid: body.user.pid,
         admin: body.user.admin,
         authenticated: true
       });

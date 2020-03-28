@@ -9,7 +9,7 @@ import ListItemText from '@material-ui/core/ListItemText';
 import Typography from '@material-ui/core/Typography';
 import { Link as RRLink } from 'react-router-dom';
 import { withRouter, Switch as RRSwitch } from 'react-router-dom';
-import { withStyles } from '@material-ui/core/styles';
+import { withStyles, withTheme } from '@material-ui/core/styles';
 import { Tabs, Tab } from '@material-ui/core';
 import classNames from 'classnames';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
@@ -99,6 +99,9 @@ const styles = theme => ({
   },
   themeSwitch: {
     marginLeft: theme.spacing.unit
+  },
+  listItem: {
+    color: theme.palette.text.primary
   }
 });
 
@@ -177,45 +180,19 @@ function TabChooser({
   }
 
   function handleTabChange(event, value) {
-    let tabPath = pathFromTabIndex(value);
+    // let tabPath = pathFromTabIndex(value);
     //history.push(tabPath);
     //localStorage.lastTab = location.pathname;
-    selectTab(value);
+    if (value >= 0) {
+      selectTab(value);
+    }
   }
   function handleLogout() {
-    localStorage.olivia_id = -1;
+    localStorage.olivia_pid = '';
     localStorage.removeItem('olivia_token');
     updateLogin(false);
     window.location.href = `${process.env.PUBLIC_URL}/`;
   } // apply HOC*/
-
-  /*let ConfirmLogoutDialog = ({ classes }) => {
-    let [onOff, setOnOff] = useState(false);
-    let clickHandler = async () => {
-      let shouldSwitch = await dialog(
-        <Confirm title="Are you sure?">
-          <Typography variant="body2">
-            Are you sure you want to log out?
-          </Typography>
-        </Confirm>
-      );
-      if (shouldSwitch) setOnOff(!onOff);
-    };
-
-    return (
-      <div className={classes.root}>
-        <Typography align="center" variant="h5" gutterBottom>
-          A demonstration of how to use a modal dialog.
-        </Typography>
-        <Typography component="p">
-          The switch is {onOff ? 'off' : 'on'}.
-          <Button onClick={clickHandler}>Switch it</Button>
-        </Typography>
-      </div>
-    );
-  };
-
-  ConfirmLogoutDialog = withStyles(styles)(ConfirmLogoutDialog); */
 
   function LoginButton() {
     return (
@@ -314,13 +291,14 @@ function TabChooser({
       />
 
       <Divider />
-      <List>
+      <List color="inherit">
         {children.map((tab, index) =>
           !tab.props.hidden &&
           (!tab.props.reqLogin || (isLoggedIn && tab.props.reqLogin)) &&
           (!tab.props.reqAdmin || (currentUser.admin && tab.props.reqAdmin)) ? (
             <RRLink
               className="list-link"
+              color="inherit"
               to={{
                 pathname: tab.props.path,
                 key: index,
@@ -332,12 +310,17 @@ function TabChooser({
             >
               <ListItem
                 button
+                color="inherit"
                 key={tab.props.path}
                 currenttab={currentTab}
                 value={currentTab}
                 onClick={() => handleListSelect(index, tab.props.path)}
               >
-                <ListItemText primary={tab.props.label} key={index} />
+                <ListItemText
+                  className={classes.listItem}
+                  primary={tab.props.label}
+                  key={index}
+                />
               </ListItem>
             </RRLink>
           ) : null
@@ -397,7 +380,9 @@ function TabChooser({
             ) : (
               <Tabs value={currentTab} onChange={handleTabChange}>
                 {children.map((tab, i) => {
-                  return !tab.props.reqLogin ? (
+                  return !tab.props.reqLogin &&
+                    !tab.props.reqAdmin &&
+                    !tab.props.hidden ? (
                     <Tab
                       component={RRLink}
                       to={{
@@ -460,7 +445,7 @@ function TabChooser({
             path="/logout"
             hidden={true}
             render={() => {
-              localStorage.olivia_id = -1;
+              localStorage.olivia_pid = '';
               localStorage.removeItem('olivia_token');
               updateLogin(false);
               history.replace('/');
@@ -494,4 +479,4 @@ function TabChooser({
 // the 'withRouter' HOC will make 'location' (and 'history', and 'match) available
 // to the component.
 // See https://reacttraining.com/react-router/web/api/withRouter
-export default withRouter(withStyles(styles)(TabChooser));
+export default withRouter(withTheme(withStyles(styles)(TabChooser)));
