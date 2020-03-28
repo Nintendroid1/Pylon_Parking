@@ -6,7 +6,7 @@ import {
   MuiPickersUtilsProvider,
   KeyboardDatePicker
 } from '@material-ui/pickers';
-import { KeyboardTimePicker as TimePicker } from './parking-spot-components.js';
+import { TimePicker } from './parking-spot-components.js';
 // import { TimePicker as TimePicker } from '@material-ui/pickers'
 import Button from '@material-ui/core/Button';
 import {

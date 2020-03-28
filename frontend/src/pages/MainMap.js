@@ -105,9 +105,11 @@ const MainMap = ({ classes, ...props }) => {
         </Card>
       </div>
       <div className={classes.centerCol}>
-        <div style={{ display: 'flex', justifyContent: 'left' }}>
-          <ul>{zoneList}</ul>
-        </div>
+        <Typography color="primary" variant="h4">
+          <div style={{ display: 'flex', justifyContent: 'left' }}>
+            <ul>{zoneList}</ul>
+          </div>
+        </Typography>
       </div>
     </>
   );

@@ -9,10 +9,9 @@ import TableRow from '@material-ui/core/TableRow';
 import TablePagination from '@material-ui/core/TablePagination';
 import apiprefix from './apiprefix';
 import 'date-fns';
-import { Typography, Button, MenuItem, Select } from '@material-ui/core';
+import { Typography, Select } from '@material-ui/core';
 import queryStrings from 'query-string';
 import TextField from '@material-ui/core/TextField';
-import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
 import Button from '@material-ui/core/Button';
 import {
@@ -70,7 +69,7 @@ const getEntriesForPage = (page, numEntriesPerPage, listOfTransactions) => {
   }
 
   // return listOfTransactions.slice(startIndex, endIndex);
-  return []
+  return [];
 };
 
 const TransactionTableHeader = props => {
@@ -110,16 +109,15 @@ const TransactionsTableBody = ({
   );
 };
 
-const TransactionTable = props => {
-  const {
-    listOfTransactions,
-    page,
-    updatePage,
-    numEntriesPerPage,
-    updateNumEntriesPerPage,
-    tableHeaders
-  } = props;
-
+const TransactionTable = ({
+  listOfTransactions,
+  page,
+  updatePage,
+  numEntriesPerPage,
+  updateNumEntriesPerPage,
+  tableHeaders,
+  ...props
+}) => {
   const listOfFilterOptions = ['Parking ID', 'Buyer ID', 'Seller ID'];
   const [filterOption, updateFilterOption] = useState('');
   const [textFieldValue, updateTextFieldValue] = useState('');
@@ -169,7 +167,9 @@ SelectProps={{
           value={textFieldValue}
           onChange={handleTextFieldChange}
         />
-        <Button variant="contained" color="primary" onClick={handleClickFilter}>Filter!</Button>
+        <Button variant="contained" color="primary" onClick={handleClickFilter}>
+          Filter!
+        </Button>
       </div>
       <Table stickyHeader>
         <TransactionTableHeader tableHeaders={tableHeaders} />
@@ -201,9 +201,7 @@ const handleNewTransaction = (
   updateListOfTransactions(listOfTransactions);
 };
 
-const TransactionHistory = (props) => {
-  const { socket } = props;
-
+const TransactionHistory = ({ socket, ...props }) => {
   const [message, updateMessage] = useState('Loading');
   const [listOfTransactions, updateListOfTransactions] = useState([]);
   const [page, updatePage] = useState(0);
@@ -216,7 +214,8 @@ const TransactionHistory = (props) => {
     buyerId: 'Buyer ID'
   };
 
-  const url = `/transaction_history`;
+  //const url = `/transaction_history`;
+  const url = `${apiprefix}/transaction_history`;
 
   const getTransactionHistory = async () => {
     const response = await makeAPICall('GET', url);
@@ -247,20 +246,6 @@ const TransactionHistory = (props) => {
     }
   };
 
-  const [listOfTransactions, updateListOfTransactions] = useState(
-    getTransactionHistory()
-  );
-  const [page, updatePage] = useState(0);
-  const [numEntriesPerPage, updateNumEntriesPerPage] = useState(10);
-
-  // Table header.
-  const tableHeaders = {
-    parkingId: 'Parking ID',
-    sellerId: 'Seller ID',
-    buyerId: 'Buyer ID'
-  };
-
-  const url = `${apiprefix}/transaction_history`;
 
   useEffect(() => {
     getTransactionHistory();
@@ -275,8 +260,9 @@ const TransactionHistory = (props) => {
   return (
     <>
       <div>
-        {message ?
-          <Typography>{message}</Typography> :
+        {message ? (
+          <Typography>{message}</Typography>
+        ) : (
           <Typography>
             <TransactionTable
               listOfTransactions={listOfTransactions}
@@ -287,7 +273,7 @@ const TransactionHistory = (props) => {
               tableHeaders={tableHeaders}
             />
           </Typography>
-        }
+        )}
       </div>
     </>
   );
