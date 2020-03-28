@@ -8,6 +8,11 @@ const usersRouter = require('./api/users');
 const zonesRouter = require('./api/zones');
 const purchaseRouter = require('./api/purchase');
 
+// Initializing socket and passing it to each app.
+const socketAPI = require('./realtime/socket-broadcaster');
+socketAPI.initSocket(app);
+app.set('socket-api', socketAPI);
+
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms'));
 app.use('/api', indexRouter);
 app.use('/api/users', usersRouter);
