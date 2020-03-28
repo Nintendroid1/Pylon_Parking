@@ -6,14 +6,15 @@ io.on('connection', socket => {
 
 // Broadcast updated information to all clients viewing info on parking lot
 // specified by parkingLotId.
-// 
+//
 // parkingLotId should be an integer value.
 function broadcastZoneInfo(io, zoneId, data) {
   if (io === null) {
     console.log('Socket has not been initilized');
   }
+  // console.log(io);
 
-  io.of(`zone-${zoneId}`).emit('zone info', data);
+  io.of(`zones`).emit(`zone-${zoneId}`, data);
 }
 
 
@@ -25,7 +26,7 @@ function broadcastParkingSpotInfo(io, parkingSpotId, data) {
     console.log('Socket has not been initilized');
   }
 
-  io.of(`parkingSpot-${parkingSpotId}`).emit('parking spot info', data);
+  io.of(`parking_spot-${parkingSpotId}`).emit('parking spot info', data);
 }
 
 // Broadcasting updated info on new transaction that has been made.
