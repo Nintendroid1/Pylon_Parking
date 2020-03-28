@@ -10,8 +10,8 @@ router.get('/all', (req, res) => {
         }
         else {
             // socket call.
-            const socketAPI = router.get('socket-api');
-            socketAPI.broadcastZoneInfo(1, 'testing things out');
+            const socket = router.get('socket-api');
+            socketAPI.broadcastZoneInfo(socket, 1, 'testing things out');
 
 			console.log(dbres.rows);
             res.status(200).json({zones: dbres.rows});

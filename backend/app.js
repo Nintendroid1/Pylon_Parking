@@ -9,7 +9,6 @@ const zonesRouter = require('./api/zones');
 const purchaseRouter = require('./api/purchase');
 
 // Initializing socket and passing it to each app.
-const socketAPI = require('./realtime/socket-broadcaster');
 const server = require('http').createServer(app);
 io = require('socket.io').listen(server);
 
@@ -38,7 +37,7 @@ io.of('transactionHistory').on('connect', (socket) => {
   console.log(`Client connected to 'transactionHistory' namespace.`);
 });
 
-app.set('socket-api', socketAPI);
+app.set('socket-api', io);
 
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms'));
 app.use('/api', indexRouter);
