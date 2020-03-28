@@ -70,7 +70,7 @@ const App = ({ classes, ...props }) => {
   });
   const [isAdmin, updateAdmin] = useState(0);
 
-  
+
   // Endpoint for the websocket.
   // Base url.
   const endpoint = "http://localhost:3000/";
@@ -148,7 +148,7 @@ const App = ({ classes, ...props }) => {
                 hidden={false}
                 component={WelcomeTab}
               />
-              <Route 
+              <Route
                 exact
                 path="/transaction_history"
                 label="Transaction History"
