@@ -234,13 +234,18 @@ const Zone = ({
   }, []);
 
   useEffect(() => {
-    socket.on(`zone-${zoneId}`, data =>
-      handleParkingSpotTimeChange(
-        parkingSpotsInfo,
-        updateparkingSpotsInfo,
-        data
-      )
-    );
+    console.log(zoneId);
+    console.log(socket);
+    socket.on(`zone-${zoneId}`, data => {
+      console.log("Big Test ASDFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF");
+      console.log(data);
+      // handleParkingSpotTimeChange(
+      //   parkingSpotsInfo,
+      //   updateparkingSpotsInfo,
+      //   data
+      // )
+      return null
+    });
   }, []);
 
   return (

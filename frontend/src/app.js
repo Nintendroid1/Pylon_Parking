@@ -106,12 +106,24 @@ const App = ({ classes, ...props }) => {
 
   // Endpoint for the websocket.
   // Base url.
-  const endpoint = apiprefix;
+  const endpoint = `/socket.io`;
 
   // Creating websockets to backend.
-  const parkingLotSocket = io(`${endpoint}/zone`);
-  const parkingSpotSocket = io(`${endpoint}/parkingSpot`);
-  const transactionHistorySocket = io(endpoint);
+  console.log(endpoint);
+  // const testSocket = io({ path: `${endpoint}` });
+  // const testSocket = io({ path: `${endpoint}` });
+  // const testSocket = io(`http://localhost:3001`);
+  // console.log(`Is connected: ${testSocket.connected}`); // true
+  // testSocket.on('connect', () => {
+  //   console.log(testSocket.connected); // true
+  // });
+  // testSocket.emit('request');
+  // testSocket.on('connect_error', error => {
+  //   console.log(error); // true
+  // });
+  const parkingLotSocket = io(`http://localhost:3001/zones`);//{ path: `${endpoint}/zones` });
+  const parkingSpotSocket = io(`http://localhost:3001/parking_spot`);//{ path: `${endpoint}/parkingSpot` });
+  const transactionHistorySocket = io(`http://localhost:3001/parking_spot`);
   const userSocket = io(`${endpoint}/user`);
 
   //console.log(localStorage.olivia_id);
