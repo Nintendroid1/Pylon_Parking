@@ -10,7 +10,34 @@ const purchaseRouter = require('./api/purchase');
 
 // Initializing socket and passing it to each app.
 const socketAPI = require('./realtime/socket-broadcaster');
-socketAPI.initSocket(app);
+const server = require('http').createServer(app);
+io = require('socket.io').listen(server);
+
+// Client socket connecting to specific parking lot websocket for updates.
+io.of(/^\/zone-\d+$/).on('connect', (socket) => {
+  const newNamespace = socket.nsp; // newNamespace.name === '/parkingLot-101'
+
+  // broadcast to all clients in the given sub-namespace
+  // newNamespace.emit('hello');
+  console.log(`Client connected to ${newNamespace} namespace.`);
+});
+
+// Client socket connecting to specific parking spot websocket for updates.
+io.of(/^\/parkingSpot-\d+$/).on('connect', (socket) => {
+  const newNamespace = socket.nsp; // newNamespace.name === '/parkingSpot-101' Must also denote parking lot number.
+
+  // broadcast to all clients in the given sub-namespace
+  // newNamespace.emit('hello');
+  console.log(`Client connected to ${newNamespace} namespace.`);
+});
+
+// Client socket connecting to transaction history web socket.
+io.of('transactionHistory').on('connect', (socket) => {
+  // broadcast to all clients in the given sub-namespace
+  // newNamespace.emit('hello');
+  console.log(`Client connected to 'transactionHistory' namespace.`);
+});
+
 app.set('socket-api', socketAPI);
 
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms'));

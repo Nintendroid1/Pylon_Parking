@@ -1,41 +1,8 @@
-const io = null;
-
-// Client socket connecting to specific parking lot websocket for updates.
-io.of(/^\/zone-\d+$/).on('connect', (socket) => {
-  const newNamespace = socket.nsp; // newNamespace.name === '/parkingLot-101'
-
-  // broadcast to all clients in the given sub-namespace
-  // newNamespace.emit('hello');
-  console.log(`Client connected to ${newNamespace} namespace.`);
-});
-
-// Client socket connecting to specific parking spot websocket for updates.
-io.of(/^\/parkingSpot-\d+$/).on('connect', (socket) => {
-  const newNamespace = socket.nsp; // newNamespace.name === '/parkingSpot-101' Must also denote parking lot number.
-
-  // broadcast to all clients in the given sub-namespace
-  // newNamespace.emit('hello');
-  console.log(`Client connected to ${newNamespace} namespace.`);
-});
-
-// Client socket connecting to transaction history web socket.
-io.of('transactionHistory').on('connect', (socket) => {
-  // broadcast to all clients in the given sub-namespace
-  // newNamespace.emit('hello');
-  console.log(`Client connected to 'transactionHistory' namespace.`);
-});
-
 /*
 io.on('connection', socket => {
   console.log(`Client with socket id ${socket.id} connected with server!`)
 })
 */
-
-// Initializes the sockets to be used.
-function initSocket(expressApp) {
-  const server = require('http').createServer(expressApp);
-  io = require('socket.io').listen(server);
-}
 
 // Broadcast updated information to all clients viewing info on parking lot
 // specified by parkingLotId.
