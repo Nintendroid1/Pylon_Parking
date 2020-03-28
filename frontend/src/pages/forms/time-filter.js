@@ -6,13 +6,14 @@ import {
   MuiPickersUtilsProvider,
   KeyboardDatePicker
 } from '@material-ui/pickers';
-import { TimePicker } from './parking-spot-components.js';
+import { KeyboardTimePicker as TimePicker } from './parking-spot-components.js';
+// import { TimePicker as TimePicker } from '@material-ui/pickers'
 import Button from '@material-ui/core/Button';
 import {
   withStyles,
   MuiThemeProvider,
   createMuiTheme
-} from '@material-ui/core/styles';
+} from '@material-ui/core/styles'; 
 
 const styles = theme => ({
   root: {
@@ -145,12 +146,14 @@ const TimeFilter = ({
           </Grid>
           <Grid>
             <TimePicker
+              color="secondary"
               handleTimeChange={handleTimeChange}
               time={time.startTime}
               name={'startTime'}
               label={'Start Time'}
             />
             <TimePicker
+              color="secondary"
               handleTimeChange={handleTimeChange}
               time={time.endTime}
               name={'endTime'}

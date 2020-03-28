@@ -63,10 +63,7 @@ const PrivateKeyField = props => {
 
   return (
     <>
-      <FormControl 
-        required
-        variant="outlined"
-      >
+      <FormControl required variant="outlined">
         <InputLabel>Private Key</InputLabel>
         <OutlinedInput
           id="private-key"
@@ -91,9 +88,16 @@ const PrivateKeyField = props => {
   );
 };
 
-const TimePicker = props => {
-  const { handleTimeChange, time, name, label, hasError, errorMessage, isRequired } = props;
-
+const TimePicker = ({
+  handleTimeChange,
+  time,
+  name,
+  label,
+  hasError,
+  errorMessage,
+  isRequired,
+  ...props
+}) => {
   if (hasError === undefined) {
     hasError = false;
   }
@@ -147,14 +151,14 @@ const ConfirmationDialogFieldButton = props => {
 
     updatePrivateKey({
       privateKey: '',
-      showPrivateKey: false,
-    })
+      showPrivateKey: false
+    });
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = event => {
     event.preventDefault();
     handleOnConfirm(privateKey.privateKey);
-  }
+  };
 
   return (
     <div>
@@ -165,9 +169,7 @@ const ConfirmationDialogFieldButton = props => {
         <Dialog open={open} onClose={handleClose}>
           <DialogTitle>{messageTitle}</DialogTitle>
           <DialogContent>
-            <Grid>
-              {messageContent}
-            </Grid>
+            <Grid>{messageContent}</Grid>
             <Grid>
               <PrivateKeyField
                 privateKey={privateKey}
@@ -179,7 +181,7 @@ const ConfirmationDialogFieldButton = props => {
             <Button onClick={handleClose} color="primary">
               Cancel
             </Button>
-            <Button type='submit' color="primary">
+            <Button type="submit" color="primary">
               Confirm
             </Button>
           </DialogActions>
@@ -203,8 +205,8 @@ const StartEndTime = props => {
   const [cost, updateCost] = useState('N/A');
   const [privateKey, updatePrivateKey] = useState({
     privateKey: '',
-    showPrivateKey: false,
-  })
+    showPrivateKey: false
+  });
 
   const handleTimeChange = event => {
     let { name, value } = event.target;
@@ -239,7 +241,7 @@ const StartEndTime = props => {
           handleOnConfirm={handleOnConfirm}
           privateKey={privateKey}
           updatePrivateKey={updatePrivateKey}
-          buttonColor='primary'
+          buttonColor="primary"
         />
       </Grid>
       <Grid>
