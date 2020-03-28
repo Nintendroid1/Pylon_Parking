@@ -10,7 +10,7 @@ CREATE TABLE users
 	email VARCHAR(256),
 	first_name VARCHAR(100),
 	last_name VARCHAR(100),
-	admin_status VARCHAR(100),
+	admin_status INT DEFAULT 0,
 	PRIMARY KEY (PID)
 );
 
