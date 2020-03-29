@@ -22,6 +22,9 @@ const styles = theme => ({
   }
 });
 
+// Number of seconds between UTC time and EST time.
+const UTCToESTInSec = 4 * 60 * 60;
+
 const militaryTimeDifference = (startTime, endTime) => {
   let [startTimeHour, startTimeMinute] = startTime.split(':').map(e => Number(e));
   let [endTimeHour, endTimeMinute] = endTime.split(':').map(e => Number(e));
@@ -87,6 +90,102 @@ const compareMilitaryTime = (time1, time2) => {
   return 0;
 };
 
+const convertNormalToMilitary = time => {
+  let [hour, minute, temp] = time.split(':');
+  const [minute, period] = temp.split(' ');
+
+  if (period === 'PM') {
+    hour = Number(hour) + 12;
+  }
+
+  return hour + ':' + minute;
+};
+
+const convertEpochToMilitary = epoch => {
+  const option = {
+    hour12: false,
+    hour: '2-digit',
+    minute: '2-digit'
+  }
+
+  const temp_date = new Date(epoch * 1000 - UTCToESTInSec);
+  return temp_date.toLocaleTimeString('en-US', option);
+};
+
+// Expects military time.
+const convertMilitaryToEpoch = (date, time) => {
+  const [hour, minute] = time.split(':');
+  const year = date.getFullYear();
+  const month = date.getMonth() + 1;
+  const day = date.getDate();
+
+  if (Number(hour) + UTCToESTInSec >= 24) {
+    hour = 24 - Number(hour) + UTCToESTInSec;
+  }
+
+  return new Date(Date.UTC(year, month, day, hour, minute)).getTime();
+};
+
+const convertEpochToNormal = epoch => {
+  return new Date(epoch.toLocaleTimeString('en-US'));
+};
+
+const DateFilter = ({
+  time,
+  handleDateFilter,
+  ...props
+}) => {
+
+  const handleOnClick = event => {
+    event.preventDefault();
+    handleDateFilter();
+  }
+
+  return (
+    <>
+      <CustomDatePicker
+        time={time}
+      />
+      <Button
+        variant='contained'
+        color='primary'
+        onClick={handleOnClick}
+      >
+        Filter!
+      </Button>
+    </>
+  );
+}
+
+const CustomDatePicker = ({
+  time,
+  ...props
+}) => {
+
+  const handleDateChange = newDate => {
+    updateTime({ ...time, date: newDate });
+  };
+
+  return (
+    <>
+      <KeyboardDatePicker
+        disableToolbar
+        variant="inline"
+        format="MM/dd/yyyy"
+        margin="normal"
+        label="Date"
+        value={time.date}
+        onChange={handleDateChange}
+        KeyboardButtonProps={{
+          'aria-label': 'change date'
+        }}
+      />
+    </>
+  );
+}
+
+// Used by list-parking-spots.js.
+// Filtering by date and time.
 const TimeFilter = ({
   isDark,
   updateLogin,
@@ -110,20 +209,14 @@ const TimeFilter = ({
     showPrivateKey: false
   });
 
-  const handleDateChange = newDate => {
-    updateTime({ ...time, date: newDate });
-  };
-
   const handleSubmit = event => {
-    console.log(typeof onSubmit);
-    console.log(time);
+    event.preventDefault();
     onSubmit(time);
   };
 
   const handleTimeChange = event => {
     let { name, value } = event.target;
     updateTime({ ...time, [name]: value });
-    //updateCost(calculateCost(time.startTime, time.endTime));
   };
 
   return (
@@ -131,17 +224,8 @@ const TimeFilter = ({
       <MuiPickersUtilsProvider utils={DateFnsUtils}>
         <form>
           <Grid container justify="space-around">
-            <KeyboardDatePicker
-              disableToolbar
-              variant="inline"
-              format="MM/dd/yyyy"
-              margin="normal"
-              label="Date"
-              value={time.date}
-              onChange={handleDateChange}
-              KeyboardButtonProps={{
-                'aria-label': 'change date'
-              }}
+            <CustomDatePicker
+              time={time}
             />
           </Grid>
           <Grid>
@@ -176,7 +260,12 @@ export {
   sortByMilitaryTime,
   militaryTimeDifference,
   isTimeMultipleOf15,
-  roundUpToNearest15
+  roundUpToNearest15,
+  CustomDatePicker,
+  convertEpochToMilitary,
+  convertEpochToNormal,
+  convertMilitaryToEpoch,
+  DateFilter
 };
 
 /*
