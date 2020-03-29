@@ -28,4 +28,3 @@ backend/*
 # Ignore vim stuff
 *.sw?
 *.vim
-tags
