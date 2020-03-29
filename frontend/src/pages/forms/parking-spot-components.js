@@ -191,6 +191,7 @@ const ConfirmationDialogFieldButton = props => {
   );
 };
 
+// Used by parking-spot.js
 const StartEndTime = props => {
   const {
     time,

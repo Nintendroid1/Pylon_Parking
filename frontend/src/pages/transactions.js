@@ -14,6 +14,10 @@ import queryStrings from 'query-string';
 import TextField from '@material-ui/core/TextField';
 import MenuItem from '@material-ui/core/MenuItem';
 import Button from '@material-ui/core/Button';
+import { 
+  convertEpochToMilitary, 
+  convertMilitaryToEpoch
+} from './forms/time-filter';
 import {
   withStyles,
   withTheme,
@@ -110,6 +114,7 @@ const TransactionsTableBody = ({
 };
 
 const TransactionTable = ({
+  userId,
   listOfTransactions,
   page,
   updatePage,
@@ -119,8 +124,8 @@ const TransactionTable = ({
   ...props
 }) => {
   const listOfFilterOptions = ['Parking ID', 'Buyer ID', 'Seller ID'];
-  const [filterOption, updateFilterOption] = useState('');
-  const [textFieldValue, updateTextFieldValue] = useState('');
+  const [filterOption, updateFilterOption] = useState('Buyer ID');
+  const [textFieldValue, updateTextFieldValue] = useState(userId);
   const [displayList, updateDisplayList] = useState(listOfTransactions);
 
   const handleChangePage = (event, newPage) => {
@@ -192,6 +197,7 @@ SelectProps={{
   );
 };
 
+// Must change if including the parking spot times.
 const handleNewTransaction = (
   listOfTransactions,
   updateListOfTransactions,
@@ -201,6 +207,7 @@ const handleNewTransaction = (
   updateListOfTransactions(listOfTransactions);
 };
 
+// Must change epoch if any to military time.
 const TransactionHistory = ({ socket, ...props }) => {
   const [message, updateMessage] = useState('Loading');
   const [listOfTransactions, updateListOfTransactions] = useState([]);

@@ -1,3 +1,5 @@
+// All components used in the specific zones page expects the time to be military time.
+
 import React, { useState, useEffect } from 'react';
 import { makeAPICall } from '../api';
 import Table from '@material-ui/core/Table';
@@ -11,7 +13,7 @@ import history from '../history';
 import { Link } from 'react-router-dom';
 import apiprefix from './apiprefix';
 import orderBy from 'lodash/orderBy';
-import { TimeFilter } from './forms/time-filter';
+import { TimeFilter, convertMilitaryToEpoch, convertEpochToMilitary } from './forms/time-filter';
 import Button from '@material-ui/core/Button';
 import {
   convertMilitaryTimeToNormal,
@@ -66,11 +68,6 @@ function TableData({ classes, ...props }) {
   const data = props.parkingInfo.map(e => ({
     ...e
   }));
-  const pretty_date = epoch => {
-    let temp_date = new Date(epoch * 1000);
-    let date_str = `${temp_date.toLocaleString()}`;
-    return date_str;
-  };
 
   return data.map(parkingSpot => {
     return (
@@ -92,7 +89,7 @@ function TableData({ classes, ...props }) {
             </Link>
           </TableCell>
           <TableCell>{parkingSpot.spot_id}</TableCell>
-          <TableCell>{pretty_date(parkingSpot.next_avail)}</TableCell>
+          <TableCell>{parkingSpot.next_avail}</TableCell>
         </TableRow>
       </>
     );
@@ -153,6 +150,7 @@ const handleParkingSpotTimeChange = (
   const index = parkingSpotsInfo.findIndex(
     e => e.parking_id === parkingInfo.parking_id
   );
+  parkingInfo.next_avail = convertEpochToMilitary(parkingInfo.next_avail);
   parkingSpotsInfo[index] = parkingInfo;
   updateparkingSpotsInfo(parkingSpotsInfo);
 };
@@ -198,6 +196,8 @@ const Zone = ({
     console.log(resbody.parkingInfo);
 
     if (response.status === 200) {
+      // The components on this page expects the time to be in military time.
+      resbody.parkingInfo.forEach(e => e.next_avail = convertEpochToMilitary(e.next_avail));
       updateparkingSpotsInfo(resbody.parkingInfo);
       updateMessage(null);
     } else {
@@ -212,16 +212,21 @@ const Zone = ({
 
   const handleFiltering = async values => {
     const { date, startTime, endTime } = values;
-    const year = date.getFullYear();
-    const month = date.getMonth() + 1;
-    const day = date.getDate();
 
+    // the month starts numbering from 0, so 0 is January, and 1 is February.
     const url = 'zones/';
-    const newURL = `${url}/all/?month=${month}&day=${day}&year=${year}&startTime=${startTime}&endTime=${endTime}`;
+
+    // Converting military time to epoch from EDT to UTC.
+    const startUTCEpoch = convertMilitaryToEpoch(date, startTime);
+    const endUTCEpoch = convertMilitaryToEpoch(date, endTime);
+
+    const newURL = `${url}/all/?startEpoch=${startEpoch}&endEpoch=${endEpoch}`;
     let response = await makeAPICall('GET', newURL);
     let resbody = await response.json();
 
     if (response.status === 200) {
+      // The functions acting upon this info expect the time to be in military time.
+      resbody.parkingInfo.forEach(e => e.next_avail = convertEpochToMilitary(e.next_avail));
       updateparkingSpotsInfo(resbody.parkingInfo);
       updateMessage(null);
     } else {

@@ -1,17 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { makeAPICall } from '../api';
-import PropTypes from 'prop-types';
 import { withStyles, withTheme } from '@material-ui/core/styles';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
 import TableHead from '@material-ui/core/TableHead';
-import TableFooter from '@material-ui/core/TableFooter';
 import TableRow from '@material-ui/core/TableRow';
-import TablePagination from '@material-ui/core/TablePagination';
-import Check from '@material-ui/icons/Check';
-import NavigateLeftIcon from '@material-ui/icons/NavigateBefore';
-import NavigateRightIcon from '@material-ui/icons/NavigateNext';
 import { Typography, CircularProgress, TextField } from '@material-ui/core';
 import RequireAuthentication from '../RequireAuthentication';
 import queryString from 'query-string';
@@ -22,7 +16,14 @@ import history from '../../history';
 import { Link } from 'react-router-dom';
 import apiprefix from './apiprefix';
 import { TimePicker } from './forms/parking-spot-components';
-import { compareMilitaryTime, isTimeMultipleOf15, roundUpToNearest15 } from './forms/time-filter';
+import { 
+  compareMilitaryTime,
+  convertMilitaryToEpoch,
+  convertEpochToMilitary,
+  convertMilitaryTimeToNormal,
+  isTimeMultipleOf15, 
+  roundUpToNearest15 
+} from './forms/time-filter';
 import Box from '@material-ui/core/Box';
 import { ConfirmationDialogFieldButton } from './forms/parking-spot-components';
 import {
@@ -161,13 +162,23 @@ const SellingMessageContent = (
 const SellingParkingSpotTableBody = props => {
   const { parkingSpotsInfo, handleSellRequest } = props;
   const [sellInfo, updateSellInfo] = useState({
+    date: Date.now(),
     parkingSpotId: -1,
     startTime: '24:00',
     endTime: '24:00',
     cost: 0,
-    privateKey: '',
-    showPrivateKey: false,
   });
+  const [privateKey, updatePrivateKey] = useState({
+    privateKey: '',
+    showPrivateKey: false
+  })
+
+  const handleOnConfirm = () => {
+    const index = parkingSpotsInfo.findIndex(e => e.id === sellInfo.parkingSpotId);
+    const date = parkingSpotsInfo[index].date;
+    updateSellInfo({ ...sellInfo, date: date });
+    handleSellRequest(sellInfo, privateKey.privateKey);
+  }
 
   return (
     <>
@@ -177,8 +188,8 @@ const SellingParkingSpotTableBody = props => {
             <>
               <TableRow>
               <TableCell>{parkingSpot.id}</TableCell>
-              <TableCell>{parkingSpot.startTime}</TableCell>
-              <TableCell>{parkingSpot.endTime}</TableCell>
+              <TableCell>{convertMilitaryTimeToNormal(parkingSpot.startTime)}</TableCell>
+              <TableCell>{convertMilitaryTimeToNormal(parkingSpot.endTime)}</TableCell>
               <TableCell>{parkingSpot.cost}</TableCell>
               <TableCell>
                 <ConfirmationDialogFieldButton 
@@ -190,9 +201,9 @@ const SellingParkingSpotTableBody = props => {
                     sellInfo,
                     updateSellInfo
                   )}
-                  handleOnConfirm={handleSellRequest}
-                  privateKey={sellInfo}
-                  updatePrivateKey={updateSellInfo}
+                  handleOnConfirm={handleOnConfirm}
+                  privateKey={privateKey}
+                  updatePrivateKey={updatePrivateKey}
                   buttonColor='secondary'
                 />
               </TableCell>
@@ -240,11 +251,11 @@ const SellingParkingSpotTable = props => {
 const UserInfo = (props) => {
 
   const [message, updateMessage] = useState('Loading');
-  const [userInfo, updateUserInfo] = useState(null);
+  const [userInfo, updateUserInfo] = useState([]);
 
   const { socket } = props;
 
-  /*
+  // Changes epoch to military time.
   let getUserInfo = async () => {
     let id = localStorage.blockchain_id; // change if necessary.
 
@@ -253,20 +264,33 @@ const UserInfo = (props) => {
     let respbody = await response.json();
 
     if (response.status === 200) {
+      // Extracting the date and leaving in UTC so no need for further conversion.
+      // Converting epoch to military time.
+      respbody.userInfo.parkingSpotsInfo.forEach(e => {
+        e.date = new Date(Date.UTC(e.startTime));
+        e.startTime = convertEpochToMilitary(e.startTime);
+        e.endTime = convertEpochToMilitary(e.endTime);
+      });
+
       updateUserInfo(respbody.userInfo);
     } else {
       updateMessage(<div>Failed to get user.</div>);
     }
   };
-  */
 
+  /*
   const getUserInfo = () => {
     updateUserInfo(tempInput);
     updateMessage(null);
   }
+  */
 
-  const handleSellRequest = (sellInfo) => {
-
+  const handleSellRequest = (sellInfo, privatekey) => {
+    // Make sure that the date field is correct.
+    console.log(sellInfo.date);
+    const startUTCEpoch = convertMilitaryToEpoch(sellInfo.date, sellInfo.startTime);
+    const endUTCEpoch = convertMilitaryToEpoch(sellInfo.date, sellInfo.endTime);
+    
     // Make api request.
   }
 
@@ -276,7 +300,18 @@ const UserInfo = (props) => {
   }, []);
 
   useEffect(() => {
-    socket.on(`user-${userInfo.username}`, function() {});
+    // data = {
+    //  parkingId: parking spot sold off,
+    //  money: # hokie tokens in wallet now. 
+    // }
+    socket.on(`user-${userInfo.username}`, data => {
+      const index = userInfo.findIndex(e => e.parkingId = data.parkingId);
+
+      userInfo = userInfo.splice(index, 1);
+      userInfo.money = data.money;
+
+      updateUserInfo(userInfo);
+    });
   }, []);
 
   // Change to something more meaningful.

@@ -12,7 +12,10 @@ import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import {
   compareMilitaryTime,
   militaryTimeDifference,
-  convertMilitaryTimeToNormal
+  convertMilitaryTimeToNormal,
+  convertEpochToMilitary,
+  convertMilitaryToEpoch,
+  DateFilter
 } from './forms/time-filter';
 import {
   withStyles,
@@ -94,6 +97,11 @@ const handleParkingInfoChanges = (
   updateparkingSpotInfo,
   newParkingSpotInfo
 ) => {
+  newParkingSpotInfo.forEach(e => {
+    e.startTime = convertEpochToMilitary(e.startTime);
+    e.endTime = convertEpochToMilitary(e.endTime);
+  });
+
   updateparkingSpotInfo(newParkingSpotInfo);
 };
 
@@ -124,19 +132,25 @@ const ParkingSpot = ({
   const [message, updateMessage] = useState('Loading'); // Initial message cannot be null. See useEffect() for reason.
   const [parkingSpotInfo, updateparkingSpotInfo] = useState([]);
   const [time, updateTime] = useState({
+    date: today,
     startTime: currTime,
     endTime: '24:00'
   });
 
-  /*
+  
   const listParkingSpotTimes = async () => {
     const url = `${apiprefix}/parking_spot/${id}`;
     let response = await makeAPICall('GET', url);
     let resbody = await response.json();
 
     if (response.status === 200) {
-      updateMessage(null);
+      resbody.parkingInfo.forEach(e => {
+        e.startTime = convertEpochToMilitary(e.startTime);
+        e.endTime = convertEpochToMilitary(e.endTime);
+      })
+
       updateparkingSpotInfo(resbody.parkingInfo);
+      updateMessage(null);
     } else {
       updateMessage(
         <div>
@@ -145,12 +159,14 @@ const ParkingSpot = ({
       );
     }
   };
-  */
+  
 
+  /*
   const listParkingSpotTimes = () => {
     updateparkingSpotInfo(TempInput);
     updateMessage(null);
   };
+  */
 
   const calculatePricePerTimeSlot = (timeSlot, startTime, endTime) => {
     // If timeSlot's start time is after the start time the client wants, then use
@@ -194,12 +210,54 @@ const ParkingSpot = ({
     return totalCost;
   };
 
+  const handleDateFiltering = async () => {
+    const date = convertMilitaryToEpoch(time.date, '00:00');
+
+    const url = `${apiprefix}/parking_spot/${id}/?epoch=${date}`;
+    const response = await makeAPICall('GET', url);
+    const respbody = await response.json();
+
+    if (response.status === 200) {
+      resbody.parkingInfo.forEach(e => {
+        e.startTime = convertEpochToMilitary(e.startTime);
+        e.endTime = convertEpochToMilitary(e.endTime);
+      })
+
+      updateparkingSpotInfo(resbody.parkingInfo);
+      updateMessage(null);
+    } else {
+      updateMessage(
+        <div>
+          {respbody.message}
+        </div>
+      );
+    }
+  };
+
   // Buying option, confirmation message and so forth.
   // Make api call to make a transaction.
   const handleBuyRequest = async privateKey => {
-    // Redirect them to invoice page.
-    //const url = `${apiprefix}/parking_spot/${id}/buy/?startTime=${time.startTime}&endTime=${time.endTime}`;
+    const startUTCEpoch = convertMilitaryToEpoch(time.date, time.startTime);
+    const endUTCEpoch = convertMilitaryToEpoch(time.date, time.endTime);
 
+    // Make api call to carry out transaction.
+    const url = `${apiprefix}/parking_spot/${id}/buy/?startEpoch=${startUTCEpoch}&endEpoch=${endUTCEpoch}`;
+    const response = await makeAPICall('POST', url);
+    const respbody = await response.json();
+
+    if (response.status === 200) {
+      // Redirect them to invoice page.
+      console.log('Successfully purchased spot!');
+      // Can have it as a snackbar that appears at the top of the page instead of redirection.
+    } else {
+      updateMessage(
+        <div>
+          {respbody.message}
+        </div>
+      );
+    }
+
+    // For testing purposes.
     console.log(`
       Start Time: ${time.startTime} \n
       End Time: ${time.endTime} \n
@@ -230,10 +288,6 @@ const ParkingSpot = ({
     socket.on(`parkingSpot-${id}`, data =>
       handleParkingInfoChanges(updateparkingSpotInfo, data)
     );
-
-    return () => {
-      socket.disconnect();
-    };
   }, []);
 
   return (
@@ -245,6 +299,10 @@ const ParkingSpot = ({
           ) : (
             <div>
               <MuiPickersUtilsProvider utils={DateFnsUtils}>
+                <DateFilter 
+                  time={time}
+                  handleDateFilter={handleDateFiltering}
+                />
                 <StartEndTime
                   time={time}
                   updateTime={updateTime}
