@@ -123,7 +123,7 @@ const TransactionTable = ({
   tableHeaders,
   ...props
 }) => {
-  const listOfFilterOptions = ['Parking ID', 'Buyer ID', 'Seller ID'];
+  const listOfFilterOptions = ['Parking ID', 'Buyer ID', 'Seller ID', 'All'];
   const [filterOption, updateFilterOption] = useState('Buyer ID');
   const [textFieldValue, updateTextFieldValue] = useState(userId);
   const [displayList, updateDisplayList] = useState(listOfTransactions);
@@ -203,7 +203,7 @@ const handleNewTransaction = (
   updateListOfTransactions,
   newTransaction
 ) => {
-  listOfTransactions.unshift(newTransaction);
+  listOfTransactions.unshift(newTransaction); // Assumes the entries arrive in sequential order. Need to manually sort perhaps.
   updateListOfTransactions(listOfTransactions);
 };
 

@@ -17,7 +17,8 @@ import { TimeFilter, convertMilitaryToEpoch, convertEpochToMilitary } from './fo
 import Button from '@material-ui/core/Button';
 import {
   convertMilitaryTimeToNormal,
-  sortByMilitaryTime
+  sortByMilitaryTime,
+  compareMilitaryTime
 } from './forms/time-filter';
 
 import {
@@ -142,17 +143,31 @@ function MakeTable({
 
 // Should cause a rerender to occur because of state change, so do not need to worry
 // about sorting in this function.
+// Need to take care if they are filtering by some time range.
 const handleParkingSpotTimeChange = (
   parkingSpotsInfo,
   updateparkingSpotsInfo,
-  parkingInfo
+  parkingInfo,
+  currentTimeFilter
 ) => {
-  const index = parkingSpotsInfo.findIndex(
-    e => e.parking_id === parkingInfo.parking_id
-  );
-  parkingInfo.next_avail = convertEpochToMilitary(parkingInfo.next_avail);
-  parkingSpotsInfo[index] = parkingInfo;
-  updateparkingSpotsInfo(parkingSpotsInfo);
+
+  const year = currentTimeFilter.date.getFullYear();
+  const month = currentTimeFilter.date.getMonth();
+  const day = currentTimeFilter.date.getDate();
+  const [startTimeHour, startTimeMin] = currentTimeFilter.startTime.split(':');
+  const [endTimeHour, endTimeMin] = currentTimeFilter.endTime.split(':');
+
+  const timeFilterStartTimeEpoch = new Date(Date.UTC(year, month, day, startTimeHour, startTimeMin));
+  const timeFilterEndTimeEpoch = new Date(Date.UTC(year, month, day, endTimeHour, endTimeMin));  
+
+  if (timeFilterStartTimeEpoch < parkingInfo.next_avail && timeFilterEndTimeEpoch > parkingInfo.next_avail) {
+    const index = parkingSpotsInfo.findIndex(
+      e => e.parking_id === parkingInfo.parking_id
+    );
+    parkingInfo.next_avail = convertEpochToMilitary(parkingInfo.next_avail);
+    parkingSpotsInfo[index] = parkingInfo;
+    updateparkingSpotsInfo(parkingSpotsInfo);
+  }
 };
 
 const Zone = ({
@@ -176,6 +191,11 @@ const Zone = ({
   const [parkingSpotsInfo, updateparkingSpotsInfo] = useState(null);
   const [order, updateOrder] = useState('asc');
   const [columnToSort, updatecolumnToSort] = useState('id');
+  const [currentTimeFilter, updateCurrentTimeFilter] = useState({
+    date: Date.now(),
+    startTime: '00:00',
+    endTime: '23:59'
+  })
 
   // Expected url: ./list_parking_spots/:parkingLotId
   let tempUrl = window.location.pathname;
@@ -219,8 +239,13 @@ const Zone = ({
     // Converting military time to epoch from EDT to UTC.
     const startUTCEpoch = convertMilitaryToEpoch(date, startTime);
     const endUTCEpoch = convertMilitaryToEpoch(date, endTime);
+    updateCurrentTimeFilter({
+      date: date,
+      startTime: startTime,
+      endTime: endTime
+    })
 
-    const newURL = `${url}/all/?startEpoch=${startEpoch}&endEpoch=${endEpoch}`;
+    const newURL = `${url}/all/?startEpoch=${startUTCEpoch}&endEpoch=${endUTCEpoch}`;
     let response = await makeAPICall('GET', newURL);
     let resbody = await response.json();
 
@@ -247,7 +272,8 @@ const Zone = ({
       handleParkingSpotTimeChange(
         parkingSpotsInfo,
         updateparkingSpotsInfo,
-        data
+        data,
+        currentTimeFilter
       )
     });
   }, []);
