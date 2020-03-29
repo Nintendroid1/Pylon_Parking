@@ -121,9 +121,12 @@ const App = ({ classes, ...props }) => {
   // testSocket.on('connect_error', error => {
   //   console.log(error); // true
   // });
-  const parkingLotSocket = io(`http://localhost:3001/zones`);//{ path: `${endpoint}/zones` });
-  const parkingSpotSocket = io(`http://localhost:3001/parking_spot`);//{ path: `${endpoint}/parkingSpot` });
-  const transactionHistorySocket = io(`http://localhost:3001/parking_spot`);
+
+  const endpoint = 'http://localhost:3001';
+
+  const parkingLotSocket = io(`${endpoint}/zones`);//{ path: `${endpoint}/zones` });
+  const parkingSpotSocket = io(`${endpoint}/parking_spot`);//{ path: `${endpoint}/parkingSpot` });
+  const transactionHistorySocket = io(`${endpoint}/transaction_history`);
   const userSocket = io(`${endpoint}/user`);
 
   //console.log(localStorage.olivia_id);
