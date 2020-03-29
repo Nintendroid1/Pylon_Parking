@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { makeAPICall } from '../api';
 import PropTypes from 'prop-types';
-import { withStyles, withTheme } from '@material-ui/core/styles';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
@@ -18,15 +17,20 @@ import queryString from 'query-string';
 import IconButton from '@material-ui/core/IconButton';
 import EditIcon from '@material-ui/icons/Edit';
 import Grid from '@material-ui/core/Grid';
-import history from '../../history';
+import history from '../history';
 import { Link } from 'react-router-dom';
 import apiprefix from './apiprefix';
 import { TimePicker } from './forms/parking-spot-components';
-import { compareMilitaryTime, isTimeMultipleOf15, roundUpToNearest15 } from './forms/time-filter';
+import {
+  compareMilitaryTime,
+  isTimeMultipleOf15,
+  roundUpToNearest15
+} from './forms/time-filter';
 import Box from '@material-ui/core/Box';
 import { ConfirmationDialogFieldButton } from './forms/parking-spot-components';
 import {
   withStyles,
+  withTheme,
   MuiThemeProvider,
   createMuiTheme
 } from '@material-ui/core/styles';
@@ -54,11 +58,11 @@ const tempParkingSpots = [
 ];
 
 const tempInput = {
-  username: 'Bob',
+  pid: 'Bob',
   email: 'Bob@vt.edu',
   money: 15,
   parkingSpotsInfo: tempParkingSpots
-}
+};
 
 const SellingMessageContent = (
   parkingSpotStartTime,
@@ -69,15 +73,15 @@ const SellingMessageContent = (
 
   const [ validCost, updateValidCost ] = useState({
     hasError: false,
-    errorMessage: '',
+    errorMessage: ''
   });
 
-  const [ validTime, updateValidTime ] = useState({
+  const [validTime, updateValidTime] = useState({
     startTimeHasError: false,
     startTimeErrorMessage: '',
     endTimeHasError: false,
-    endTimeErrorMessage: '',
-  })
+    endTimeErrorMessage: ''
+  });
 
   // Need to include error handling for time.
   const handleTimeChange = event => {
@@ -95,58 +99,61 @@ const SellingMessageContent = (
 
     // chosen start time is before parking spot start time.
     if (name === 'startTime' && compareMilitaryTime(value, currTime) < 0) {
-      updateValidTime({ 
-        ...validTime, 
+      updateValidTime({
+        ...validTime,
         startTimeHasError: true,
-        startTimeErrorMessage: 'Start Time Cannot Be Before Current Time.' 
+        startTimeErrorMessage: 'Start Time Cannot Be Before Current Time.'
       });
-    } 
-    
+    }
+
     // chosen end time is after parking spot end time.
-    else if (name === 'endTime' && compareMilitaryTime(value, parkingSpotEndTime) > 0) {
-      updateValidTime({ 
-        ...validTime, 
+    else if (
+      name === 'endTime' &&
+      compareMilitaryTime(value, parkingSpotEndTime) > 0
+    ) {
+      updateValidTime({
+        ...validTime,
         endTimeHasError: true,
-        startTimeErrorMessage: 'End Time Cannot Be After Purchased Time.' 
+        startTimeErrorMessage: 'End Time Cannot Be After Purchased Time.'
       });
     }
   };
 
-  const handleOnChangeCost = (event) => {
+  const handleOnChangeCost = event => {
     const cost = event.target.value;
 
     if (isNaN(cost)) {
       updateValidCost({
         hasError: true,
-        errorMessage: 'Invalid characters detected. Must be a decimal number',
+        errorMessage: 'Invalid characters detected. Must be a decimal number'
       });
     } else if (Number(cost) < 0) {
       updateValidCost({
         hasError: true,
-        errorMessage: 'Cost must be at least 0',
+        errorMessage: 'Cost must be at least 0'
       });
     } else {
       updateSellInfo({ ...sellInfo, cost: Number(cost) });
     }
-  }
+  };
 
   return (
     <>
-      <TimePicker 
+      <TimePicker
         isRequired={true}
         handleTimeChange={handleTimeChange}
         time={sellInfo.startTime}
         name={'startTime'}
         label={'Start Time'}
       />
-      <TimePicker 
+      <TimePicker
         isRequired={true}
         handleTimeChange={handleTimeChange}
         time={sellInfo.endTime}
         name={'endTime'}
         label={'End Time'}
       />
-      <TextField 
+      <TextField
         required
         error={validCost.hasError}
         label={'Cost Per 15 minutes'}
@@ -166,7 +173,7 @@ const SellingParkingSpotTableBody = props => {
     endTime: '24:00',
     cost: 0,
     privateKey: '',
-    showPrivateKey: false,
+    showPrivateKey: false
   });
 
   return (
@@ -176,29 +183,29 @@ const SellingParkingSpotTableBody = props => {
           return (
             <>
               <TableRow>
-              <TableCell>{parkingSpot.id}</TableCell>
-              <TableCell>{parkingSpot.startTime}</TableCell>
-              <TableCell>{parkingSpot.endTime}</TableCell>
-              <TableCell>{parkingSpot.cost}</TableCell>
-              <TableCell>
-                <ConfirmationDialogFieldButton 
-                  buttonMessage='Sell'
-                  messageTitle={`Sell Parking Spot ${parkingSpot.id}`}
-                  messageContent={SellingMessageContent(
-                    parkingSpot.startTime,
-                    parkingSpot.endTime,
-                    sellInfo,
-                    updateSellInfo
-                  )}
-                  handleOnConfirm={handleSellRequest}
-                  privateKey={sellInfo}
-                  updatePrivateKey={updateSellInfo}
-                  buttonColor='secondary'
-                />
-              </TableCell>
-            </TableRow>
+                <TableCell>{parkingSpot.id}</TableCell>
+                <TableCell>{parkingSpot.startTime}</TableCell>
+                <TableCell>{parkingSpot.endTime}</TableCell>
+                <TableCell>{parkingSpot.cost}</TableCell>
+                <TableCell>
+                  <ConfirmationDialogFieldButton
+                    buttonMessage="Sell"
+                    messageTitle={`Sell Parking Spot ${parkingSpot.id}`}
+                    messageContent={SellingMessageContent(
+                      parkingSpot.startTime,
+                      parkingSpot.endTime,
+                      sellInfo,
+                      updateSellInfo
+                    )}
+                    handleOnConfirm={handleSellRequest}
+                    privateKey={sellInfo}
+                    updatePrivateKey={updateSellInfo}
+                    buttonColor="secondary"
+                  />
+                </TableCell>
+              </TableRow>
             </>
-          )
+          );
         })}
       </TableBody>
     </>
@@ -214,7 +221,9 @@ const SellingParkingSpotTableHeader = () => {
           <TableCell>Start Time</TableCell>
           <TableCell>End Time</TableCell>
           <TableCell>Average Price Per 15 minutes</TableCell>
-          <TableCell><span /></TableCell>
+          <TableCell>
+            <span />
+          </TableCell>
         </TableRow>
       </TableHead>
     </>
@@ -228,7 +237,7 @@ const SellingParkingSpotTable = props => {
     <>
       <Table stickyHeader>
         <SellingParkingSpotTableHeader />
-        <SellingParkingSpotTableBody 
+        <SellingParkingSpotTableBody
           parkingSpotsInfo={parkingSpotsInfo}
           handleSellRequest={handleSellRequest}
         />
@@ -237,18 +246,16 @@ const SellingParkingSpotTable = props => {
   );
 };
 
-const UserInfo = (props) => {
-
+const UserInfo = props => {
   const [message, updateMessage] = useState('Loading');
   const [userInfo, updateUserInfo] = useState(null);
 
   const { socket } = props;
 
-  /*
   let getUserInfo = async () => {
-    let id = localStorage.blockchain_id; // change if necessary.
+    let pid = localStorage.olivia_pid; // change if necessary.
 
-    let url = `${apiprefix}/user/${id}`;
+    let url = `${apiprefix}/users/${pid}`;
     let response = await makeAPICall('GET', url);
     let respbody = await response.json();
 
@@ -258,17 +265,15 @@ const UserInfo = (props) => {
       updateMessage(<div>Failed to get user.</div>);
     }
   };
-  */
 
   const getUserInfo = () => {
     updateUserInfo(tempInput);
     updateMessage(null);
-  }
+  };
 
-  const handleSellRequest = (sellInfo) => {
-
+  const handleSellRequest = sellInfo => {
     // Make api request.
-  }
+  };
 
   // Need another socket event for when parking spot is sold.
   useEffect(() => {
@@ -276,27 +281,28 @@ const UserInfo = (props) => {
   }, []);
 
   useEffect(() => {
-    socket.on(`user-${userInfo.username}`, function() {});
+    socket.on(`user-${userInfo.pid}`, function() {});
   }, []);
 
   // Change to something more meaningful.
   return (
     <>
       <div>
-        {message ?
-          <Typography>{message}</Typography> :
+        {message ? (
+          <Typography>{message}</Typography>
+        ) : (
           <>
-            <SellingParkingSpotTable 
+            <SellingParkingSpotTable
               parkingSpotsInfo={userInfo.parkingSpotsInfo}
               handleSellRequest={handleSellRequest}
             />
             <Typography>
-              <Box>{`Username: ${userInfo.username}`}</Box>
+              <Box>{`PID: ${userInfo.pid}`}</Box>
               <Box>{`Email: ${userInfo.email}`}</Box>
               <Box>{`Hokie Coins: ${userInfo.money}`}</Box>
             </Typography>
           </>
-        }
+        )}
       </div>
     </>
   );
