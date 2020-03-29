@@ -26,7 +26,7 @@ function broadcastParkingSpotInfo(io, parkingSpotId, data) {
     console.log('Socket has not been initilized');
   }
 
-  io.of(`parking_spot-${parkingSpotId}`).emit('parking spot info', data);
+  io.of(`parking_spot`).emit(`parkingSpot-${parkingSpotId}`, data);
 }
 
 // Broadcasting updated info on new transaction that has been made.
@@ -35,7 +35,7 @@ function broadcastTransactionHistoryInfo(io, data) {
     console.log('Socket has not been initilized');
   }
 
-  io.emit('transactionHistory', data);
+  io.of('transactionHistory').emit('transactionHistory', data);
 }
 
 module.exports= {

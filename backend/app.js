@@ -12,6 +12,7 @@ const purchaseRouter = require("./api/purchase");
 const server = require("http").Server(app);
 const io = require("socket.io").listen(server);
 
+/*
 io.on("connect", socket => {
   socket.on("request", () => {
     console.log("HEEEREE");
@@ -20,6 +21,7 @@ io.on("connect", socket => {
     console.log(error);
   });
 });
+*/
 // Client socket connecting to specific parking lot websocket for updates.
 io.of("/zones").on("connect", socket => {
   const newNamespace = socket.nsp; // newNamespace.name === '/parkingLot-101'
@@ -43,8 +45,12 @@ io.of("/parking_spot").on("connect", socket => {
 io.of("transactionHistory").on("connect", socket => {
   // broadcast to all clients in the given sub-namespace
   // newNamespace.emit('hello');
-  console.log(`Client connected to 'transactionHistory' namespace.`);
+  console.log(`Client connected to /transactionHistory namespace.`);
 });
+
+io.of("/users").on("connect", socket => {
+  console.log(`Client connected to /users namespace.`);
+})
 
 app.set("socket-api", io);
 

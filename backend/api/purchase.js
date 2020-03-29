@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const jwt = require('./jwt');
 const db = require('../db');
+const socketAPI = require("../realtime/socket-broadcaster");
+
 
 router.use(express.json());
 
@@ -20,6 +22,31 @@ router.post('/', (req, res) => {
                             res.status(500).json({message: "Internal error"});
                         }
                         else {
+                            /* 
+                                Socket updating other users that this spot has been acquired.
+                            */
+                           // Getting the socket, which is in the settings object.
+                            const socket = req.app.settings["socket-api"];
+
+                            // TODO
+                            const updatedParkingSpotInfo = null; // object that would be sent back as if the get specific parking spot with parking spot id was called.
+
+                            // TODO
+                            const updatedParkingSpotInfoForZone = null; // object containing updated info on this parking spot.
+
+                            const parkingSpotInfoForTransactionHistory = null; // object containing info for the transaction history page, in case someone viewing entire history.
+
+                            // Send updated info to clients viewing this parking spot in the zones page.
+                            socketAPI.broadcastZoneInfo(socket, req.body.spot.zone_id, updatedParkingSpotInfoForZone);
+
+                            // Send updated info to clients viewing this parking spot.
+                            // Expects each parking spot regardless of zone to have a unique id.
+                            // id: [zone_id]-[spot_id]
+                            const parkingSpotId = req.body.spot.zone_id + '-' + req.body.spot.spot_id;
+                            socketAPI.broadcastParkingSpotInfo(socket, parkingSpotId, updatedParkingSpotInfo);
+
+                            socketAPI.broadcastTransactionHistoryInfo(socket, parkingSpotInfoForTransactionHistory);
+
                             res.status(200).json({message: "Spot aquired", spot: result.rows});
                         }
                     });

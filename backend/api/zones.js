@@ -10,10 +10,10 @@ router.get("/all", (req, res) => {
       res.status(500).json({ message: "Internal server error" });
     } else {
       // socket call.
-      const socket = req.app.settings["socket-api"];
+      // const socket = req.app.settings["socket-api"];
       // console.log(socket)
-      socket.of('zones').emit('zone-1', 'TEST TEST TEST');
-      socketAPI.broadcastZoneInfo(socket, 1, "testing things out");
+      // socket.of('zones').emit('zone-1', 'TEST TEST TEST');
+      // socketAPI.broadcastZoneInfo(socket, 1, "testing things out");
 
       // console.log(dbres.rows);
       res.status(200).json({ zones: dbres.rows });
