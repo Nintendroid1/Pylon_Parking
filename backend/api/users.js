@@ -1,22 +1,49 @@
 const express = require("express");
 const router = express.Router();
+const { withJWTAuthMiddleware } = require("express-kun");
 const jwt = require("./jwt");
 const db = require("../db");
+const { createSecureRouter, getTokenFromBearer } = require("./auth.js");
 
 router.use(express.json());
+
+const secureRouter = createSecureRouter(router);
 
 router.get("/", (req, res) => {
   res.send("This should be login api");
 });
 
-router.get("/info", (req, res) => {
-  if(jwt.verifyJWT(req.body.token, req.body.pid)) {
-    db.query("SELECT * FROM users WHERE PID = $1", [req.body.pid], (err,dbres) => {
-      res.status(200).json({userInfo: dbres.rows[0]});
-    });
-  }
-  else {
-    res.status(403).json({message: "Invalid token"});
+secureRouter.get("/:pid", (req, res) => {
+  let req_token = getTokenFromBearer(req);
+  if (jwt.verifyJWT(req_token, req.params.pid)) {
+    let userInfo = {};
+    db.query("SELECT * FROM users WHERE PID = $1", [req.params.pid])
+      .then(dbres => {
+        if (dbres.rows[0]) {
+          let tempUser = dbres.rows[0];
+          userInfo = {
+            pid: tempUser.pid,
+            email: tempUser.email,
+            first_name: tempUser.first_name,
+            last_name: tempUser.last_name,
+            parkingSpotsInfo: []
+          };
+        }
+      })
+      .then(() => {
+        db.query("SELECT * FROM parking_times WHERE user_PID = $1", [
+          req.params.pid
+        ]).then(dbres => {
+          if (dbres.rows[0]) {
+            userInfo.parkingSpotsInfo = dbres.rows;
+          } else {
+            userInfo.parkingSpotsInfo = [];
+          }
+          res.status(200).json({ userInfo });
+        });
+      });
+  } else {
+    res.status(403).json({ message: "Invalid token" });
   }
 });
 
