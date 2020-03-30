@@ -47,7 +47,7 @@ const styles = theme => ({
 
 function LoginForm({ onSubmit, message, classes, isLoading }) {
   const [values, setValues] = useState({
-    username: '',
+    pid: '',
     password: ''
   });
 
@@ -75,12 +75,12 @@ function LoginForm({ onSubmit, message, classes, isLoading }) {
           </Typography>
           <form id="logform" onSubmit={handleSubmit} className={classes.form}>
             <FormControl margin="normal" required fullWidth>
-              <InputLabel htmlFor="username">Username</InputLabel>
+              <InputLabel htmlFor="username">PID</InputLabel>
               <Input
                 onChange={handleChange}
-                id="username"
-                name="username"
-                autoComplete="current-username"
+                id="pid"
+                name="pid"
+                autoComplete="current-pid"
                 autoFocus
               />
             </FormControl>

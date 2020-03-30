@@ -106,22 +106,6 @@ const App = ({ classes, ...props }) => {
 
   // Endpoint for the websocket.
   // Base url.
-  const endpoint = `/socket.io`;
-
-  // Creating websockets to backend.
-  console.log(endpoint);
-  // const testSocket = io({ path: `${endpoint}` });
-  // const testSocket = io({ path: `${endpoint}` });
-  // const testSocket = io(`http://localhost:3001`);
-  // console.log(`Is connected: ${testSocket.connected}`); // true
-  // testSocket.on('connect', () => {
-  //   console.log(testSocket.connected); // true
-  // });
-  // testSocket.emit('request');
-  // testSocket.on('connect_error', error => {
-  //   console.log(error); // true
-  // });
-
   const endpoint = 'http://localhost:3001';
 
   const parkingLotSocket = io(`${endpoint}/zones`);//{ path: `${endpoint}/zones` });
