@@ -60,7 +60,8 @@ const styles = theme => ({
 
 const headerCells = [
   { id: 'id', label: 'Spot #' },
-  { id: 'time', label: 'Next Available Time' }
+  { id: 'start_time', label: 'Next Available Start Time' },
+  { id: 'end_time', label: 'Next Available End Time' }
   // { id: 'available', label: 'Is Available' }
   // { id: 'cost', label: 'Average Cost/15 minutes' }
 ];
@@ -90,7 +91,8 @@ function TableData({ classes, ...props }) {
             </Link>
           </TableCell>
           <TableCell>{parkingSpot.spot_id}</TableCell>
-          <TableCell>{parkingSpot.next_avail}</TableCell>
+          <TableCell>{parkingSpot.start_time}</TableCell>
+          <TableCell>{parkingSpot.end_time}</TableCell>
         </TableRow>
       </>
     );
@@ -131,8 +133,8 @@ function MakeTable({
         <TableData
           classes={classes}
           parkingInfo={
-            columnToSort === 'time'
-              ? sortByMilitaryTime(parkingInfo, order)
+            columnToSort === 'start_time' || columnToSort === 'end_time'
+              ? sortByMilitaryTime(parkingInfo, order, columnToSort)
               : orderBy(parkingInfo, columnToSort, order)
           }
         />
@@ -160,11 +162,14 @@ const handleParkingSpotTimeChange = (
   const timeFilterStartTimeEpoch = new Date(Date.UTC(year, month, day, startTimeHour, startTimeMin));
   const timeFilterEndTimeEpoch = new Date(Date.UTC(year, month, day, endTimeHour, endTimeMin));  
 
-  if (timeFilterStartTimeEpoch < parkingInfo.next_avail && timeFilterEndTimeEpoch > parkingInfo.next_avail) {
+  // Ensures that updated parking spot info is within the filtering options the client wants.
+  if (timeFilterStartTimeEpoch <= parkingInfo.start_time && timeFilterEndTimeEpoch >= parkingInfo.end_time) {
     const index = parkingSpotsInfo.findIndex(
-      e => e.parking_id === parkingInfo.parking_id
+      e => e.spot_id === parkingInfo.spot_id
     );
-    parkingInfo.next_avail = convertEpochToMilitary(parkingInfo.next_avail);
+
+    parkingInfo.start_time = convertEpochToMilitary(parkingInfo.start_time);
+    parkingInfo.endTime = convertEpochToMilitary(parkingInfo.endTime);
     parkingSpotsInfo[index] = parkingInfo;
     updateparkingSpotsInfo(parkingSpotsInfo);
   }
@@ -213,11 +218,17 @@ const Zone = ({
     let response = await makeAPICall('GET', url);
     let resbody = await response.json();
     console.log('RESPPPPP');
+    // spot_id
+    // start_time
+    // end_time
     console.log(resbody.parkingInfo);
 
     if (response.status === 200) {
       // The components on this page expects the time to be in military time.
-      resbody.parkingInfo.forEach(e => e.next_avail = convertEpochToMilitary(e.next_avail));
+      resbody.parkingInfo.forEach(e => {
+        e.start_time = convertEpochToMilitary(e.start_time);
+        e.end_time = convertEpochToMilitary(e.end_time);
+      });
       updateparkingSpotsInfo(resbody.parkingInfo);
       updateMessage(null);
     } else {
@@ -245,13 +256,17 @@ const Zone = ({
       endTime: endTime
     })
 
-    const newURL = `${url}/all/?startEpoch=${startUTCEpoch}&endEpoch=${endUTCEpoch}`;
+    const newURL = `${apiprefix}/zones/${zoneId}/?startTime=${startUTCEpoch}&endTime=${endUTCEpoch}`;
     let response = await makeAPICall('GET', newURL);
     let resbody = await response.json();
 
     if (response.status === 200) {
       // The functions acting upon this info expect the time to be in military time.
-      resbody.parkingInfo.forEach(e => e.next_avail = convertEpochToMilitary(e.next_avail));
+      // Suppose to send client a list of spots where the start and end time are open.
+      resbody.parkingInfo.forEach(e => {
+        e.start_time = convertEpochToMilitary(e.start_time)
+        e.end_time = convertEpochToMilitary(e.end_time)
+      });
       updateparkingSpotsInfo(resbody.parkingInfo);
       updateMessage(null);
     } else {

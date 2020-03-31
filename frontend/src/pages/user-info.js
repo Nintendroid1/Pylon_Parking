@@ -177,8 +177,6 @@ const SellingParkingSpotTableBody = props => {
     startTime: '24:00',
     endTime: '24:00',
     cost: 0,
-    privateKey: '',
-    showPrivateKey: false
   });
   const [privateKey, updatePrivateKey] = useState({
     privateKey: '',
@@ -200,12 +198,12 @@ const SellingParkingSpotTableBody = props => {
             <>
               <TableRow>
                 <TableCell>{parkingSpot.id}</TableCell>
-                <TableCell>{parkingSpot.startTime}</TableCell>
-                <TableCell>{parkingSpot.endTime}</TableCell>
+                <TableCell>{convertMilitaryTimeToNormal(parkingSpot.startTime)}</TableCell>
+                <TableCell>{convertMilitaryTimeToNormal(parkingSpot.endTime)}</TableCell>
                 <TableCell>{parkingSpot.cost}</TableCell>
                 <TableCell>
-                  <ConfirmationDialogFieldButton
-                    buttonMessage="Sell"
+                  <ConfirmationDialogFieldButton 
+                    buttonMessage='Sell'
                     messageTitle={`Sell Parking Spot ${parkingSpot.id}`}
                     messageContent={SellingMessageContent(
                       parkingSpot.startTime,
@@ -213,34 +211,13 @@ const SellingParkingSpotTableBody = props => {
                       sellInfo,
                       updateSellInfo
                     )}
-                    handleOnConfirm={handleSellRequest}
-                    privateKey={sellInfo}
-                    updatePrivateKey={updateSellInfo}
-                    buttonColor="secondary"
+                    handleOnConfirm={handleOnConfirm}
+                    privateKey={privateKey}
+                    updatePrivateKey={updatePrivateKey}
+                    buttonColor='secondary'
                   />
                 </TableCell>
               </TableRow>
-              <TableCell>{parkingSpot.id}</TableCell>
-              <TableCell>{convertMilitaryTimeToNormal(parkingSpot.startTime)}</TableCell>
-              <TableCell>{convertMilitaryTimeToNormal(parkingSpot.endTime)}</TableCell>
-              <TableCell>{parkingSpot.cost}</TableCell>
-              <TableCell>
-                <ConfirmationDialogFieldButton 
-                  buttonMessage='Sell'
-                  messageTitle={`Sell Parking Spot ${parkingSpot.id}`}
-                  messageContent={SellingMessageContent(
-                    parkingSpot.startTime,
-                    parkingSpot.endTime,
-                    sellInfo,
-                    updateSellInfo
-                  )}
-                  handleOnConfirm={handleOnConfirm}
-                  privateKey={privateKey}
-                  updatePrivateKey={updatePrivateKey}
-                  buttonColor='secondary'
-                />
-              </TableCell>
-            </TableRow>
             </>
           );
         })}
@@ -305,6 +282,7 @@ const UserInfo = ({ socket, ...props } ) => {
       });
 
       updateUserInfo(respbody.userInfo);
+      updateMessage(null);
     } else {
       updateMessage(<div>Failed to get user.</div>);
     }

@@ -5,7 +5,7 @@ import TableCell from '@material-ui/core/TableCell';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import { Typography } from '@material-ui/core';
-import { StartEndTime } from './forms/parking-spot-components';
+import { Startend_time } from './forms/parking-spot-components';
 import 'date-fns';
 import DateFnsUtils from '@date-io/date-fns';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
@@ -31,10 +31,10 @@ const styles = theme => ({
 });
 
 const TempInput = [
-  { startTime: '7:00', endTime: '12:00', cost: '2' },
-  { startTime: '12:00', endTime: '13:00', cost: '3' },
-  { startTime: '13:00', endTime: '14:00', cost: '2' },
-  { startTime: '14:00', endTime: '21:00', cost: '1' }
+  { start_time: '7:00', end_time: '12:00', cost: '2' },
+  { start_time: '12:00', end_time: '13:00', cost: '3' },
+  { start_time: '13:00', end_time: '14:00', cost: '2' },
+  { start_time: '14:00', end_time: '21:00', cost: '1' }
 ];
 
 /*
@@ -45,8 +45,8 @@ const TableData = props => {
     return (
       <>
         <TableRow>
-          <TableCell>{parkingSpot.startTime}</TableCell>
-          <TableCell>{parkingSpot.endTime}</TableCell>
+          <TableCell>{parkingSpot.start_time}</TableCell>
+          <TableCell>{parkingSpot.end_time}</TableCell>
           <TableCell>{parkingSpot.cost}</TableCell>
         </TableRow>
       </>
@@ -64,8 +64,8 @@ const TableData = props => {
     return (
       <>
         <TableRow>
-          <TableCell>{parkingSpot.startTime}</TableCell>
-          <TableCell>{parkingSpot.endTime}</TableCell>
+          <TableCell>{parkingSpot.start_time}</TableCell>
+          <TableCell>{parkingSpot.end_time}</TableCell>
           <TableCell>{parkingSpot.cost}</TableCell>
         </TableRow>
       </>
@@ -98,8 +98,8 @@ const handleParkingInfoChanges = (
   newParkingSpotInfo
 ) => {
   newParkingSpotInfo.forEach(e => {
-    e.startTime = convertEpochToMilitary(e.startTime);
-    e.endTime = convertEpochToMilitary(e.endTime);
+    e.start_time = convertEpochToMilitary(e.start_time);
+    e.end_time = convertEpochToMilitary(e.end_time);
   });
 
   updateparkingSpotInfo(newParkingSpotInfo);
@@ -127,26 +127,27 @@ const ParkingSpot = ({
   let timeSplit = today.toTimeString().split(':');
   let currTime = timeSplit[0].concat(':', timeSplit[1]);
   let tempUrl = window.location.pathname;
-  let id = Number(tempUrl.substring(tempUrl.lastIndexOf('/') + 1));
+  let spot_id = Number(tempUrl.substring(tempUrl.lastIndexOf('/') + 1));
+  let zone_id = 0;
 
   const [message, updateMessage] = useState('Loading'); // Initial message cannot be null. See useEffect() for reason.
   const [parkingSpotInfo, updateparkingSpotInfo] = useState([]);
   const [time, updateTime] = useState({
     date: today,
-    startTime: currTime,
-    endTime: '24:00'
+    start_time: currTime,
+    end_time: '24:00'
   });
 
   
   const listParkingSpotTimes = async () => {
-    const url = `${apiprefix}/parking_spot/${id}`;
+    const url = `${apiprefix}/zones/${zone_id}/spot/${spot_id}`;
     let response = await makeAPICall('GET', url);
     let resbody = await response.json();
 
     if (response.status === 200) {
       resbody.parkingInfo.forEach(e => {
-        e.startTime = convertEpochToMilitary(e.startTime);
-        e.endTime = convertEpochToMilitary(e.endTime);
+        e.start_time = convertEpochToMilitary(e.start_time);
+        e.end_time = convertEpochToMilitary(e.end_time);
       })
 
       updateparkingSpotInfo(resbody.parkingInfo);
@@ -168,21 +169,21 @@ const ParkingSpot = ({
   };
   */
 
-  const calculatePricePerTimeSlot = (timeSlot, startTime, endTime) => {
+  const calculatePricePerTimeSlot = (timeSlot, start_time, end_time) => {
     // If timeSlot's start time is after the start time the client wants, then use
     // timeSlot's start time, otherwise, the client's start time is taken care of in
     // this timeSlot, so use client's start time.
     let timeToStartCalc =
-      compareMilitaryTime(timeSlot.startTime, startTime) > 0
-        ? timeSlot.startTime
-        : startTime;
+      compareMilitaryTime(timeSlot.start_time, start_time) > 0
+        ? timeSlot.start_time
+        : start_time;
 
     // If timeSlot's end time is before the client's end time, then use timeSlot's
     // end time.
     let timeToEndCalc =
-      compareMilitaryTime(timeSlot.endTime, endTime) < 0
-        ? timeSlot.endTime
-        : endTime;
+      compareMilitaryTime(timeSlot.end_time, end_time) < 0
+        ? timeSlot.end_time
+        : end_time;
 
     const totalTimeWanted = militaryTimeDifference(
       timeToStartCalc,
@@ -192,18 +193,18 @@ const ParkingSpot = ({
     return (totalTimeWanted / 15) * timeSlot.cost;
   };
 
-  const calculatePrice = (startTime, endTime) => {
+  const calculatePrice = (start_time, end_time) => {
     // Calculate the price for the spot.
     const listOfTimes = parkingSpotInfo.filter(
       e =>
-        compareMilitaryTime(startTime, e.startTime) >= 0 &&
-        compareMilitaryTime(endTime, e.startTime) <= 0
+        compareMilitaryTime(start_time, e.start_time) >= 0 &&
+        compareMilitaryTime(end_time, e.start_time) <= 0
     );
 
     const totalCost = listOfTimes.reduce(
       (accumulator, currTimeSlot) => (
         accumulator +
-        calculatePricePerTimeSlot(currTimeSlot, startTime, endTime)
+        calculatePricePerTimeSlot(currTimeSlot, start_time, end_time)
       ), 0
     );
 
@@ -213,14 +214,14 @@ const ParkingSpot = ({
   const handleDateFiltering = async () => {
     const date = convertMilitaryToEpoch(time.date, '00:00');
 
-    const url = `${apiprefix}/parking_spot/${id}/?epoch=${date}`;
+    const url = `${apiprefix}/zones/${zone_id}/spot/${spot_id}/?date=${date}`;
     const response = await makeAPICall('GET', url);
     const respbody = await response.json();
 
     if (response.status === 200) {
       resbody.parkingInfo.forEach(e => {
-        e.startTime = convertEpochToMilitary(e.startTime);
-        e.endTime = convertEpochToMilitary(e.endTime);
+        e.start_time = convertEpochToMilitary(e.start_time);
+        e.end_time = convertEpochToMilitary(e.end_time);
       })
 
       updateparkingSpotInfo(resbody.parkingInfo);
@@ -237,11 +238,11 @@ const ParkingSpot = ({
   // Buying option, confirmation message and so forth.
   // Make api call to make a transaction.
   const handleBuyRequest = async privateKey => {
-    const startUTCEpoch = convertMilitaryToEpoch(time.date, time.startTime);
-    const endUTCEpoch = convertMilitaryToEpoch(time.date, time.endTime);
+    const startUTCEpoch = convertMilitaryToEpoch(time.date, time.start_time);
+    const endUTCEpoch = convertMilitaryToEpoch(time.date, time.end_time);
 
     // Make api call to carry out transaction.
-    const url = `${apiprefix}/parking_spot/${id}/buy/?startEpoch=${startUTCEpoch}&endEpoch=${endUTCEpoch}`;
+    const url = `${apiprefix}/purchase`;
     const response = await makeAPICall('POST', url);
     const respbody = await response.json();
 
@@ -259,8 +260,8 @@ const ParkingSpot = ({
 
     // For testing purposes.
     console.log(`
-      Start Time: ${time.startTime} \n
-      End Time: ${time.endTime} \n
+      Start Time: ${time.start_time} \n
+      End Time: ${time.end_time} \n
       Private Key: ${privateKey}
     `);
     // make smart contract and redirect to invoice.
@@ -268,10 +269,10 @@ const ParkingSpot = ({
   };
 
   let popUpMessage = `Are you sure you want to rent parking spot ${id} from ${
-    convertMilitaryTimeToNormal(time.startTime)
-  } to ${convertMilitaryTimeToNormal(time.endTime)} for ${calculatePrice(
-    time.startTime,
-    time.endTime
+    convertMilitaryTimeToNormal(time.start_time)
+  } to ${convertMilitaryTimeToNormal(time.end_time)} for ${calculatePrice(
+    time.start_time,
+    time.end_time
   )} hokie tokens?`;
 
   // Renders after first render.
@@ -303,7 +304,7 @@ const ParkingSpot = ({
                   time={time}
                   handleDateFilter={handleDateFiltering}
                 />
-                <StartEndTime
+                <Startend_time
                   time={time}
                   updateTime={updateTime}
                   buttonName={'Buy!'}

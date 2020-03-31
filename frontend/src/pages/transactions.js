@@ -123,10 +123,18 @@ const TransactionTable = ({
   tableHeaders,
   ...props
 }) => {
-  const listOfFilterOptions = ['Parking ID', 'Buyer ID', 'Seller ID', 'All'];
+  const listOfFilterOptions = ['None', 'Parking ID', 'Buyer ID', 'Seller ID', 'Time'];
   const [filterOption, updateFilterOption] = useState('Buyer ID');
-  const [textFieldValue, updateTextFieldValue] = useState(userId);
+  const [textFieldValue, updateTextFieldValue] = useState({
+    value: userId,
+    isDisabled: false
+  });
   const [displayList, updateDisplayList] = useState(listOfTransactions);
+  /*
+  const [timeFilter, updateTimeFilter] = useState({
+    startTime: '00:00',
+    endTIme: '23:59'
+  });*/
 
   const handleChangePage = (event, newPage) => {
     updatePage(newPage);
@@ -138,12 +146,13 @@ const TransactionTable = ({
   };
 
   const handleTextFieldChange = event => {
-    updateTextFieldValue(event.target.value);
+    updateTextFieldValue({ ...textFieldValue, value: event.target.value });
   };
 
   const handleClickFilter = event => {
-    const temp = listOfTransactions.filter(
-      e => e[filterOption] === textFieldValue
+    // If no filter option, then display all, otherwise, filter base on filter option.
+    const temp = filterOption === 'None' ? listOfTransactions : listOfTransactions.filter(
+      e => e[filterOption] === textFieldValue.value
     );
     updateDisplayList(temp);
   };
@@ -168,11 +177,16 @@ SelectProps={{
           updateFilterOption={updateFilterOption}
         />
         <TextField
+          disabled={textFieldValue.isDisabled}
           label={`Enter a ${filterOption}`}
-          value={textFieldValue}
+          value={textFieldValue.value}
           onChange={handleTextFieldChange}
         />
-        <Button variant="contained" color="primary" onClick={handleClickFilter}>
+        <Button 
+          variant="contained" 
+          color="primary" 
+          onClick={handleClickFilter}
+        >
           Filter!
         </Button>
       </div>
