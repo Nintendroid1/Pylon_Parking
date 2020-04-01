@@ -20,7 +20,7 @@ import Zone from './pages/list-parking-spots';
 import ParkingSpot from './pages/parking-spot';
 import TransactionHistory from './pages/transactions';
 import io from 'socket.io-client';
-import UserInfo from './pages/user-info';
+import SellPage from './pages/sell-page';
 import apiprefix from './pages/apiprefix';
 
 import Typography from '@material-ui/core/Typography';
@@ -156,23 +156,14 @@ const App = ({ classes, ...props }) => {
                 component={MainMap}
               />
               <Route
-                path="/zones/:zone_id"
-                label="List Parking Spots"
-                key="/zones"
-                hidden={true}
-                reqAdmin={false}
-                reqLogin={false}
-                render={() => <Zone socket={parkingLotSocket} />}
-              />
-              <Route
                 exact
-                path="/profile"
-                label="Profile"
-                key="/profile"
+                path="/my_spots"
+                label="My Spots"
+                key="/my_spots"
                 reqAdmin={false}
                 reqLogin={true}
                 hidden={false}
-                render={() => <UserInfo socket={userSocket} />}
+                render={() => <SellPage socket={userSocket} />}
               />
               <Route
                 exact
@@ -194,6 +185,15 @@ const App = ({ classes, ...props }) => {
                 reqAdmin={false}
                 reqLogin={false}
                 render={() => <ParkingSpot socket={parkingSpotSocket} />}
+              />
+              <Route
+                path="/zones/:zone_id"
+                label="List Parking Spots"
+                key="/zones"
+                hidden={true}
+                reqAdmin={false}
+                reqLogin={false}
+                render={() => <Zone socket={parkingLotSocket} />}
               />
             </TabChooser>
           </Router>

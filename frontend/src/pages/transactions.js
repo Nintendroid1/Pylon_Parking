@@ -121,6 +121,7 @@ const TransactionTable = ({
   numEntriesPerPage,
   updateNumEntriesPerPage,
   tableHeaders,
+  getEntireHistory,
   ...props
 }) => {
   const listOfFilterOptions = ['None', 'Parking ID', 'Buyer ID', 'Seller ID', 'Time'];
@@ -150,6 +151,13 @@ const TransactionTable = ({
   };
 
   const handleClickFilter = event => {
+
+    // Not sure if this is allowed.
+    // Need to check for re-renders and other errors.
+    useEffect(() => {
+      getEntireHistory();
+    }, []);
+
     // If no filter option, then display all, otherwise, filter base on filter option.
     const temp = filterOption === 'None' ? listOfTransactions : listOfTransactions.filter(
       e => e[filterOption] === textFieldValue.value
@@ -221,6 +229,26 @@ const handleNewTransaction = (
   updateListOfTransactions(listOfTransactions);
 };
 
+const updatePageInfo = (queryPage, currPage, updatePage) => {
+  if (
+    queryPage !== undefined &&
+    isNaN(queryPage) !== false &&
+    Number(queryPage) !== currPage
+  ) {
+    updatePage(Number(queryPage));
+  }
+}
+
+const updateNumEntryInfo = (queryNumEntry, currNumEntry, updateNumEntriesPerPage) => {
+  if (
+    queryNumEntry !== undefined &&
+    isNaN(queryNumEntry) !== false &&
+    Number(queryNumEntry) !== currNumEntry
+  ) {
+    updateNumEntriesPerPage(Number(queryNumEntry));
+  }
+}
+
 // Must change epoch if any to military time.
 const TransactionHistory = ({ socket, ...props }) => {
   const [message, updateMessage] = useState('Loading');
@@ -238,28 +266,31 @@ const TransactionHistory = ({ socket, ...props }) => {
   //const url = `/transaction_history`;
   const url = `${apiprefix}/transaction_history`;
 
-  const getTransactionHistory = async () => {
+  const getUserTransactionHistory = async () => {
+    const response = await makeAPICall('GET', `${url}/${localStorage.olivia_pid}/spots`);
+    const respbody = await response.json();
+
+    if (response.status === 200) {
+      const queryParams = queryStrings.parse(window.location.search);
+
+      updatePageInfo(queryParams.page, page, updatePage);
+      updateNumEntryInfo(queryParams.numEntries, numEntriesPerPage, updateNumEntriesPerPage);
+
+      updateListOfTransactions(respbody.listOfTransactions);
+    } else {
+      updateMessage('Error has occurred');
+    }
+  }
+
+  const getEntireHistory = async () => {
     const response = await makeAPICall('GET', url);
     const respbody = await response.json();
 
     if (response.status === 200) {
       const queryParams = queryStrings.parse(window.location.search);
 
-      if (
-        queryParams.page !== undefined &&
-        isNaN(queryParams.page) !== false &&
-        Number(queryParams.page) !== page
-      ) {
-        updatePage(Number(queryParams.page));
-      }
-
-      if (
-        queryParams.numEntries !== undefined &&
-        isNaN(queryParams.numEntries) !== false &&
-        Number(queryParams.numEntries) !== numEntriesPerPage
-      ) {
-        updateNumEntriesPerPage(Number(queryParams.numEntries));
-      }
+      updatePageInfo(queryParams.page, page, updatePage);
+      updateNumEntryInfo(queryParams.numEntries, numEntriesPerPage, updateNumEntriesPerPage);
 
       updateListOfTransactions(respbody.listOfTransactions);
     } else {
@@ -269,9 +300,10 @@ const TransactionHistory = ({ socket, ...props }) => {
 
 
   useEffect(() => {
-    getTransactionHistory();
+    getUserTransactionHistory();
   }, []);
 
+  // need to update for correct user.
   useEffect(() => {
     socket.on('transactionHistory', data =>
       handleNewTransaction(listOfTransactions, updateListOfTransactions, data)
@@ -292,6 +324,7 @@ const TransactionHistory = ({ socket, ...props }) => {
               numEntriesPerPage={numEntriesPerPage}
               updateNumEntriesPerPage={updateNumEntriesPerPage}
               tableHeaders={tableHeaders}
+              getEntireHistory={getEntireHistory}
             />
           </Typography>
         )}

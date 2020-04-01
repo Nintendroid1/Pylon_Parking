@@ -126,9 +126,9 @@ const ParkingSpot = ({
   let today = new Date();
   let timeSplit = today.toTimeString().split(':');
   let currTime = timeSplit[0].concat(':', timeSplit[1]);
-  let tempUrl = window.location.pathname;
-  let spot_id = Number(tempUrl.substring(tempUrl.lastIndexOf('/') + 1));
-  let zone_id = 0;
+  let tempUrl = window.location.pathname.split('/'); // the first index is an empty string.
+  let spot_id = Number(tempUrl[4]);
+  let zone_id = Number(tempUrl[2])
 
   const [message, updateMessage] = useState('Loading'); // Initial message cannot be null. See useEffect() for reason.
   const [parkingSpotInfo, updateparkingSpotInfo] = useState([]);
@@ -243,7 +243,17 @@ const ParkingSpot = ({
 
     // Make api call to carry out transaction.
     const url = `${apiprefix}/purchase`;
-    const response = await makeAPICall('POST', url);
+    const json = {
+      pid: localStorage.olivia_pid,
+      spot: {
+        spot_id: spot_id,
+        zone_id: zone_id,
+        start_time: startUTCEpoch,
+        end_time: endUTCEpoch
+       }
+    }
+    
+    const response = await makeAPICall('POST', url, json);
     const respbody = await response.json();
 
     if (response.status === 200) {
@@ -268,7 +278,7 @@ const ParkingSpot = ({
     return 1;
   };
 
-  let popUpMessage = `Are you sure you want to rent parking spot ${id} from ${
+  let popUpMessage = `Are you sure you want to rent parking spot ${zone_id}-${spot_id} from ${
     convertMilitaryTimeToNormal(time.start_time)
   } to ${convertMilitaryTimeToNormal(time.end_time)} for ${calculatePrice(
     time.start_time,
@@ -286,7 +296,7 @@ const ParkingSpot = ({
     //
     // expect data to be the entire information, not just the new info.
     // Like if an api get request was made.
-    socket.on(`parkingSpot-${id}`, data =>
+    socket.on(`parkingSpot-${zone_id}-${spot_id}`, data =>
       handleParkingInfoChanges(updateparkingSpotInfo, data)
     );
   }, []);

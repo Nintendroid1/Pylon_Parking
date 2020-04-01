@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { makeAPICall } from '../api';
+import UpdatePasswordForm from './forms/update-user-form';
 import PropTypes from 'prop-types';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
@@ -38,63 +39,36 @@ import {
   createMuiTheme
 } from '@material-ui/core/styles';
 
-const UserInfo = () => {
+const UpdateUserInfo = () => {
+  const [message, updateMessage] = useState(null);
 
-  const [message, updateMessage] = useState('Loading');
-  const [userInfo, updateUserInfo] = useState(null);
-
-  let getUserInfo = async () => {
-
+  const handleUpdate = async (password) => {
     let url = `${apiprefix}/users/${localStorage.olivia_pid}`;
-    let response = await makeAPICall('GET', url);
+
+    /*
+      password = {
+        password: current password,
+        newPassword: new password
+      }
+    */
+    let response = await makeAPICall('POST', url, password);
     let respbody = await response.json();
 
     if (response.status === 200) {
-      // Extracting the date and leaving in UTC so no need for further conversion.
-      // Converting epoch to military time.
-      console.log(respbody);
-      respbody.userInfo.parkingSpotsInfo.forEach(e => {
-        console.log(e);
-        e.date = new Date(Date.UTC(e.stat_time));
-        e.start_time = convertEpochToMilitary(e.start_time);
-        e.end_time = convertEpochToMilitary(e.end_time);
-      });
-
-      updateUserInfo(respbody.userInfo);
-      updateMessage(null);
+      // do a redirection to the home page.
     } else {
-      updateMessage(<div>Failed to get user.</div>);
-      console.log(respbody);
+      updateMessage(respbody.message);
     }
-  };
-
-  useEffect(() => {
-    getUserInfo();
-  }, []);
-
-  useEffect(() => {
-    // data = {
-    //  parkingId: parking spot sold off,
-    //  money: # hokie tokens in wallet now.
-    // }
-    socket.on(`user-${localStorage.olivia_pid}`, data => {
-      updateUserInfo({ ...userInfo, money: data.money });
-    });
-  }, []);
+  }
 
   return (
     <>
-      {message ?  (
-          <Typography>{message}</Typography>
-        ) : (
-        <Typography>
-          <Box>{`PID: ${userInfo.pid}`}</Box>
-          <Box>{`Email: ${userInfo.email}`}</Box>
-          <Box>{`Hokie Coins: ${userInfo.money}`}</Box>
-        </Typography>
-      )}
+      <Typography>{message}</Typography>
+      <Typography>
+        <UpdatePasswordForm 
+          onSubmit={handleUpdate}
+        />
+      </Typography>
     </>
   );
 }
-
-export default UserInfo;
