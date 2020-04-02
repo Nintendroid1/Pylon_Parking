@@ -93,6 +93,7 @@ const compareMilitaryTime = (time1, time2) => {
   return 0;
 };
 
+/*
 const convertNormalToMilitary = time => {
   let [hour, minute, temp] = time.split(':');
   const [minute, period] = temp.split(' ');
@@ -103,6 +104,7 @@ const convertNormalToMilitary = time => {
 
   return hour + ':' + minute;
 };
+*/
 
 const convertEpochToMilitary = epoch => {
   const option = {
@@ -132,6 +134,7 @@ const convertEpochToNormal = epoch => {
 const DateFilter = ({
   time,
   handleDateFilter,
+  updateTime,
   ...props
 }) => {
 
@@ -144,6 +147,7 @@ const DateFilter = ({
     <>
       <CustomDatePicker
         time={time}
+        updateTime={updateTime}
       />
       <Button
         variant='contained'
@@ -158,6 +162,7 @@ const DateFilter = ({
 
 const CustomDatePicker = ({
   time,
+  updateTime,
   ...props
 }) => {
 

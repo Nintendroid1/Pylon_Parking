@@ -67,8 +67,8 @@ const UpdatePasswordForm = (
   });
 
   // Should also do some input sanitization.
-  const handleChange = event => {
-    let { name, value } = event.target;
+  const handleChange = name => event => {
+    let { value } = event.target;
     let hasPasswordMismatch = false;
 
     if (password.confirmPassword !== '' && password.newPassword !== password.confirmPassword) {
@@ -112,7 +112,7 @@ const UpdatePasswordForm = (
   );
 };
 
-export{
+export {
   UpdatePasswordForm,
   CustomPassword
 };

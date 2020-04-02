@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { makeAPICall } from '../api';
-import UpdatePasswordForm from './forms/update-user-form';
+import { UpdatePasswordForm } from './forms/update-user-form';
 import PropTypes from 'prop-types';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
@@ -72,3 +72,5 @@ const UpdateUserInfo = () => {
     </>
   );
 }
+
+export default UpdateUserInfo;

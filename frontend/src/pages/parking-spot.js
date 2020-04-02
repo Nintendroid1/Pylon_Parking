@@ -313,6 +313,7 @@ const ParkingSpot = ({
                 <DateFilter 
                   time={time}
                   handleDateFilter={handleDateFiltering}
+                  updateTime={updateTime}
                 />
                 <Startend_time
                   time={time}
