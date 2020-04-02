@@ -194,7 +194,7 @@ const SellingParkingSpotTableBody = props => {
                 <TableCell>
                   {`${parkingSpot.zone_id}-${parkingSpot.spot_id}`}
                 </TableCell>
-                <TableCell>{parkingSpots.zone_name}</TableCell>
+                <TableCell>{parkingSpot.zone_name}</TableCell>
                 <TableCell>
                   {convertMilitaryTimeToNormal(parkingSpot.start_time)}
                 </TableCell>
@@ -270,7 +270,7 @@ const SellPage = ({ socket, isLoggedIn, ...props }) => {
       </Typography>
     </>
   );
-  const [spotsOwned, updateSpotsOwned] = useState([]);
+  let [spotsOwned, updateSpotsOwned] = useState([]);
 
   let getUserParkingSpots = async () => {
     let url = `${apiprefix}/users/${localStorage.olivia_pid}/spots`;
@@ -338,10 +338,14 @@ const SellPage = ({ socket, isLoggedIn, ...props }) => {
     //  money: # hokie tokens in wallet now.
     // }
     socket.on(`user-${localStorage.olivia_pid}`, data => {
-      const index = spotsOwned.findIndex(e => (Number(e.zone_id) === Number(data.zone_id) && Number(e.spot_id) === Number(data.spot_id)));
+      const index = spotsOwned.findIndex(
+        e =>
+          Number(e.zone_id) === Number(data.zone_id) &&
+          Number(e.spot_id) === Number(data.spot_id)
+      );
 
       spotsOwned = spotsOwned.splice(index, 1);
-      updateSpotsOwned(sellInfo);
+      updateSpotsOwned(spotsOwned);
     });
   }, []);
 
