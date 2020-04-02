@@ -22,6 +22,8 @@ import TransactionHistory from './pages/transactions';
 import io from 'socket.io-client';
 import SellPage from './pages/sell-page';
 import apiprefix from './pages/apiprefix';
+import ProfilePage from './pages/profile';
+import UpdateUserInfo from './pages/update-user-info';
 
 import Typography from '@material-ui/core/Typography';
 import history from './history';
@@ -108,8 +110,8 @@ const App = ({ classes, ...props }) => {
   // Base url.
   const endpoint = 'http://localhost:3001';
 
-  const parkingLotSocket = io(`${endpoint}/zones`);//{ path: `${endpoint}/zones` });
-  const parkingSpotSocket = io(`${endpoint}/parking_spot`);//{ path: `${endpoint}/parkingSpot` });
+  const parkingLotSocket = io(`${endpoint}/zones`); //{ path: `${endpoint}/zones` });
+  const parkingSpotSocket = io(`${endpoint}/parking_spot`); //{ path: `${endpoint}/parkingSpot` });
   const transactionHistorySocket = io(`${endpoint}/transaction_history`);
   const userSocket = io(`${endpoint}/user`);
 
@@ -157,16 +159,6 @@ const App = ({ classes, ...props }) => {
               />
               <Route
                 exact
-                path="/my_spots"
-                label="My Spots"
-                key="/my_spots"
-                reqAdmin={false}
-                reqLogin={true}
-                hidden={false}
-                render={() => <SellPage socket={userSocket} />}
-              />
-              <Route
-                exact
                 path="/transaction_history"
                 label="Transaction History"
                 key="/transaction_history"
@@ -176,6 +168,38 @@ const App = ({ classes, ...props }) => {
                 render={() => (
                   <TransactionHistory socket={transactionHistorySocket} />
                 )}
+              />
+              <Route
+                exact
+                path="/my_spots"
+                label="My Spots"
+                key="/my_spots"
+                reqAdmin={false}
+                reqLogin={true}
+                hidden={true}
+                render={() => (
+                  <SellPage isLoggedIn={isLoggedIn} socket={userSocket} />
+                )}
+              />
+              <Route
+                exact
+                path="/profile"
+                label="Profile"
+                key="/profile"
+                hidden={true}
+                reqAdmin={false}
+                reqLogin={true}
+                render={() => <ProfilePage isLoggedIn={isLoggedIn} />}
+              />
+              <Route
+                exact
+                path="/profile/edit"
+                label="Edit Profile"
+                key="/profile/edit"
+                hidden={true}
+                reqAdmin={false}
+                reqLogin={true}
+                render={() => <UpdateUserInfo isLoggedIn={isLoggedIn} />}
               />
               <Route
                 path="/zones/:zone_id/spot/:spot_id"
