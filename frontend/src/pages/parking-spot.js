@@ -68,7 +68,7 @@ const TableData = props => {
         <TableRow>
           <TableCell>{parkingSpot.start_time}</TableCell>
           <TableCell>{parkingSpot.end_time}</TableCell>
-          <TableCell>{parkingSpot.cost}</TableCell>
+          <TableCell>{parkingSpot.price}</TableCell>
         </TableRow>
       </>
     );
@@ -186,7 +186,7 @@ const ParkingSpot = ({
       timeToEndCalc
     );
 
-    return (totalTimeWanted / 15) * timeSlot.cost;
+    return (totalTimeWanted / 15) * timeSlot.price;
   };
 
   const calculatePrice = (start_time, end_time) => {
