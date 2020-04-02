@@ -195,7 +195,7 @@ const Zone = ({
   const [message, updateMessage] = useState(null);
   const [parkingSpotsInfo, updateparkingSpotsInfo] = useState(null);
   const [order, updateOrder] = useState('asc');
-  const [columnToSort, updatecolumnToSort] = useState('id');
+  const [columnToSort, updatecolumnToSort] = useState('spot_id');
   const [currentTimeFilter, updateCurrentTimeFilter] = useState({
     date: Date.now(),
     startTime: '00:00',

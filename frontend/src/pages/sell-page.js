@@ -192,7 +192,7 @@ const SellingParkingSpotTableBody = props => {
             <>
               <TableRow>
                 <TableCell>
-                  {`${parkingSpot.zone_id}-${parkingSpot.spot_id}`}
+                  {parkingSpot.uniqueId}
                 </TableCell>
                 <TableCell>{parkingSpot.zone_name}</TableCell>
                 <TableCell>
