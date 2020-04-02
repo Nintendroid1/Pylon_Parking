@@ -25,6 +25,9 @@ import Grid from '@material-ui/core/Grid';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import LoginTab from '../pages/login';
 import RegisterTab from '../pages/register';
+import Menu from '@material-ui/core/Menu';
+import MenuItem from '@material-ui/core/MenuItem';
+
 
 const drawerWidth = 240;
 
@@ -238,6 +241,15 @@ function TabChooser({
         history.push('/logout');
       }
     };
+    const [anchorEl, setAnchorEl] = React.useState(null);
+
+    const handleClick = event => {
+      setAnchorEl(event.currentTarget);
+    };
+
+    const handleClose = () => {
+      setAnchorEl(null);
+    };
 
     return (
       <Typography
@@ -247,21 +259,54 @@ function TabChooser({
         style={{ flexGrow: 1 }}
       >
         <Button
-          onClick={clickHandler}
-          key={'logout'}
-          label={'Logout'}
-          className="logout"
+          aria-controls="simple-menu"
+          aria-haspopup="true"
+          onClick={handleClick}
         >
           <AccountCircle className={classes.avatar} />
           <Typography
             variant="button"
             style={{ color: '#FFFFFF', fontSize: 15 }}
           >
-            Logout
+            {localStorage.olivia_pid}
           </Typography>
         </Button>
+        <Menu
+          id="simple-menu"
+          anchorEl={anchorEl}
+          keepMounted
+          open={Boolean(anchorEl)}
+          onClose={handleClose}
+        >
+          <MenuItem onClick={handleClose}>Profile</MenuItem>
+          <MenuItem onClick={handleClose}>My account</MenuItem>
+          <MenuItem onClick={clickHandler}>Logout</MenuItem>
+        </Menu>
       </Typography>
     );
+    // return (
+    //   <Typography
+    //     variant="h6"
+    //     align="right"
+    //     color="inherit"
+    //     style={{ flexGrow: 1 }}
+    //   >
+    //     <Button
+    //       onClick={clickHandler}
+    //       key={'logout'}
+    //       label={'Logout'}
+    //       className="logout"
+    //     >
+    //       <AccountCircle className={classes.avatar} />
+    //       <Typography
+    //         variant="button"
+    //         style={{ color: '#FFFFFF', fontSize: 15 }}
+    //       >
+    //         Logout
+    //       </Typography>
+    //     </Button>
+    //   </Typography>
+    // );
   };
 
   let drawerContent = (
