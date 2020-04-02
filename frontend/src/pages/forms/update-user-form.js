@@ -11,25 +11,17 @@ import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
 import withStyles from '@material-ui/core/styles/withStyles';
 import { CircularProgress } from '@material-ui/core';
-import Input from '@material-ui/core/Input';
-import InputLabel from '@material-ui/core/InputLabel';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import Visibility from '@material-ui/icons/Visibility';
 import VisibilityOff from '@material-ui/icons/VisibilityOff';
 import IconButton from '@material-ui/core/IconButton';
 
-const CustomPassword = ({
-  password,
-  propName,
-  handleChange,
-  hasError,
-}) => {
-
+const CustomPassword = ({ password, propName, handleChange, hasError }) => {
   const [showPassword, updateShowPassword] = useState(false);
 
   const handleClickShowPassword = () => {
-    updateShowPassword(!showPassword)
-  }
+    updateShowPassword(!showPassword);
+  };
 
   return (
     <>
@@ -53,29 +45,34 @@ const CustomPassword = ({
       />
     </>
   );
-}
+};
 
-const UpdatePasswordForm = (
-  onSubmit,
-) => {
-
+const UpdatePasswordForm = onSubmit => {
   const [password, updatePassword] = useState({
     currentPassword: '',
     newPassword: '',
     confirmPassword: '',
-    hasNewPasswordMismatch: false,
+    hasNewPasswordMismatch: false
   });
 
   // Should also do some input sanitization.
   const handleChange = name => event => {
+    console.log(event);
     let { value } = event.target;
     let hasPasswordMismatch = false;
 
-    if (password.confirmPassword !== '' && password.newPassword !== password.confirmPassword) {
+    if (
+      password.confirmPassword !== '' &&
+      password.newPassword !== password.confirmPassword
+    ) {
       hasPasswordMismatch = true;
     }
 
-    updatePassword({ ...password, [name]: value, hasNewPasswordMismatch: hasPasswordMismatch }); // update corresponding field in values object
+    updatePassword({
+      ...password,
+      [name]: value,
+      hasNewPasswordMismatch: hasPasswordMismatch
+    }); // update corresponding field in values object
   };
 
   const handleSubmit = event => {
@@ -89,22 +86,22 @@ const UpdatePasswordForm = (
   return (
     <>
       <form onSubmit={handleSubmit}>
-        <CustomPassword 
+        <CustomPassword
           hasError={false}
           password={password.currentPassword}
-          propName='currentPassword'
+          propName="currentPassword"
           handleChange={handleChange}
         />
         <CustomPassword
           hasError={password.hasNewPasswordMismatch}
           password={password.newPassword}
-          propName='newPassword'
+          propName="newPassword"
           handleChange={handleChange}
         />
-        <CustomPassword 
+        <CustomPassword
           hasError={password.hasNewPasswordMismatch}
           password={password.confirmPassword}
-          propName='confirmPassword'
+          propName="confirmPassword"
           handleChange={handleChange}
         />
       </form>

@@ -5,9 +5,11 @@ import TableCell from '@material-ui/core/TableCell';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import { Typography } from '@material-ui/core';
-import { Startend_time } from './forms/parking-spot-components';
+import { StartEndTime } from './forms/parking-spot-components';
 import 'date-fns';
 import DateFnsUtils from '@date-io/date-fns';
+import apiprefix from './apiprefix';
+import { makeAPICall } from '../api';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import {
   compareMilitaryTime,
@@ -128,7 +130,7 @@ const ParkingSpot = ({
   let currTime = timeSplit[0].concat(':', timeSplit[1]);
   let tempUrl = window.location.pathname.split('/'); // the first index is an empty string.
   let spot_id = Number(tempUrl[4]);
-  let zone_id = Number(tempUrl[2])
+  let zone_id = Number(tempUrl[2]);
 
   const [message, updateMessage] = useState('Loading'); // Initial message cannot be null. See useEffect() for reason.
   const [parkingSpotInfo, updateparkingSpotInfo] = useState([]);
@@ -138,7 +140,6 @@ const ParkingSpot = ({
     end_time: '24:00'
   });
 
-  
   const listParkingSpotTimes = async () => {
     const url = `${apiprefix}/zones/${zone_id}/spot/${spot_id}`;
     let response = await makeAPICall('GET', url);
@@ -148,19 +149,14 @@ const ParkingSpot = ({
       resbody.parkingInfo.forEach(e => {
         e.start_time = convertEpochToMilitary(e.start_time);
         e.end_time = convertEpochToMilitary(e.end_time);
-      })
+      });
 
       updateparkingSpotInfo(resbody.parkingInfo);
       updateMessage(null);
     } else {
-      updateMessage(
-        <div>
-          Fail
-        </div>
-      );
+      updateMessage(<div>Fail</div>);
     }
   };
-  
 
   /*
   const listParkingSpotTimes = () => {
@@ -202,10 +198,10 @@ const ParkingSpot = ({
     );
 
     const totalCost = listOfTimes.reduce(
-      (accumulator, currTimeSlot) => (
+      (accumulator, currTimeSlot) =>
         accumulator +
-        calculatePricePerTimeSlot(currTimeSlot, start_time, end_time)
-      ), 0
+        calculatePricePerTimeSlot(currTimeSlot, start_time, end_time),
+      0
     );
 
     return totalCost;
@@ -216,22 +212,18 @@ const ParkingSpot = ({
 
     const url = `${apiprefix}/zones/${zone_id}/spot/${spot_id}/?date=${date}`;
     const response = await makeAPICall('GET', url);
-    const respbody = await response.json();
+    const resbody = await response.json();
 
     if (response.status === 200) {
       resbody.parkingInfo.forEach(e => {
         e.start_time = convertEpochToMilitary(e.start_time);
         e.end_time = convertEpochToMilitary(e.end_time);
-      })
+      });
 
       updateparkingSpotInfo(resbody.parkingInfo);
       updateMessage(null);
     } else {
-      updateMessage(
-        <div>
-          {respbody.message}
-        </div>
-      );
+      updateMessage(<div>{resbody.message}</div>);
     }
   };
 
@@ -250,9 +242,9 @@ const ParkingSpot = ({
         zone_id: zone_id,
         start_time: startUTCEpoch,
         end_time: endUTCEpoch
-       }
-    }
-    
+      }
+    };
+
     const response = await makeAPICall('POST', url, json);
     const respbody = await response.json();
 
@@ -261,11 +253,7 @@ const ParkingSpot = ({
       console.log('Successfully purchased spot!');
       // Can have it as a snackbar that appears at the top of the page instead of redirection.
     } else {
-      updateMessage(
-        <div>
-          {respbody.message}
-        </div>
-      );
+      updateMessage(<div>{respbody.message}</div>);
     }
 
     // For testing purposes.
@@ -278,9 +266,9 @@ const ParkingSpot = ({
     return 1;
   };
 
-  let popUpMessage = `Are you sure you want to rent parking spot ${zone_id}-${spot_id} from ${
-    convertMilitaryTimeToNormal(time.start_time)
-  } to ${convertMilitaryTimeToNormal(time.end_time)} for ${calculatePrice(
+  let popUpMessage = `Are you sure you want to rent parking spot ${zone_id}-${spot_id} from ${convertMilitaryTimeToNormal(
+    time.start_time
+  )} to ${convertMilitaryTimeToNormal(time.end_time)} for ${calculatePrice(
     time.start_time,
     time.end_time
   )} hokie tokens?`;
@@ -310,12 +298,13 @@ const ParkingSpot = ({
           ) : (
             <div>
               <MuiPickersUtilsProvider utils={DateFnsUtils}>
-                <DateFilter 
+                <DateFilter
+                  updateTime={updateTime}
                   time={time}
                   handleDateFilter={handleDateFiltering}
                   updateTime={updateTime}
                 />
-                <Startend_time
+                <StartEndTime
                   time={time}
                   updateTime={updateTime}
                   buttonName={'Buy!'}

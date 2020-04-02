@@ -28,7 +28,6 @@ import RegisterTab from '../pages/register';
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
 
-
 const drawerWidth = 240;
 
 const styles = theme => ({
@@ -197,38 +196,40 @@ function TabChooser({
     window.location.href = `${process.env.PUBLIC_URL}/`;
   } // apply HOC*/
 
-  function LoginButton() {
+  let LoginButton = () => {
     return (
-      <Typography
-        variant="h6"
-        align="right"
-        color="inherit"
-        style={{ flexGrow: 1 }}
-      >
-        <Button
-          component={RRLink}
-          to={{
-            pathname: '/login',
-            state: {
-              from: history.location
-            }
-          }}
-          key={'login'}
-          label={'Login'}
-          className="login"
+      <>
+        <Typography
+          variant="h6"
+          align="right"
+          color="inherit"
+          style={{ flexGrow: 1 }}
         >
-          <Typography
-            variant="button"
-            style={{ color: '#FFFFFF', fontSize: 15 }}
+          <Button
+            component={RRLink}
+            to={{
+              pathname: '/login',
+              state: {
+                from: history.location
+              }
+            }}
+            key={'login'}
+            label={'Login'}
+            className="login"
           >
-            Login
-          </Typography>
-        </Button>
-      </Typography>
+            <Typography
+              variant="button"
+              style={{ color: '#FFFFFF', fontSize: 15 }}
+            >
+              Login
+            </Typography>
+          </Button>
+        </Typography>
+      </>
     );
-  }
+  };
 
-  let LogoutButton = () => {
+  let LogoutButton = ({ ...props }) => {
     let clickHandler = async () => {
       let shouldLogout = await dialog(
         <Confirm title="Are you sure?">
@@ -238,75 +239,59 @@ function TabChooser({
         </Confirm>
       );
       if (shouldLogout) {
+        handleLogout();
         history.push('/logout');
       }
     };
-    const [anchorEl, setAnchorEl] = React.useState(null);
+    const [anchorEl, setAnchorEl] = useState(null);
 
     const handleClick = event => {
       setAnchorEl(event.currentTarget);
     };
 
-    const handleClose = () => {
+    const handleClose = link => {
       setAnchorEl(null);
+      history.push(link);
     };
 
     return (
-      <Typography
-        variant="h6"
-        align="right"
-        color="inherit"
-        style={{ flexGrow: 1 }}
-      >
-        <Button
-          aria-controls="simple-menu"
-          aria-haspopup="true"
-          onClick={handleClick}
+      <>
+        <Typography
+          variant="h6"
+          align="right"
+          color="inherit"
+          style={{ flexGrow: 1 }}
         >
-          <AccountCircle className={classes.avatar} />
-          <Typography
-            variant="button"
-            style={{ color: '#FFFFFF', fontSize: 15 }}
+          <Button
+            aria-controls="simple-menu"
+            aria-haspopup="true"
+            onClick={handleClick}
           >
-            {localStorage.olivia_pid}
-          </Typography>
-        </Button>
-        <Menu
-          id="simple-menu"
-          anchorEl={anchorEl}
-          keepMounted
-          open={Boolean(anchorEl)}
-          onClose={handleClose}
-        >
-          <MenuItem onClick={handleClose}>Profile</MenuItem>
-          <MenuItem onClick={handleClose}>My account</MenuItem>
-          <MenuItem onClick={clickHandler}>Logout</MenuItem>
-        </Menu>
-      </Typography>
+            <AccountCircle className={classes.avatar} />
+            <Typography
+              variant="button"
+              style={{ color: '#FFFFFF', fontSize: 15 }}
+            >
+              {localStorage.olivia_pid}
+            </Typography>
+          </Button>
+          <Menu
+            id="simple-menu"
+            anchorEl={anchorEl}
+            keepMounted
+            open={Boolean(anchorEl)}
+            onClose={handleClose}
+          >
+            <MenuItem onClick={() => handleClose('/Profile')}>Profile</MenuItem>
+            <MenuItem onClick={handleClose}>My account</MenuItem>
+            <MenuItem onClick={() => handleClose('/my_spots')}>
+              My Spots
+            </MenuItem>
+            <MenuItem onClick={clickHandler}>Logout</MenuItem>
+          </Menu>
+        </Typography>
+      </>
     );
-    // return (
-    //   <Typography
-    //     variant="h6"
-    //     align="right"
-    //     color="inherit"
-    //     style={{ flexGrow: 1 }}
-    //   >
-    //     <Button
-    //       onClick={clickHandler}
-    //       key={'logout'}
-    //       label={'Logout'}
-    //       className="logout"
-    //     >
-    //       <AccountCircle className={classes.avatar} />
-    //       <Typography
-    //         variant="button"
-    //         style={{ color: '#FFFFFF', fontSize: 15 }}
-    //       >
-    //         Logout
-    //       </Typography>
-    //     </Button>
-    //   </Typography>
-    // );
   };
 
   let drawerContent = (
@@ -446,7 +431,7 @@ function TabChooser({
               </Tabs>
             )}
           </Typography>
-          {isLoggedIn ? LogoutButton() : LoginButton()}
+          {isLoggedIn ? <LogoutButton /> : <LoginButton />}
         </Toolbar>
         {drawerContent}
       </AppBar>
