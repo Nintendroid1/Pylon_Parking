@@ -13,7 +13,7 @@ import {
   withStyles,
   MuiThemeProvider,
   createMuiTheme
-} from '@material-ui/core/styles'; 
+} from '@material-ui/core/styles';
 
 const styles = theme => ({
   root: {
@@ -26,30 +26,33 @@ const styles = theme => ({
 const UTCToESTInSec = 4 * 60 * 60;
 
 const militaryTimeDifference = (startTime, endTime) => {
-  let [startTimeHour, startTimeMinute] = startTime.split(':').map(e => Number(e));
+  let [startTimeHour, startTimeMinute] = startTime
+    .split(':')
+    .map(e => Number(e));
   let [endTimeHour, endTimeMinute] = endTime.split(':').map(e => Number(e));
-  
+
   let timeDiff = 60 - startTimeMinute;
   startTimeMinute = 0;
   startTimeHour += 1;
 
-  timeDiff += (endTimeHour - startTimeHour) + (endTimeMinute - startTimeMinute);
+  timeDiff += endTimeHour - startTimeHour + (endTimeMinute - startTimeMinute);
 
   return timeDiff;
 };
 
 const isTimeMultipleOf15 = time => {
-  const [ , minute] = time.split(':').map(e => Number(e));
+  const [, minute] = time.split(':').map(e => Number(e));
 
   return minute % 15 === 0;
 };
 
 const roundUpToNearest15 = time => {
   const [hour, minute] = time.split(':').map(e => Number(e));
-  const newTime = hour.toString() + ':' + ((15 - (minute % 15)) + minute).toString();
+  const newTime =
+    hour.toString() + ':' + (15 - (minute % 15) + minute).toString();
 
   return newTime;
-}
+};
 
 const convertMilitaryTimeToNormal = time => {
   let [hour, minutes] = time.split(':');
@@ -72,7 +75,7 @@ const sortByMilitaryTime = (data, sortDirection, columnToSort) => {
 
 const compareParkingSpotTimes = columnToSort => (spot1, spot2) => {
   return compareMilitaryTime(spot1[columnToSort], spot2[columnToSort]);
-}
+};
 
 // If time1 earlier than time2, then return -1.
 // If time2 earlier than time1, then return 1.
@@ -93,23 +96,23 @@ const compareMilitaryTime = (time1, time2) => {
   return 0;
 };
 
-const convertNormalToMilitary = time => {
-  let [hour, minute, temp] = time.split(':');
-  const [minute, period] = temp.split(' ');
+// const convertNormalToMilitary = time => {
+//   let [hour, minute, temp] = time.split(':');
+//   const [minute, period] = temp.split(' ');
 
-  if (period === 'PM') {
-    hour = Number(hour) + 12;
-  }
+//   if (period === 'PM') {
+//     hour = Number(hour) + 12;
+//   }
 
-  return hour + ':' + minute;
-};
+//   return hour + ':' + minute;
+// };
 
 const convertEpochToMilitary = epoch => {
   const option = {
     hour12: false,
     hour: '2-digit',
     minute: '2-digit'
-  }
+  };
 
   const temp_date = new Date(epoch * 1000);
   return temp_date.toLocaleTimeString('en-US', option);
@@ -129,38 +132,23 @@ const convertEpochToNormal = epoch => {
   return new Date(epoch).toUTCString();
 };
 
-const DateFilter = ({
-  time,
-  handleDateFilter,
-  ...props
-}) => {
-
+const DateFilter = ({ time, updateTime, handleDateFilter, ...props }) => {
   const handleOnClick = event => {
     event.preventDefault();
     handleDateFilter();
-  }
+  };
 
   return (
     <>
-      <CustomDatePicker
-        time={time}
-      />
-      <Button
-        variant='contained'
-        color='primary'
-        onClick={handleOnClick}
-      >
+      <CustomDatePicker updateTime={updateTime} time={time} />
+      <Button variant="contained" color="primary" onClick={handleOnClick}>
         Filter!
       </Button>
     </>
   );
-}
+};
 
-const CustomDatePicker = ({
-  time,
-  ...props
-}) => {
-
+const CustomDatePicker = ({ time, updateTime, ...props }) => {
   const handleDateChange = newDate => {
     updateTime({ ...time, date: newDate });
   };
@@ -181,7 +169,7 @@ const CustomDatePicker = ({
       />
     </>
   );
-}
+};
 
 // Used by list-parking-spots.js.
 // Filtering by date and time.
@@ -223,9 +211,7 @@ const TimeFilter = ({
       <MuiPickersUtilsProvider utils={DateFnsUtils}>
         <form>
           <Grid container justify="space-around">
-            <CustomDatePicker
-              time={time}
-            />
+            <CustomDatePicker updateTime={updateTime} time={time} />
           </Grid>
           <Grid>
             <TimePicker

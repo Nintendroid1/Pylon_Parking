@@ -60,13 +60,6 @@ const tempParkingSpots = [
   }
 ];
 
-const tempInput = {
-  pid: 'Bob',
-  email: 'Bob@vt.edu',
-  money: 15,
-  parkingSpotsInfo: tempParkingSpots
-};
-
 const SellingMessageContent = (
   parkingSpotstart_time,
   parkingSpotend_time,
@@ -174,7 +167,7 @@ const SellingParkingSpotTableBody = props => {
     parkingSpotId: -1,
     start_time: '24:00',
     end_time: '24:00',
-    cost: 0,
+    cost: 0
   });
   const [privateKey, updatePrivateKey] = useState({
     privateKey: '',
@@ -264,7 +257,7 @@ const SellingParkingSpotTable = props => {
   );
 };
 
-const SellPage = ({ socket, ...props }) => {
+const SellPage = ({ socket, isLoggedIn, ...props }) => {
   const [message, updateMessage] = useState(
     <>
       <Typography align="center" style={{ marginTop: '40px' }} variant="h4">
@@ -278,25 +271,26 @@ const SellPage = ({ socket, ...props }) => {
     let url = `${apiprefix}/users/${localStorage.olivia_pid}/spots`;
     let response = await makeAPICall('GET', url);
     let respbody = await response.json();
+    console.log(respbody);
 
     if (response.status === 200) {
       // Extracting the date and leaving in UTC so no need for further conversion.
       // Converting epoch to military time.
       console.log(respbody);
-      respbody.sellInfo.parkingSpotsInfo.forEach(e => {
+      respbody.parkingSpotsInfo.forEach(e => {
         console.log(e);
         e.date = new Date(Date.UTC(e.stat_time));
         e.start_time = convertEpochToMilitary(e.start_time);
         e.end_time = convertEpochToMilitary(e.end_time);
       });
 
-      updateSellInfo(respbody.sellInfo);
+      updateSellInfo(respbody);
       updateMessage(null);
     } else {
       updateMessage(<div>Failed to get user.</div>);
       console.log(respbody);
     }
-  }
+  };
 
   const handleSellRequest = (sellInfo, privatekey) => {
     // Make sure that the date field is correct.
@@ -305,7 +299,10 @@ const SellPage = ({ socket, ...props }) => {
       sellInfo.date,
       sellInfo.start_time
     );
-    const endUTCEpoch = convertMilitaryToEpoch(sellInfo.date, sellInfo.end_time);
+    const endUTCEpoch = convertMilitaryToEpoch(
+      sellInfo.date,
+      sellInfo.end_time
+    );
 
     // Make api request.
   };
@@ -347,4 +344,4 @@ const SellPage = ({ socket, ...props }) => {
   );
 };
 
-export default withStyles(styles)(SellPage);
+export default withStyles(styles)(RequireAuthentication(SellPage));

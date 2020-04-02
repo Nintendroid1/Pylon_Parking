@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { makeAPICall } from '../api';
-import UpdatePasswordForm from './forms/update-user-form';
+import { UpdatePasswordForm } from './forms/update-user-form';
 import PropTypes from 'prop-types';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
@@ -38,11 +38,17 @@ import {
   MuiThemeProvider,
   createMuiTheme
 } from '@material-ui/core/styles';
+const styles = theme => ({
+  root: {
+    display: 'flex',
+    flexGrow: 1
+  }
+});
 
 const UpdateUserInfo = () => {
   const [message, updateMessage] = useState(null);
 
-  const handleUpdate = async (password) => {
+  const handleUpdate = async password => {
     let url = `${apiprefix}/users/${localStorage.olivia_pid}`;
 
     /*
@@ -59,16 +65,15 @@ const UpdateUserInfo = () => {
     } else {
       updateMessage(respbody.message);
     }
-  }
+  };
 
   return (
     <>
       <Typography>{message}</Typography>
       <Typography>
-        <UpdatePasswordForm 
-          onSubmit={handleUpdate}
-        />
+        <UpdatePasswordForm onSubmit={handleUpdate} />
       </Typography>
     </>
   );
-}
+};
+export default withStyles(styles)(RequireAuthentication(UpdateUserInfo));

@@ -38,7 +38,7 @@ import {
   createMuiTheme
 } from '@material-ui/core/styles';
 
-const UserInfo = () => {
+const UserInfo = ({socket, ...props}) => {
 
   const [message, updateMessage] = useState('Loading');
   const [userInfo, updateUserInfo] = useState(null);
