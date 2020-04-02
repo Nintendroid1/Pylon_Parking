@@ -48,14 +48,14 @@ const styles = theme => ({
 const tempParkingSpots = [
   {
     id: '1',
-    startTime: '13:00',
-    endTime: '15:00',
+    start_time: '13:00',
+    end_time: '15:00',
     cost: 3
   },
   {
     id: '2',
-    startTime: '4:00',
-    endTime: '5:00',
+    start_time: '4:00',
+    end_time: '5:00',
     cost: 3
   }
 ];
@@ -68,8 +68,8 @@ const tempInput = {
 };
 
 const SellingMessageContent = (
-  parkingSpotStartTime,
-  parkingSpotEndTime,
+  parkingSpotstart_time,
+  parkingSpotend_time,
   sellInfo,
   updateSellInfo
 ) => {
@@ -79,10 +79,10 @@ const SellingMessageContent = (
   });
 
   const [validTime, updateValidTime] = useState({
-    startTimeHasError: false,
-    startTimeErrorMessage: '',
-    endTimeHasError: false,
-    endTimeErrorMessage: ''
+    start_timeHasError: false,
+    start_timeErrorMessage: '',
+    end_timeHasError: false,
+    end_timeErrorMessage: ''
   });
 
   // Need to include error handling for time.
@@ -100,23 +100,23 @@ const SellingMessageContent = (
     let currTime = timeSplit[0].concat(':', timeSplit[1]);
 
     // chosen start time is before parking spot start time.
-    if (name === 'startTime' && compareMilitaryTime(value, currTime) < 0) {
+    if (name === 'start_time' && compareMilitaryTime(value, currTime) < 0) {
       updateValidTime({
         ...validTime,
-        startTimeHasError: true,
-        startTimeErrorMessage: 'Start Time Cannot Be Before Current Time.'
+        start_timeHasError: true,
+        start_timeErrorMessage: 'Start Time Cannot Be Before Current Time.'
       });
     }
 
     // chosen end time is after parking spot end time.
     else if (
-      name === 'endTime' &&
-      compareMilitaryTime(value, parkingSpotEndTime) > 0
+      name === 'end_time' &&
+      compareMilitaryTime(value, parkingSpotend_time) > 0
     ) {
       updateValidTime({
         ...validTime,
-        endTimeHasError: true,
-        startTimeErrorMessage: 'End Time Cannot Be After Purchased Time.'
+        end_timeHasError: true,
+        start_timeErrorMessage: 'End Time Cannot Be After Purchased Time.'
       });
     }
   };
@@ -144,15 +144,15 @@ const SellingMessageContent = (
       <TimePicker
         isRequired={true}
         handleTimeChange={handleTimeChange}
-        time={sellInfo.startTime}
-        name={'startTime'}
+        time={sellInfo.start_time}
+        name={'start_time'}
         label={'Start Time'}
       />
       <TimePicker
         isRequired={true}
         handleTimeChange={handleTimeChange}
-        time={sellInfo.endTime}
-        name={'endTime'}
+        time={sellInfo.end_time}
+        name={'end_time'}
         label={'End Time'}
       />
       <TextField
@@ -172,11 +172,9 @@ const SellingParkingSpotTableBody = props => {
   const [sellInfo, updateSellInfo] = useState({
     date: Date.now(),
     parkingSpotId: -1,
-    startTime: '24:00',
-    endTime: '24:00',
+    start_time: '24:00',
+    end_time: '24:00',
     cost: 0,
-    privateKey: '',
-    showPrivateKey: false
   });
   const [privateKey, updatePrivateKey] = useState({
     privateKey: '',
@@ -200,50 +198,30 @@ const SellingParkingSpotTableBody = props => {
             <>
               <TableRow>
                 <TableCell>{parkingSpot.id}</TableCell>
-                <TableCell>{parkingSpot.startTime}</TableCell>
-                <TableCell>{parkingSpot.endTime}</TableCell>
+                <TableCell>
+                  {convertMilitaryTimeToNormal(parkingSpot.start_time)}
+                </TableCell>
+                <TableCell>
+                  {convertMilitaryTimeToNormal(parkingSpot.end_time)}
+                </TableCell>
                 <TableCell>{parkingSpot.cost}</TableCell>
                 <TableCell>
                   <ConfirmationDialogFieldButton
                     buttonMessage="Sell"
                     messageTitle={`Sell Parking Spot ${parkingSpot.id}`}
                     messageContent={SellingMessageContent(
-                      parkingSpot.startTime,
-                      parkingSpot.endTime,
+                      parkingSpot.start_time,
+                      parkingSpot.end_time,
                       sellInfo,
                       updateSellInfo
                     )}
-                    handleOnConfirm={handleSellRequest}
-                    privateKey={sellInfo}
-                    updatePrivateKey={updateSellInfo}
+                    handleOnConfirm={handleOnConfirm}
+                    privateKey={privateKey}
+                    updatePrivateKey={updatePrivateKey}
                     buttonColor="secondary"
                   />
                 </TableCell>
               </TableRow>
-              <TableCell>{parkingSpot.id}</TableCell>
-              <TableCell>
-                {convertMilitaryTimeToNormal(parkingSpot.startTime)}
-              </TableCell>
-              <TableCell>
-                {convertMilitaryTimeToNormal(parkingSpot.endTime)}
-              </TableCell>
-              <TableCell>{parkingSpot.cost}</TableCell>
-              <TableCell>
-                <ConfirmationDialogFieldButton
-                  buttonMessage="Sell"
-                  messageTitle={`Sell Parking Spot ${parkingSpot.id}`}
-                  messageContent={SellingMessageContent(
-                    parkingSpot.startTime,
-                    parkingSpot.endTime,
-                    sellInfo,
-                    updateSellInfo
-                  )}
-                  handleOnConfirm={handleOnConfirm}
-                  privateKey={privateKey}
-                  updatePrivateKey={updatePrivateKey}
-                  buttonColor="secondary"
-                />
-              </TableCell>
             </>
           );
         })}
@@ -294,11 +272,9 @@ const SellPage = ({ socket, ...props }) => {
       </Typography>
     </>
   );
-  const [userInfo, updateUserInfo] = useState([]);
+  const [sellInfo, updateSellInfo] = useState([]);
 
-  // Changes epoch to military time.
-  let getUserInfo = async () => {
-
+  let getUserParkingSpots = async () => {
     let url = `${apiprefix}/users/${localStorage.olivia_pid}/spots`;
     let response = await makeAPICall('GET', url);
     let respbody = await response.json();
@@ -307,51 +283,48 @@ const SellPage = ({ socket, ...props }) => {
       // Extracting the date and leaving in UTC so no need for further conversion.
       // Converting epoch to military time.
       console.log(respbody);
-      respbody.userInfo.parkingSpotsInfo.forEach(e => {
+      respbody.sellInfo.parkingSpotsInfo.forEach(e => {
         console.log(e);
         e.date = new Date(Date.UTC(e.stat_time));
-        e.startTime = convertEpochToMilitary(e.start_time);
-        e.endTime = convertEpochToMilitary(e.end_time);
+        e.start_time = convertEpochToMilitary(e.start_time);
+        e.end_time = convertEpochToMilitary(e.end_time);
       });
 
-      updateUserInfo(respbody.userInfo);
+      updateSellInfo(respbody.sellInfo);
       updateMessage(null);
     } else {
       updateMessage(<div>Failed to get user.</div>);
       console.log(respbody);
     }
-  };
+  }
 
   const handleSellRequest = (sellInfo, privatekey) => {
     // Make sure that the date field is correct.
     console.log(sellInfo.date);
     const startUTCEpoch = convertMilitaryToEpoch(
       sellInfo.date,
-      sellInfo.startTime
+      sellInfo.start_time
     );
-    const endUTCEpoch = convertMilitaryToEpoch(sellInfo.date, sellInfo.endTime);
+    const endUTCEpoch = convertMilitaryToEpoch(sellInfo.date, sellInfo.end_time);
 
     // Make api request.
   };
 
   // Need another socket event for when parking spot is sold.
   useEffect(() => {
-    getUserInfo();
+    getUserParkingSpots();
   }, []);
 
   useEffect(() => {
-    socket.on(`user-${userInfo.pid}`, function() {});
     // data = {
     //  parkingId: parking spot sold off,
     //  money: # hokie tokens in wallet now.
     // }
-    socket.on(`user-${userInfo.pid}`, data => {
-      const index = userInfo.findIndex(e => (e.parkingId = data.parkingId));
+    socket.on(`user-${localStorage.olivia_pid}`, data => {
+      const index = sellInfo.findIndex(e => (e.parkingId = data.parkingId));
 
-      userInfo = userInfo.splice(index, 1);
-      userInfo.money = data.money;
-
-      updateUserInfo(userInfo);
+      sellInfo = sellInfo.splice(index, 1);
+      updateSellInfo(sellInfo);
     });
   }, []);
 
@@ -364,14 +337,9 @@ const SellPage = ({ socket, ...props }) => {
         ) : (
           <>
             <SellingParkingSpotTable
-              parkingSpotsInfo={userInfo.parkingSpotsInfo}
+              parkingSpotsInfo={sellInfo.parkingSpotsInfo}
               handleSellRequest={handleSellRequest}
             />
-            <Typography>
-              <Box>{`PID: ${userInfo.pid}`}</Box>
-              <Box>{`Email: ${userInfo.email}`}</Box>
-              <Box>{`Hokie Coins: ${userInfo.money}`}</Box>
-            </Typography>
           </>
         )}
       </div>

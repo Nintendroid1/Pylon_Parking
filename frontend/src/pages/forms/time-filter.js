@@ -65,17 +65,20 @@ const convertMilitaryTimeToNormal = time => {
 
 // sortDirection === 'asc' means earliest to latest
 // sortDirection === 'desc' means latest to earliest.
-const sortByMilitaryTime = (data, sortDirection) => {
-  const sortedData = data.sort(compareMilitaryTime);
+const sortByMilitaryTime = (data, sortDirection, columnToSort) => {
+  const sortedData = data.sort(compareParkingSpotTimes(columnToSort));
   return sortDirection === 'asc' ? sortedData : sortedData.reverse();
 };
 
+const compareParkingSpotTimes = columnToSort => (spot1, spot2) => {
+  return compareMilitaryTime(spot1[columnToSort], spot2[columnToSort]);
+}
 
 // If time1 earlier than time2, then return -1.
 // If time2 earlier than time1, then return 1.
 const compareMilitaryTime = (time1, time2) => {
-  time1 = time1.split(':');
-  time2 = time2.split(':');
+  time1 = time1.split(':').map(e => Number(e));
+  time2 = time2.split(':').map(e => Number(e));
 
   if (time1[0] < time2[0]) {
     return -1;
@@ -108,7 +111,7 @@ const convertEpochToMilitary = epoch => {
     minute: '2-digit'
   }
 
-  const temp_date = new Date(epoch * 1000 - UTCToESTInSec);
+  const temp_date = new Date(epoch * 1000);
   return temp_date.toLocaleTimeString('en-US', option);
 };
 
@@ -119,15 +122,11 @@ const convertMilitaryToEpoch = (date, time) => {
   const month = date.getMonth() + 1;
   const day = date.getDate();
 
-  if (Number(hour) + UTCToESTInSec >= 24) {
-    hour = 24 - Number(hour) + UTCToESTInSec;
-  }
-
   return new Date(Date.UTC(year, month, day, hour, minute)).getTime();
 };
 
 const convertEpochToNormal = epoch => {
-  return new Date(epoch.toLocaleTimeString('en-US'));
+  return new Date(epoch).toUTCString();
 };
 
 const DateFilter = ({
@@ -195,7 +194,7 @@ const TimeFilter = ({
   updateAdmin,
   ...props
 }) => {
-  const { onSubmit, popUpTitle, popUpContent } = props;
+  const { onSubmit } = props;
 
   let today = new Date();
   let timeSplit = today.toTimeString().split(':');
@@ -253,6 +252,75 @@ const TimeFilter = ({
   );
 };
 
+// Used by transaction.js to filter by days and time.
+/*
+const MultipleDaysTimeFilter = ({
+  isDark,
+  updateLogin,
+  selectTab,
+  classes,
+  updateUser,
+  updateAdmin,
+  ...props
+}) => {
+  const { onSubmit } = props;
+
+  let today = new Date();
+
+  const [time, updateTime] = useState({
+    startDate: today,
+    endDate: today,
+    startTime: '00:00',
+    endTime: '24:00',
+    privateKey: '',
+    showPrivateKey: false
+  });
+
+  const handleSubmit = event => {
+    event.preventDefault();
+    onSubmit(time);
+  };
+
+  const handleTimeChange = event => {
+    let { name, value } = event.target;
+    updateTime({ ...time, [name]: value });
+  };
+
+  return (
+    <>
+      <MuiPickersUtilsProvider utils={DateFnsUtils}>
+        <form>
+          <Grid container justify="space-around">
+            <CustomDatePicker
+              time={time}
+            />
+          </Grid>
+          <Grid>
+            <TimePicker
+              color="secondary"
+              handleTimeChange={handleTimeChange}
+              time={time.startTime}
+              name={'startTime'}
+              label={'Start Time'}
+            />
+            <TimePicker
+              color="secondary"
+              handleTimeChange={handleTimeChange}
+              time={time.endTime}
+              name={'endTime'}
+              label={'End Time'}
+            />
+            <Button variant="contained" color="primary" onClick={handleSubmit}>
+              Filter!
+            </Button>
+          </Grid>
+        </form>
+      </MuiPickersUtilsProvider>
+    </>
+  );
+};
+
+*/
 export {
   TimeFilter,
   compareMilitaryTime,
