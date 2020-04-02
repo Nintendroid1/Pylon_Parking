@@ -199,9 +199,9 @@ const SellingParkingSpotTableBody = props => {
             <>
               <TableRow>
                 <TableCell>
-                  {`${parkingSpot.zone_id}-${parkingSpot.spot_id}`}
+                  {parkingSpot.uniqueId}
                 </TableCell>
-                <TableCell>{parkingSpots.zone_name}</TableCell>
+                <TableCell>{parkingSpot.zone_name}</TableCell>
                 <TableCell>
                   {convertMilitaryTimeToNormal(parkingSpot.start_time)}
                 </TableCell>
@@ -344,7 +344,7 @@ const SellPage = ({ socket, ...props }) => {
       const index = spotsOwned.findIndex(e => (Number(e.zone_id) === Number(data.zone_id) && Number(e.spot_id) === Number(data.spot_id)));
 
       spotsOwned = spotsOwned.splice(index, 1);
-      updateSpotsOwned(sellInfo);
+      updateSpotsOwned(spotsOwned);
     });
   }, []);
 
