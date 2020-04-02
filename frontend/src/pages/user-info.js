@@ -53,12 +53,6 @@ const UserInfo = ({socket, ...props}) => {
       // Extracting the date and leaving in UTC so no need for further conversion.
       // Converting epoch to military time.
       console.log(respbody);
-      respbody.userInfo.parkingSpotsInfo.forEach(e => {
-        console.log(e);
-        e.date = new Date(Date.UTC(e.stat_time));
-        e.start_time = convertEpochToMilitary(e.start_time);
-        e.end_time = convertEpochToMilitary(e.end_time);
-      });
 
       updateUserInfo(respbody.userInfo);
       updateMessage(null);

@@ -128,7 +128,7 @@ const SellingMessageContent = (
         errorMessage: 'Cost must be at least 0'
       });
     } else {
-      updateSellInfo({ ...sellInfo, cost: Number(cost) });
+      updateSellInfo({ ...sellInfo, price: Number(cost) });
     }
   };
 
@@ -152,7 +152,7 @@ const SellingMessageContent = (
         required
         error={validCost.hasError}
         label={'Cost Per 15 minutes'}
-        value={sellInfo.cost}
+        value={sellInfo.price}
         helperText={validCost.errorMessage}
         onChange={handleOnChangeCost}
       />
@@ -164,7 +164,8 @@ const SellingParkingSpotTableBody = props => {
   const { parkingSpotsInfo, handleSellRequest } = props;
   const [sellInfo, updateSellInfo] = useState({
     date: Date.now(),
-    parkingSpotId: -1,
+    spot_id: -1,
+    zone_id: -1,
     start_time: '24:00',
     end_time: '24:00',
     cost: 0
@@ -176,7 +177,7 @@ const SellingParkingSpotTableBody = props => {
 
   const handleOnConfirm = () => {
     const index = parkingSpotsInfo.findIndex(
-      e => e.id === sellInfo.parkingSpotId
+      e => e.spot_id === sellInfo.spot_id && e.zone_id === sellInfo.zone_id
     );
     const date = parkingSpotsInfo[index].date;
     updateSellInfo({ ...sellInfo, date: date });
@@ -190,18 +191,21 @@ const SellingParkingSpotTableBody = props => {
           return (
             <>
               <TableRow>
-                <TableCell>{parkingSpot.id}</TableCell>
+                <TableCell>
+                  {`${parkingSpot.zone_id}-${parkingSpot.spot_id}`}
+                </TableCell>
+                <TableCell>{parkingSpots.zone_name}</TableCell>
                 <TableCell>
                   {convertMilitaryTimeToNormal(parkingSpot.start_time)}
                 </TableCell>
                 <TableCell>
                   {convertMilitaryTimeToNormal(parkingSpot.end_time)}
                 </TableCell>
-                <TableCell>{parkingSpot.cost}</TableCell>
+                <TableCell>{parkingSpot.price}</TableCell>
                 <TableCell>
                   <ConfirmationDialogFieldButton
                     buttonMessage="Sell"
-                    messageTitle={`Sell Parking Spot ${parkingSpot.id}`}
+                    messageTitle={`Sell Parking Spot ${parkingSpot.zone_id}-${parkingSpot.spot_id}`}
                     messageContent={SellingMessageContent(
                       parkingSpot.start_time,
                       parkingSpot.end_time,
@@ -229,6 +233,7 @@ const SellingParkingSpotTableHeader = () => {
       <TableHead>
         <TableRow>
           <TableCell>Parking Spot ID</TableCell>
+          <TableCell>Zone Name</TableCell>
           <TableCell>Start Time</TableCell>
           <TableCell>End Time</TableCell>
           <TableCell>Average Price Per 15 minutes</TableCell>
@@ -265,7 +270,7 @@ const SellPage = ({ socket, isLoggedIn, ...props }) => {
       </Typography>
     </>
   );
-  const [sellInfo, updateSellInfo] = useState([]);
+  const [spotsOwned, updateSpotsOwned] = useState([]);
 
   let getUserParkingSpots = async () => {
     let url = `${apiprefix}/users/${localStorage.olivia_pid}/spots`;
@@ -277,14 +282,29 @@ const SellPage = ({ socket, isLoggedIn, ...props }) => {
       // Extracting the date and leaving in UTC so no need for further conversion.
       // Converting epoch to military time.
       console.log(respbody);
+      /*
+        respbody = {
+          parkingSpotsInfo: [
+            {
+              zone_name: zone name,
+              spot_id: spot id,
+              zone_id: zone id,
+              price: price per 15,
+              start_time: epoch,
+              end_time: epoch
+            }
+          ]
+        }
+      */
       respbody.parkingSpotsInfo.forEach(e => {
         console.log(e);
+        e.uniqueId = `${e.zone_id}-${e.spot_id}`;
         e.date = new Date(Date.UTC(e.stat_time));
         e.start_time = convertEpochToMilitary(e.start_time);
         e.end_time = convertEpochToMilitary(e.end_time);
       });
 
-      updateSellInfo(respbody);
+      updateSpotsOwned(respbody.parkingSpotsInfo);
       updateMessage(null);
     } else {
       updateMessage(<div>Failed to get user.</div>);
@@ -318,10 +338,10 @@ const SellPage = ({ socket, isLoggedIn, ...props }) => {
     //  money: # hokie tokens in wallet now.
     // }
     socket.on(`user-${localStorage.olivia_pid}`, data => {
-      const index = sellInfo.findIndex(e => (e.parkingId = data.parkingId));
+      const index = spotsOwned.findIndex(e => (Number(e.zone_id) === Number(data.zone_id) && Number(e.spot_id) === Number(data.spot_id)));
 
-      sellInfo = sellInfo.splice(index, 1);
-      updateSellInfo(sellInfo);
+      spotsOwned = spotsOwned.splice(index, 1);
+      updateSpotsOwned(sellInfo);
     });
   }, []);
 
@@ -334,7 +354,7 @@ const SellPage = ({ socket, isLoggedIn, ...props }) => {
         ) : (
           <>
             <SellingParkingSpotTable
-              parkingSpotsInfo={sellInfo.parkingSpotsInfo}
+              parkingSpotsInfo={spotsOwned}
               handleSellRequest={handleSellRequest}
             />
           </>

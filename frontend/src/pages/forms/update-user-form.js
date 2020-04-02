@@ -109,4 +109,7 @@ const UpdatePasswordForm = onSubmit => {
   );
 };
 
-export { UpdatePasswordForm, CustomPassword };
+export {
+  UpdatePasswordForm,
+  CustomPassword
+};

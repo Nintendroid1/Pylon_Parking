@@ -59,7 +59,7 @@ const styles = theme => ({
 // ];
 
 const headerCells = [
-  { id: 'id', label: 'Spot #' },
+  { id: 'spot_id', label: 'Spot #' },
   { id: 'start_time', label: 'Next Available Start Time' },
   { id: 'end_time', label: 'Next Available End Time' }
   // { id: 'available', label: 'Is Available' }
