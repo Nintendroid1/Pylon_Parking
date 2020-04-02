@@ -27,6 +27,7 @@ import LoginTab from '../pages/login';
 import RegisterTab from '../pages/register';
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
+import { MuiThemeProvider } from '@material-ui/core/styles';
 
 const drawerWidth = 240;
 
@@ -104,6 +105,9 @@ const styles = theme => ({
   },
   listItem: {
     color: theme.palette.text.primary
+  },
+  logoutButton: {
+    color: theme.palette.primary
   }
 });
 
@@ -126,6 +130,7 @@ function TabChooser({
   updateUser,
   isAdmin,
   updateAdmin,
+  curTheme,
   ...props
 }) {
   console.log(props);
@@ -196,7 +201,7 @@ function TabChooser({
     window.location.href = `${process.env.PUBLIC_URL}/`;
   } // apply HOC*/
 
-  let LoginButton = () => {
+  let LoginButton = ({ color, ...props }) => {
     return (
       <>
         <Typography
@@ -229,11 +234,20 @@ function TabChooser({
     );
   };
 
-  let LogoutButton = ({ ...props }) => {
+  let LogoutButton = ({ color, classes, ...props }) => {
     let clickHandler = async () => {
       let shouldLogout = await dialog(
-        <Confirm title="Are you sure?">
-          <Typography variant="body2">
+        <Confirm
+          color="inherit"
+          className={classes.logoutButton}
+          title="Are you sure?"
+          theme={curTheme}
+        >
+          <Typography
+            className={classes.logoutButton}
+            color="inherit"
+            variant="body2"
+          >
             Are you sure you want to log out?
           </Typography>
         </Confirm>
@@ -257,9 +271,10 @@ function TabChooser({
     return (
       <>
         <Typography
+          className={classes.logoutButton}
           variant="h6"
           align="right"
-          color="inherit"
+          color={color}
           style={{ flexGrow: 1 }}
         >
           <Button
@@ -431,7 +446,11 @@ function TabChooser({
               </Tabs>
             )}
           </Typography>
-          {isLoggedIn ? <LogoutButton /> : <LoginButton />}
+          {isLoggedIn ? (
+            <LogoutButton classes={classes} color="inherit" />
+          ) : (
+            <LoginButton />
+          )}
         </Toolbar>
         {drawerContent}
       </AppBar>

@@ -105,6 +105,7 @@ const App = ({ classes, ...props }) => {
     }
   });
   const [isAdmin, updateAdmin] = useState(0);
+  let [curTheme, updateTheme] = useState(lightTheme);
 
   // Endpoint for the websocket.
   // Base url.
@@ -136,6 +137,7 @@ const App = ({ classes, ...props }) => {
               currentUser={currentUser}
               updateAdmin={updateAdmin}
               isAdmin={isAdmin}
+              curTheme={curTheme}
             >
               <Route
                 exact
