@@ -12,11 +12,17 @@ router.post('/', (req, res) => {
     if(jwt.verifyJWT(req.body.token, req.body.pid)) {
         //Talk to the blockchain here
 
-        db.query('SELECT availability FROM parking_times WHERE spot_ID = $1 AND zone_ID = $2 AND time_code = $3', [req.body.spot.spot_id, req.body.spot.zone_id, req.body.spot.time_code])
+        db.query('SELECT availability FROM parking_times WHERE spot_ID = $1 AND zone_ID = $2 AND time_code BETWEEN $3 AND $4', [req.body.spot.spot_id, req.body.spot.zone_id, req.body.spot.start_time, req.body.spot.end_time - 1])
         .then(dbres => {
             if(dbres.rows[0]) {
-                if(dbres.rows[0].availability) {
-                    db.query('UPDATE parking_times SET user_PID = $1, availability = false WHERE spot_ID = $2 AND zone_ID = $3 AND time_code = $4 RETURNING *', [req.body.pid, req.body.spot.spot_id, req.body.spot.zone_id, req.body.spot.time_code], (err,result) => {
+                let isValidReq = true;
+                for(i in dbres.rows) {
+                    if(!dbres.rows[i].availability) {
+                        isValidReq = false;
+                    }
+                }
+                if(isValidReq) {
+                    db.query('UPDATE parking_times SET user_PID = $1, availability = false WHERE spot_ID = $2 AND zone_ID = $3 AND time_code BETWEEN $4 AND $5 RETURNING *', [req.body.pid, req.body.spot.spot_id, req.body.spot.zone_id, req.body.spot.start_time, req.body.spot.end_time-1], (err,result) => {
                         if (err) {
                             console.log(err.stack);
                             res.status(500).json({message: "Internal error"});
