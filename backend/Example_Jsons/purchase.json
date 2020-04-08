@@ -1,9 +1,10 @@
 {
-    "userName": "testPID",
-    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE1ODUyNTMyODksInVzZXIiOiJ0ZXN0UElEIiwiaWF0IjoxNTg1MjQ5Njg5fQ.Nh6A99a5jeiGwgc9EAF4ZL3Gu0xNPrkb6UUst48L7QU",
+    "pid": "admin",
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE1ODYzNjY1NDEsInBpZCI6ImFkbWluIiwiYWRtaW4iOjEsImlhdCI6MTU4NjM2Mjk0MX0.GGWWxkruDYPElHktjY2BTke_DL7QEFbCIfYTpiIZ-KQ",
     "spot": {
         "spot_id": "1",
         "zone_id": "1",
-        "time_code": "firsttimecode"
+        "start_time": "1587355200",
+        "end_time": "081080894097410897"
     }
 }

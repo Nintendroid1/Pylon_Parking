@@ -11,30 +11,41 @@ router.post("/", (req, res) => {
     //Talk to the blockchain here
 
     db.query(
-      "SELECT availability FROM parking_times WHERE spot_ID = $1 AND zone_ID = $2 AND time_code = $3",
-      [req.body.spot.spot_id, req.body.spot.zone_id, req.body.spot.time_code]
+      "SELECT availability FROM parking_times WHERE spot_ID = $1 AND zone_ID = $2 AND time_code BETWEEN $3 AND $4",
+      [
+        req.body.spot.spot_id,
+        req.body.spot.zone_id,
+        req.body.spot.start_time,
+        req.body.spot.end_time - 1
+      ]
     ).then(dbres => {
       if (dbres.rows[0]) {
-        if (dbres.rows[0].availability) {
+        let isValidReq = true;
+        for (i in dbres.rows) {
+          if (!dbres.rows[i].availability) {
+            isValidReq = false;
+          }
+        }
+        if (isValidReq) {
           db.query(
-            "UPDATE parking_times SET user_PID = $1, availability = false WHERE spot_ID = $2 AND zone_ID = $3 AND time_code = $4 RETURNING *",
+            "UPDATE parking_times SET user_PID = $1, availability = false WHERE spot_ID = $2 AND zone_ID = $3 AND time_code BETWEEN $4 AND $5 RETURNING *",
             [
               req.body.pid,
               req.body.spot.spot_id,
               req.body.spot.zone_id,
               req.body.spot.start_time,
-              req.body.spot.end_time
+              req.body.spot.end_time - 1
             ],
             (err, result) => {
               if (err) {
                 console.log(err.stack);
                 res.status(500).json({ message: "Internal error" });
               } else {
-                // Socket updating other users that this spot has been acquired.
-                //
+                /*
+                                Socket updating other users that this spot has been acquired.
+                            */
                 // Getting the socket, which is in the settings object.
                 const socket = req.app.settings["socket-api"];
-
                 let updatedParkingSpotInfo = null; // object that would be sent back as if the get specific parking spot with parking spot id was called.
 
                 const parkingSpotInfoForTransactionHistory = null; // object containing info for the transaction history page, in case someone viewing entire history.
@@ -68,7 +79,6 @@ router.post("/", (req, res) => {
                 //   updatedParkingSpotInfoForZone
                 // );
 
-
                 // socketAPI.broadcastTransactionHistoryInfo(
                 // TODO
                 //   socket,
@@ -85,10 +95,29 @@ router.post("/", (req, res) => {
                 // not the university, then an updated value on the amount of
                 // tokens they have after the parking spot was sold.
 
+                zone_call = null;
+                db.query(
+                  "SELECT * FROM parking_times WHERE spot_ID = $1 AND zone_ID = $2",
+                  [req.body.spot_id, req.body.zone_id],
+                  (err, dbres) => {
+                    if (err) {
+                      console.log(err.stack);
+                      res
+                        .status(500)
+                        .json({ message: "Internal server error" });
+                    } else {
+                      zone_call = dbres.rows;
+                    }
+                  }
+                );
 
                 res
                   .status(200)
-                  .json({ message: "Spot aquired", spot: result.rows });
+                  .json({
+                    message: "Spot aquired",
+                    spot: result.rows,
+                    spot_page: zone_call
+                  });
               }
             }
           );
@@ -99,8 +128,6 @@ router.post("/", (req, res) => {
         res.status(403).json({ message: "Bad spot code" });
       }
     });
-  } else {
-    res.status(403).json({ message: "Bad login or json format" });
   }
 });
 
