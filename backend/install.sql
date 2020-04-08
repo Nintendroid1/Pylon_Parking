@@ -33,12 +33,11 @@ CREATE TABLE parking_times
 (
 	zone_ID INT NOT NULL,
 	spot_ID INT NOT NULL,
-	start_time INT,
-	end_time INT,
+	time_code INT,
 	user_PID VARCHAR(100),
 	availability boolean,
 	price DECIMAL(16, 10) DEFAULT 4.20,
-	PRIMARY KEY (spot_ID, zone_ID, start_time, end_time),
+	PRIMARY KEY (spot_ID, zone_ID, time_code),
 	FOREIGN KEY (spot_ID, zone_ID) REFERENCES parking_spots(spot_ID, zone_ID),
 	FOREIGN KEY (user_PID) REFERENCES users(PID)
 );
