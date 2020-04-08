@@ -22,10 +22,15 @@ router.get("/all", (req, res) => {
 });
 
 router.get("/:zone_id/spot/:spot_id", (req, res) => {
-  if(req.query.startTime && req.query.endTime) {
+  if (req.query.startTime && req.query.endTime) {
     db.query(
-      "SELECT * FROM parking_times WHERE spot_ID = $1 AND zone_ID = $2 AND time_code > $3 AND time_code < $",
-      [req.params.spot_id, req.params.zone_id, req.query.startTime, req.query.endTime],
+      "SELECT * FROM parking_times WHERE spot_ID = $1 AND zone_ID = $2 AND start_time >= $3 AND end_time <= $4",
+      [
+        req.params.spot_id,
+        req.params.zone_id,
+        req.query.startTime,
+        req.query.endTime
+      ],
       (err, dbres) => {
         if (err) {
           console.log(err.stack);
@@ -36,8 +41,7 @@ router.get("/:zone_id/spot/:spot_id", (req, res) => {
         }
       }
     );
-  }
-  else {
+  } else {
     db.query(
       "SELECT * FROM parking_times WHERE spot_ID = $1 AND zone_ID = $2",
       [req.params.spot_id, req.params.zone_id],
@@ -57,33 +61,31 @@ router.get("/:zone_id/spot/:spot_id", (req, res) => {
 router.get("/:zone_id", (req, res) => {
   if (req.query.startTime && req.query.endTime) {
     db.query(
-      'SELECT spot_id, zone_id, MIN(time_code) "next_avail" FROM parking_times\
-                  WHERE zone_id = $1 AND\
-                  time_code > $2 AND time_code < $3 GROUP BY zone_id, spot_id ORDER BY spot_id ASC',
-      [req.params.zone_id, req.query.startTime, req.query.endTime],
-      (err, dbres) => {
-        if (err) {
-          console.log(err.stack);
-          res.status(500).json({ message: "Internal server error" });
-        } else {
-          res.status(200).json({ parkingInfo: dbres.rows });
-        }
+      'WITH filtered_times AS (SELECT * FROM parking_times WHERE zone_id = $1 AND start_time >= $2 AND end_time <= $3)\
+      SELECT spot_id, zone_id, MIN(start_time) as "start_time", MIN(end_time) as "end_time" FROM filtered_times GROUP BY zone_id, spot_id ORDER BY spot_id ASC',
+      [req.params.zone_id, req.query.startTime, req.query.endTime]
+    ).then((dbres, err) => {
+      if (err) {
+        console.log(err.stack);
+        res.status(500).json({ message: "Internal server error" });
+      } else {
+        console.log(dbres.rows);
+        res.status(200).json({ parkingInfo: dbres.rows });
       }
-    );
+    });
   } else {
     // db.query('SELECT spot_id FROM parking_spots WHERE zone_ID = $1',[req.params.zone_id], (err,dbres) => {
     db.query(
-      'SELECT spot_id, zone_id, MIN(time_code) "next_avail" FROM parking_times WHERE zone_id = $1 GROUP BY zone_id, spot_id ORDER BY spot_id ASC',
-      [req.params.zone_id],
-      (err, dbres) => {
-        if (err) {
-          console.log(err.stack);
-          res.status(500).json({ message: "Internal server error" });
-        } else {
-          res.status(200).json({ parkingInfo: dbres.rows });
-        }
+      'SELECT spot_id, zone_id, MIN(start_time) as "start_time", MIN(end_time) as "end_time" FROM parking_times WHERE zone_id = $1 GROUP BY zone_id, spot_id ORDER BY spot_id ASC',
+      [req.params.zone_id]
+    ).then((dbres, err) => {
+      if (err) {
+        console.log(err.stack);
+        res.status(500).json({ message: "Internal server error" });
+      } else {
+        res.status(200).json({ parkingInfo: dbres.rows });
       }
-    );
+    });
   }
 });
 

@@ -1,4 +1,5 @@
 // const bcrypt = require('bcrypt');
+//
 const { withJWTAuthMiddleware } = require("express-kun");
 const secret = "verysecretpasswordthatsdefinatelynotinthesource";
 
@@ -23,3 +24,40 @@ module.exports = {
   createSecureRouter,
   getTokenFromBearer
 };
+
+
+// var passport = require("passport");
+// var passportJwt = require("passport-jwt");
+// var conf = require("./config.js");
+// var JwtStrategy = require('passport-jwt').Strategy,
+//     ExtractJwt = require('passport-jwt').ExtractJwt;
+// var params = {
+//   secretOrKey: conf.jwtSecret,
+//   jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken()
+// }
+// var opts = {}
+// opts.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken();
+// opts.secretOrKey = 'secret';
+// opts.issuer = 'accounts.examplesoft.com';
+// opts.audience = 'yoursite.net';
+// passport.use(new JwtStrategy(opts, function(jwt_payload, done) {
+
+//   done(null, jwt_payload);
+// }));
+
+// const requireAuthenticationWithPredicate = pred => (req, res, next) => {
+//   passport.authenticate('jwt', { session: false }, function(err, user) {
+//     if (user === false) {
+//       res.status(401).json({ message: 'Invalid User' });
+//     } else if (pred.test(user) === true) {
+//       req.user = user;
+//       next();
+//     } else {
+//       res.status(403).json({ message: 'Authentication Failed' });
+//     }
+//   })(req, res, next);
+// };
+
+// module.exports = {
+//   requireLogin: requireAuthenticationWithPredicate({test: () => true})
+// }

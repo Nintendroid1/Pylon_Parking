@@ -17,6 +17,8 @@
     "express-kun": "^1.0.24",
     "jsonwebtoken": "^8.5.1",
     "morgan": "^1.9.1",
+    "passport": "^0.4.1",
+    "passport-jwt": "^4.0.0",
     "pg": "^7.18.2",
     "socket.io": "^2.3.0"
   }
