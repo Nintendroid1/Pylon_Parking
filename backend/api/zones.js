@@ -31,7 +31,7 @@ router.get("/:zone_id/spot/:spot_id", (req, res) => {
         req.query.startTime,
         req.query.endTime
       ],
-      (err, dbres) => {
+      (dbres, err) => {
         if (err) {
           console.log(err.stack);
           res.status(500).json({ message: "Internal server error" });
@@ -45,7 +45,7 @@ router.get("/:zone_id/spot/:spot_id", (req, res) => {
     db.query(
       "SELECT * FROM parking_times WHERE spot_ID = $1 AND zone_ID = $2",
       [req.params.spot_id, req.params.zone_id],
-      (err, dbres) => {
+      (dbres, err) => {
         if (err) {
           console.log(err.stack);
           res.status(500).json({ message: "Internal server error" });

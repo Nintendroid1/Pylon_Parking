@@ -58,7 +58,8 @@ secureRouter.get("/:pid", function(req, res) {
           pid: tempUser.pid,
           email: tempUser.email,
           first_name: tempUser.first_name,
-          last_name: tempUser.last_name
+          last_name: tempUser.last_name,
+          balance: 0
         };
       }
       res.status(200).json({ ...userInfo });
