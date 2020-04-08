@@ -19,17 +19,6 @@ VALUES
      (3, 1),
      (3, 2);
 
-INSERT INTO parking_times(zone_id, spot_id, time_code, user_pid, availability)
-VALUES
-     (2, 1, 1587355200, NULL, True),
-     (2, 2, 1587355200, NULL, True),
-     (2, 3, 1587355200, NULL, True),
-     (2, 4, 1587355200, NULL, True),
-     (3, 1, 1587355200, NULL, True),
-     (3, 2, 1587355200, NULL, True),
-     (1, 1, 1587355200, NULL, True),
-     (1, 2, 1587355200, NULL, True);
-
 INSERT INTO users(pid, pass, email, first_name, last_name, admin_status)
 VALUES
     ('admin','adminpass','admin@vt.edu','The','Admin','1'),
@@ -111,3 +100,15 @@ VALUES
     ('morassle_vdw','mora','morassle_vdw@vt.edu','Tyson','Horne','0'),
     ('eggcorn','eggc','eggcorn@vt.edu','Dion','Salinas','0'),
     ('gewgawyvinyl','gewg','gewgawyvinyl@vt.edu','Alaya','Warner','0');
+
+INSERT INTO parking_times(zone_id, spot_id, start_time, end_time, user_pid, availability)
+VALUES
+     (2, 1, 1587355200, 1587358800, 'admin', True),
+     (2, 2, 1587355200, 1587358800, 'admin', True),
+     (2, 3, 1587355200, 1587358800, 'admin', True),
+     (2, 4, 1587355200, 1587358800, 'admin', True),
+     (3, 1, 1587355200, 1587358800, 'muffinsApay', True),
+     (3, 2, 1587355200, 1587358800, 'muffinsApay', True),
+     (1, 1, 1587355200, 1587358800, 'muffinsApay', True),
+     (1, 2, 1585693800, 1585713540, 'eggcorn', True),
+     (1, 2, 1587355200, 1587358800, 'eggcorn', True);
