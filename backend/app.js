@@ -7,6 +7,7 @@ const indexRouter = require("./api/index");
 const usersRouter = require("./api/users");
 const zonesRouter = require("./api/zones");
 const purchaseRouter = require("./api/purchase");
+const sellRouter = require("./api/sell");
 
 // Initializing socket and passing it to each app.
 const server = require("http").Server(app);
@@ -61,6 +62,7 @@ app.use("/api", indexRouter);
 app.use("/api/users", usersRouter);
 app.use("/api/zones", zonesRouter);
 app.use("/api/purchase", purchaseRouter);
+app.use("/api/sell", sellRouter);
 app.use(express.json());
 
 app.use(function(req, res, next) {
