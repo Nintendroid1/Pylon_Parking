@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # -- Remove exisiting blockchain
-kill -9 keosd
-kill -9 nodeos
+pkill keosd
+pkill nodeos
 keosd &
 
 # start_dev_chain.sh
