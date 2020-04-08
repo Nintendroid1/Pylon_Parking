@@ -7,7 +7,7 @@ const db = require('../db');
 router.use(express.json());
 
 router.post('/',(req,res) => {
-    if(jwt.verifyJWT(req.body.token, req.body.userName)) {
+    if(jwt.verifyJWT(req.body.token, req.body.pid)) {
         if(req.body.pid && req.body.token && req.body.spot.spot_id && req.body.spot.zone_id && req.body.spot.start_time && req.body.spot.end_time && req.body.spot.price) {
 
             let isValidReq = true;
@@ -20,13 +20,14 @@ router.post('/',(req,res) => {
                     }
                 }
                 if(isValidReq) {
-                    db.query("UPDATE parking_times SET price = $5, availability = true WHERE spot_id = $1 AND zone_id = $2 AND time_code BETWEEN $3 AND $4",
-                    [req.body.spot.spot_id, req.body.spot.zone_id, req.body.spot.start_time, req.body.spot.end_time-1, req.body.spot.price], (dbres,err) => {
+                    db.query("UPDATE parking_times SET price = $5, availability = true WHERE spot_id = $1 AND zone_id = $2 AND time_code BETWEEN $3 AND $4 RETURNING *",
+                    [req.body.spot.spot_id, req.body.spot.zone_id, req.body.spot.start_time, req.body.spot.end_time-1, req.body.spot.price], (err, response) => {
                         if(err) {
+                            console.log(err);
                             res.status(500).json({message: "Internal Server Error"});
                         }
                         else {
-                            res.status(200).json({message: "Success"});
+                            res.status(200).json({message: "Success", rows: response.rows});
                         }
                     });
                 }

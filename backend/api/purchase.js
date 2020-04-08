@@ -16,7 +16,7 @@ router.post('/', (req, res) => {
         .then(dbres => {
             if(dbres.rows[0]) {
                 if(dbres.rows[0].availability) {
-                    db.query('UPDATE parking_times SET user_PID = $1, availability = false WHERE spot_ID = $2 AND zone_ID = $3 AND time_code = $4 RETURNING *', [req.body.pid, req.body.spot.spot_id, req.body.spot.zone_id, req.body.spot.start_time, req.body.spot.end_time], (err,result) => {
+                    db.query('UPDATE parking_times SET user_PID = $1, availability = false WHERE spot_ID = $2 AND zone_ID = $3 AND time_code = $4 RETURNING *', [req.body.pid, req.body.spot.spot_id, req.body.spot.zone_id, req.body.spot.time_code], (err,result) => {
                         if (err) {
                             console.log(err.stack);
                             res.status(500).json({message: "Internal error"});
@@ -47,7 +47,21 @@ router.post('/', (req, res) => {
 
                             socketAPI.broadcastTransactionHistoryInfo(socket, parkingSpotInfoForTransactionHistory);
 
-                            res.status(200).json({message: "Spot aquired", spot: result.rows});
+                            zone_call = null;
+                            db.query(
+                                "SELECT * FROM parking_times WHERE spot_ID = $1 AND zone_ID = $2",
+                                [req.body.spot_id, req.body.zone_id],
+                                (err, dbres) => {
+                                    if (err) {
+                                        console.log(err.stack);
+                                        res.status(500).json({ message: "Internal server error" });
+                                      } else {
+                                        zone_call = dbres.rows;
+                                      }
+                                }
+                            );
+
+                            res.status(200).json({message: "Spot aquired", spot: result.rows, spot_page: zone_call});
                         }
                     });
                 }
