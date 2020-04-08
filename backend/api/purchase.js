@@ -55,9 +55,9 @@ router.post('/', (req, res) => {
                                     if (err) {
                                         console.log(err.stack);
                                         res.status(500).json({ message: "Internal server error" });
-                                      } else {
-                                        zone_call = dbres.rows;
-                                      }
+                                    } else {
+                                    zone_call = dbres.rows;
+                                    }
                                 }
                             );
 
