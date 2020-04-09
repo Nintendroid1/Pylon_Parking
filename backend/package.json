@@ -13,6 +13,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "eosjs": "^20.0.3",
     "express": "^4.17.1",
     "express-kun": "^1.0.24",
     "jsonwebtoken": "^8.5.1",
