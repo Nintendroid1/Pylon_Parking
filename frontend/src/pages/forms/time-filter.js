@@ -130,13 +130,7 @@ const convertEpochToNormal = epoch => {
   return new Date(epoch).toUTCString();
 };
 
-const DateFilter = ({
-  time,
-  handleDateFilter,
-  updateTime,
-  ...props
-}) => {
-
+const DateFilter = ({ time, handleDateFilter, updateTime, ...props }) => {
   const handleOnClick = event => {
     event.preventDefault();
     handleDateFilter();
@@ -144,26 +138,13 @@ const DateFilter = ({
 
   return (
     <>
-      <CustomDatePicker
-        time={time}
-        updateTime={updateTime}
-      />
-      <Button
-        variant='contained'
-        color='primary'
-        onClick={handleOnClick}
-      >
+      <CustomDatePicker time={time} updateTime={updateTime} />
+      <Button variant="contained" color="primary" onClick={handleOnClick}>
         Filter!
       </Button>
     </>
   );
 };
-
-const CustomDatePicker = ({
-  time,
-  updateTime,
-  ...props
-}) => {
 
 const CustomDatePicker = ({ time, updateTime, ...props }) => {
   const handleDateChange = newDate => {

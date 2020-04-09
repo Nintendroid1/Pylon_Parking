@@ -38,13 +38,11 @@ import {
   createMuiTheme
 } from '@material-ui/core/styles';
 
-const UserInfo = ({socket, ...props}) => {
-
+const UserInfo = ({ socket, isLoggedIn, ...props }) => {
   const [message, updateMessage] = useState('Loading');
   const [userInfo, updateUserInfo] = useState(null);
 
   let getUserInfo = async () => {
-
     let url = `${apiprefix}/users/${localStorage.olivia_pid}`;
     let response = await makeAPICall('GET', url);
     let respbody = await response.json();
@@ -54,7 +52,7 @@ const UserInfo = ({socket, ...props}) => {
       // Converting epoch to military time.
       console.log(respbody);
 
-      updateUserInfo(respbody.userInfo);
+      updateUserInfo(respbody);
       updateMessage(null);
     } else {
       updateMessage(<div>Failed to get user.</div>);
@@ -78,9 +76,9 @@ const UserInfo = ({socket, ...props}) => {
 
   return (
     <>
-      {message ?  (
-          <Typography>{message}</Typography>
-        ) : (
+      {message ? (
+        <Typography>{message}</Typography>
+      ) : (
         <Typography>
           <Box>{`PID: ${userInfo.pid}`}</Box>
           <Box>{`Email: ${userInfo.email}`}</Box>
@@ -89,6 +87,6 @@ const UserInfo = ({socket, ...props}) => {
       )}
     </>
   );
-}
+};
 
 export default UserInfo;

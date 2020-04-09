@@ -23,19 +23,29 @@ import io from 'socket.io-client';
 import SellPage from './pages/sell-page';
 import apiprefix from './pages/apiprefix';
 import ProfilePage from './pages/profile';
+import UserInfo from './pages/user-info';
 import UpdateUserInfo from './pages/update-user-info';
 
 import Typography from '@material-ui/core/Typography';
 import history from './history';
+import Dashboard from './ui/Dashboard';
+import SimpleChart from './ui/SimpleChart';
+
+// Icons
+import MapIcon from '@material-ui/icons/Map';
+import DashboardIcon from '@material-ui/icons/Dashboard';
+import HistoryIcon from '@material-ui/icons/History';
+import HomeIcon from '@material-ui/icons/Home';
 
 const styles = theme => ({
   root: {
     display: 'flex',
     flexGrow: 1
-  }
+  },
+  appBarSpacer: theme.mixins.toolbar
 });
 
-const lightTheme = createMuiTheme({
+let lightTheme = createMuiTheme({
   palette: {
     primary: {
       // light: will be calculated from palette.primary.main,
@@ -56,11 +66,13 @@ const lightTheme = createMuiTheme({
     // Used by the functions below to shift a color's luminance by approximately
     // two indexes within its tonal palette.
     // E.g., shift from Red 500 to Red 300 or Red 700.
-    tonalOffset: 0.2
+    tonalOffset: 0.2,
+    shadows: 'none',
+    zDepthShadows: 'none'
   },
   typography: { useNextVariants: true } // avoids deprecated warning
 });
-const darkTheme = createMuiTheme({
+let darkTheme = createMuiTheme({
   palette: {
     primary: {
       // light: will be calculated from palette.primary.main,
@@ -144,6 +156,7 @@ const App = ({ classes, ...props }) => {
                 path="/"
                 label="Welcome"
                 key="/"
+                icon={<HomeIcon />}
                 hidden={false}
                 reqAdmin={false}
                 reqLogin={false}
@@ -154,6 +167,7 @@ const App = ({ classes, ...props }) => {
                 path="/map"
                 label="Map"
                 key="/map"
+                icon={<MapIcon />}
                 hidden={false}
                 reqAdmin={false}
                 reqLogin={false}
@@ -164,12 +178,26 @@ const App = ({ classes, ...props }) => {
                 path="/transaction_history"
                 label="Transaction History"
                 key="/transaction_history"
+                panelGroup="profile"
+                icon={<HistoryIcon />}
                 reqAdmin={false}
                 reqLogin={false}
                 hidden={false}
                 render={() => (
                   <TransactionHistory socket={transactionHistorySocket} />
                 )}
+              />
+              <Route
+                exact
+                path="/dashboard"
+                label="Dashboard"
+                key="/dashboard"
+                panelGroup="profile"
+                icon={<DashboardIcon />}
+                reqAdmin={false}
+                reqLogin={false}
+                hidden={false}
+                component={Dashboard}
               />
               <Route
                 exact
@@ -191,7 +219,9 @@ const App = ({ classes, ...props }) => {
                 hidden={true}
                 reqAdmin={false}
                 reqLogin={true}
-                render={() => <ProfilePage isLoggedIn={isLoggedIn} />}
+                render={() => (
+                  <ProfilePage socket={userSocket} isLoggedIn={isLoggedIn} />
+                )}
               />
               <Route
                 exact

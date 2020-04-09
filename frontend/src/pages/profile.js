@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { makeAPICall } from '../api';
 import { withStyles } from '@material-ui/core/styles';
 import Table from '@material-ui/core/Table';
@@ -27,12 +27,13 @@ const styles = theme => ({
   }
 });
 
-let ProfilePage = ({ classes, ...props }) => {
+let ProfilePage = ({ classes, socket, ...props }) => {
   const [user, updateUser] = useState({
     pid: '',
     first_name: '',
     last_name: '',
-    email: ''
+    email: '',
+    balance: ''
   });
   const [hasCalled, updateCall] = useState(false);
   const [isLoading, setLoading] = useState(false);
@@ -48,7 +49,8 @@ let ProfilePage = ({ classes, ...props }) => {
         pid: rbody.pid,
         first_name: rbody.first_name,
         last_name: rbody.last_name,
-        email: rbody.email
+        email: rbody.email,
+        balance: rbody.balance
       });
       setLoading(false);
     } else {
@@ -56,10 +58,19 @@ let ProfilePage = ({ classes, ...props }) => {
     }
   };
 
-  if (!hasCalled) {
-    updateCall(true);
+  useEffect(() => {
     loadUser();
-  }
+  }, []);
+
+  useEffect(() => {
+    // data = {
+    //  parkingId: parking spot sold off,
+    //  money: # hokie tokens in wallet now.
+    // }
+    socket.on(`user-${localStorage.olivia_pid}`, data => {
+      updateUser({ ...user, money: data.money });
+    });
+  }, []);
   return (
     <>
       <div style={{ width: '100%' }}>
@@ -117,6 +128,22 @@ let ProfilePage = ({ classes, ...props }) => {
                   <LinearProgress />
                 ) : (
                   <Typography style={{ fontSize: 16 }}>{user.email}</Typography>
+                )}
+              </TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell>
+                <Typography style={{ fontSize: 18 }}>
+                  Account Balance:
+                </Typography>
+              </TableCell>
+              <TableCell align="left">
+                {isLoading ? (
+                  <LinearProgress />
+                ) : (
+                  <Typography style={{ fontSize: 16 }}>
+                    {user.balance}
+                  </Typography>
                 )}
               </TableCell>
             </TableRow>

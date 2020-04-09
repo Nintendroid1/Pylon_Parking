@@ -14,8 +14,8 @@ import queryStrings from 'query-string';
 import TextField from '@material-ui/core/TextField';
 import MenuItem from '@material-ui/core/MenuItem';
 import Button from '@material-ui/core/Button';
-import { 
-  convertEpochToMilitary, 
+import {
+  convertEpochToMilitary,
   convertMilitaryToEpoch
 } from './forms/time-filter';
 import {
@@ -124,7 +124,13 @@ const TransactionTable = ({
   getEntireHistory,
   ...props
 }) => {
-  const listOfFilterOptions = ['None', 'Parking ID', 'Buyer ID', 'Seller ID', 'Time'];
+  const listOfFilterOptions = [
+    'None',
+    'Parking ID',
+    'Buyer ID',
+    'Seller ID',
+    'Time'
+  ];
   const [filterOption, updateFilterOption] = useState('Buyer ID');
   const [textFieldValue, updateTextFieldValue] = useState({
     value: userId,
@@ -151,17 +157,19 @@ const TransactionTable = ({
   };
 
   const handleClickFilter = event => {
-
     // Not sure if this is allowed.
     // Need to check for re-renders and other errors.
-    useEffect(() => {
-      getEntireHistory();
-    }, []);
+    // useEffect(() => {
+    //   getEntireHistory();
+    // }, []);
 
     // If no filter option, then display all, otherwise, filter base on filter option.
-    const temp = filterOption === 'None' ? listOfTransactions : listOfTransactions.filter(
-      e => e[filterOption] === textFieldValue.value
-    );
+    const temp =
+      filterOption === 'None'
+        ? listOfTransactions
+        : listOfTransactions.filter(
+            e => e[filterOption] === textFieldValue.value
+          );
     updateDisplayList(temp);
   };
 
@@ -190,11 +198,7 @@ SelectProps={{
           value={textFieldValue.value}
           onChange={handleTextFieldChange}
         />
-        <Button 
-          variant="contained" 
-          color="primary" 
-          onClick={handleClickFilter}
-        >
+        <Button variant="contained" color="primary" onClick={handleClickFilter}>
           Filter!
         </Button>
       </div>
@@ -237,9 +241,13 @@ const updatePageInfo = (queryPage, currPage, updatePage) => {
   ) {
     updatePage(Number(queryPage));
   }
-}
+};
 
-const updateNumEntryInfo = (queryNumEntry, currNumEntry, updateNumEntriesPerPage) => {
+const updateNumEntryInfo = (
+  queryNumEntry,
+  currNumEntry,
+  updateNumEntriesPerPage
+) => {
   if (
     queryNumEntry !== undefined &&
     isNaN(queryNumEntry) !== false &&
@@ -247,7 +255,7 @@ const updateNumEntryInfo = (queryNumEntry, currNumEntry, updateNumEntriesPerPage
   ) {
     updateNumEntriesPerPage(Number(queryNumEntry));
   }
-}
+};
 
 // Must change epoch if any to military time.
 const TransactionHistory = ({ socket, ...props }) => {
@@ -267,20 +275,27 @@ const TransactionHistory = ({ socket, ...props }) => {
   const url = `${apiprefix}/transaction_history`;
 
   const getUserTransactionHistory = async () => {
-    const response = await makeAPICall('GET', `${url}/${localStorage.olivia_pid}/spots`);
+    const response = await makeAPICall(
+      'GET',
+      `${url}/${localStorage.olivia_pid}/spots`
+    );
     const respbody = await response.json();
 
     if (response.status === 200) {
       const queryParams = queryStrings.parse(window.location.search);
 
       updatePageInfo(queryParams.page, page, updatePage);
-      updateNumEntryInfo(queryParams.numEntries, numEntriesPerPage, updateNumEntriesPerPage);
+      updateNumEntryInfo(
+        queryParams.numEntries,
+        numEntriesPerPage,
+        updateNumEntriesPerPage
+      );
 
       updateListOfTransactions(respbody.listOfTransactions);
     } else {
       updateMessage('Error has occurred');
     }
-  }
+  };
 
   const getEntireHistory = async () => {
     const response = await makeAPICall('GET', url);
@@ -290,14 +305,17 @@ const TransactionHistory = ({ socket, ...props }) => {
       const queryParams = queryStrings.parse(window.location.search);
 
       updatePageInfo(queryParams.page, page, updatePage);
-      updateNumEntryInfo(queryParams.numEntries, numEntriesPerPage, updateNumEntriesPerPage);
+      updateNumEntryInfo(
+        queryParams.numEntries,
+        numEntriesPerPage,
+        updateNumEntriesPerPage
+      );
 
       updateListOfTransactions(respbody.listOfTransactions);
     } else {
       updateMessage('Error has occurred');
     }
   };
-
 
   useEffect(() => {
     getUserTransactionHistory();
