@@ -49,8 +49,8 @@ io.of("transactionHistory").on("connect", socket => {
   console.log(`Client connected to /transactionHistory namespace.`);
 });
 
-io.of("/users").on("connect", socket => {
-  console.log(`Client connected to /users namespace.`);
+io.of("/user").on("connect", socket => {
+  console.log(`Client connected to /user namespace.`);
 })
 
 app.set("socket-api", io);

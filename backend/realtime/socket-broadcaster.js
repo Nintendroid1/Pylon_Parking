@@ -29,6 +29,22 @@ function broadcastParkingSpotInfo(io, parkingSpotId, data) {
   io.of(`parking_spot`).emit(`parkingSpot-${parkingSpotId}`, data);
 }
 
+function broadcastUserInfo(io, userId, data) {
+  if (io === null) {
+    console.log("Socket has not been initialized");
+  }
+
+  io.of(`user`).emit(`userInfo-${userId}`, data);
+}
+
+function broadcastSellPageInfo(io, userId, data) {
+  if (io === null) {
+    console.log("Socket has not been initialized");
+  }
+
+  io.of(`user`).emit(`user-${userId}`, data);
+}
+
 // Broadcasting updated info on new transaction that has been made.
 function broadcastTransactionHistoryInfo(io, data) {
   if (io === null) {
@@ -42,4 +58,5 @@ module.exports= {
   broadcastZoneInfo,
   broadcastParkingSpotInfo,
   broadcastTransactionHistoryInfo,
+  broadcastUserInfo,
 }
