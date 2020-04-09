@@ -170,7 +170,7 @@ const BountySystem = () => {
     const respbody = await response.json();
 
     if (response.status === 200) {
-      // make a toaster stating that the report has been received.
+      // make a toaster stating that the report has been received?
     } else {
       // there was an error in the report.
     }
@@ -179,9 +179,6 @@ const BountySystem = () => {
   return (
     <>
       <Typography>
-        <CustomSnackbar 
-
-        />
         <ReportField 
           info={info}
           updateInfo={updateInfo}
