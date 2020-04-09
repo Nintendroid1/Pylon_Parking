@@ -334,8 +334,8 @@ const SellPage = ({ socket, isLoggedIn, ...props }) => {
 
   useEffect(() => {
     // data = {
-    //  parkingId: parking spot sold off,
-    //  money: # hokie tokens in wallet now.
+    //  zone_id
+    //  spot_id
     // }
     socket.on(`user-${localStorage.olivia_pid}`, data => {
       const index = spotsOwned.findIndex(

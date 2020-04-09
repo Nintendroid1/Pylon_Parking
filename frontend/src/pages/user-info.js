@@ -53,6 +53,16 @@ const UserInfo = ({ socket, isLoggedIn, ...props }) => {
       console.log(respbody);
 
       updateUserInfo(respbody);
+      /*
+        respbody.body = {
+          pid: tempUser.pid,
+          email: tempUser.email,
+          first_name: tempUser.first_name,
+          last_name: tempUser.last_name
+          balance
+        }
+      */
+      // updateUserInfo(respbody.body);
       updateMessage(null);
     } else {
       updateMessage(<div>Failed to get user.</div>);
@@ -65,12 +75,9 @@ const UserInfo = ({ socket, isLoggedIn, ...props }) => {
   }, []);
 
   useEffect(() => {
-    // data = {
-    //  parkingId: parking spot sold off,
-    //  money: # hokie tokens in wallet now.
-    // }
-    socket.on(`user-${localStorage.olivia_pid}`, data => {
-      updateUserInfo({ ...userInfo, money: data.money });
+    // data = balance # hokie tokens in wallet now.
+    socket.on(`userInfo-${localStorage.olivia_pid}`, data => {
+      updateUserInfo({ ...userInfo, balance: data });
     });
   }, []);
 
@@ -81,8 +88,10 @@ const UserInfo = ({ socket, isLoggedIn, ...props }) => {
       ) : (
         <Typography>
           <Box>{`PID: ${userInfo.pid}`}</Box>
+          <Box>{`First Name: ${userInfo.first_name}`}</Box>
+          <Box>{`Last Name: ${userInfo.last_name}`}</Box>
           <Box>{`Email: ${userInfo.email}`}</Box>
-          <Box>{`Hokie Coins: ${userInfo.money}`}</Box>
+          <Box>{`Hokie Coins: ${userInfo.balance}`}</Box>
         </Typography>
       )}
     </>

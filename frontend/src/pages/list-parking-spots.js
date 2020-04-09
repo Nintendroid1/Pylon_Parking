@@ -169,7 +169,7 @@ const handleParkingSpotTimeChange = (
     );
 
     parkingInfo.start_time = convertEpochToMilitary(parkingInfo.start_time);
-    parkingInfo.endTime = convertEpochToMilitary(parkingInfo.endTime);
+    parkingInfo.endTime = convertEpochToMilitary(parkingInfo.end_time);
     parkingSpotsInfo[index] = parkingInfo;
     updateparkingSpotsInfo(parkingSpotsInfo);
   }
