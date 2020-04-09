@@ -23,6 +23,8 @@ import apiprefix from './apiprefix';
 import { TimePicker } from './forms/parking-spot-components';
 import CustomSnackbar from '../ui/snackbars';
 import QrReader from 'react-qr-reader';
+import Camera from 'react-html5-camera-photo';
+import 'react-html5-camera-photo/build/css/index.css';
 import {
   compareMilitaryTime,
   convertMilitaryToEpoch,
@@ -40,9 +42,61 @@ import {
   createMuiTheme
 } from '@material-ui/core/styles';
 
-const QrReaderField = (
+/*
+Code for coverting base 64 image to unit8clampedarray
+
+var BASE64_MARKER = ';base64,';
+
+function convertDataURIToBinary(dataURI) {
+  var base64Index = dataURI.indexOf(BASE64_MARKER) + BASE64_MARKER.length;
+  var base64 = dataURI.substring(base64Index);
+  var raw = window.atob(base64);
+  var rawLength = raw.length;
+  var array = new Uint8Array(new ArrayBuffer(rawLength));
+
+  for(let i = 0; i < rawLength; i++) {
+    array[i] = raw.charCodeAt(i);
+  }
+  return array;
+}
+*/
+
+/*
+for finding the width and height of the image, use:
+
+var i = new Image(); 
+
+i.onload = function(){
+ alert( i.width+", "+i.height );
+};
+
+i.src = imageData; 
+*/
+
+/*
+https://github.com/cozmo/jsQR/issues/96
+has some example code for converting base 64 image to needed for jsqr.
+*/
+
+const CaptureImage = props => {
+  const { updateImageUri } = props;
+
+  const handleTakePhoto = dataUri => {
+    updateImageUri(dataUri);
+  }
+
+  return (
+    <>
+      <Camera 
+        onTakePhoto={(dataUri) => { handleTakePhoto(dataUri); }}
+      />
+    </>
+  );
+}
+
+const QrReaderField = ({
   updateData,
-) => {
+}) => {
 
   const handleOnScan = (data) => {
     updateData(data);
@@ -67,12 +121,13 @@ const QrReaderField = (
   );
 }
 
-const ReportField = (
+/*
+const ReportField = ({
   info,
   updateInfo,
   makeReport,
   getInfo
-) => {
+}) => {
 
   const hasInfo = info.license_info === '' ? false : true;
 
@@ -163,7 +218,7 @@ const ReportField = (
     </>
   );
 }
-
+*/
 const BountySystem = () => {
 
   const [info, updateInfo] = useState({

@@ -115,7 +115,7 @@ const App = ({ classes, ...props }) => {
 
   const parkingLotSocket = io(`${endpoint}/zones`); //{ path: `${endpoint}/zones` });
   const parkingSpotSocket = io(`${endpoint}/parking_spot`); //{ path: `${endpoint}/parkingSpot` });
-  const transactionHistorySocket = io(`${endpoint}/transaction_history`);
+  const transactionHistorySocket = io(`${endpoint}/transactionHistory`);
   const userSocket = io(`${endpoint}/user`);
 
   //console.log(localStorage.olivia_id);
