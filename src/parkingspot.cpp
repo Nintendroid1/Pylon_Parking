@@ -131,9 +131,9 @@ public:
   }
 
   //Updates parking spot available
-  //[[eosio::action]]
-  [[eosio::on_notify("eosio.token::transfer")]]
-  void modavail(name user, eosio::asset quantity, uint64_t spot_id, uint64_t zone_id, uint32_t time_code, name owner) {
+  [[eosio::action]]
+  // [[eosio::on_notify("eosio.token::transfer")]]
+  void modavail(name user, eosio::asset quantity, uint64_t spot_id, uint64_t zone_id, uint32_t time_code, name buyer, name seller) {
     //Ensure not transferring to self
     // if (owner == get_self() || user != get_self()) {
     //   return;
@@ -169,37 +169,53 @@ public:
             print("DOES NOT EXIST! Parking Spot: ", spot_id, " in Zone: ", zone_id);
         }
         else {
+          //require_auth(buyer);
+          action transferSeller = action(
+            permission_level{buyer,"active"_n},
+            "eosio.token"_n,
+            "transfer"_n,
+            std::make_tuple(buyer, seller, quantity, std::string("payment from buyer"))
+          );
+          transferSeller.send();
             //Get money from user
-            balance_table balance(get_self(), user.value);
-            auto bal_it = balance.find(hokie_coin.raw());
+            // balance_table balanceBuy(get_self(), buyer.value);
+            // auto bal_it_buy = balanceBuy.find(hokie_coin.raw());
 
-            if (bal_it != balance.end())
-              //Subtract from exisiting money
-              balance.modify(bal_it, get_self(), [&](auto &row) {
-                if(row.funds < quantity) {
-                  print("Insufficient Funds From User");
-                  return;
-                }
-                row.funds -= quantity;
-              });
-            else
-                print("No Account Found for User");
-              }
+            // if (bal_it_buy != balanceBuy.end()) {
+            //   //Subtract from exisiting money
+            //   balanceBuy.modify(bal_it_buy, get_self(), [&](auto &row) {
+            //     if(row.funds < quantity) {
+            //       print("Insufficient Funds From Buyer");
+            //       return;
+            //     }
+            //     row.funds -= quantity;
+            //   });
+            // }
+            // else {
+            //     print("No Account Found for Buyer - Creating Account");
+            //     balanceBuy.emplace(get_self(), [&](auto &row) {
+            //       eosio::asset x(0, hokie_coin);
+            //       row.funds = x;
+            //     });
+            //     return;
+            //   }
 
-            //Transfer money to old owner
-            balance_table balance(get_self(), owner.value);
-            auto bal_it = balance.find(hokie_coin.raw());
+            // //Transfer money to old owner
+            // balance_table balanceSell(get_self(), seller.value);
+            // auto bal_it_sell = balanceSell.find(hokie_coin.raw());
 
-            if (bal_it != balance.end())
-              //Add to exisiting money
-              balance.modify(bal_it, get_self(), [&](auto &row) {
-                row.funds += quantity;
-              });
-            else
-              //Give new money
-              balance.emplace(get_self(), [&](auto &row) {
-                row.funds = quantity;
-              });
+            // if (bal_it_sell != balanceSell.end()) {
+            //   //Add to exisiting money
+            //   balanceSell.modify(bal_it_sell, get_self(), [&](auto &row) {
+            //     row.funds += quantity;
+            //   });
+            // }
+            // else {
+            //   //Give new money
+            //   balanceSell.emplace(get_self(), [&](auto &row) {
+            //     row.funds = quantity;
+            //   });
+            // }
 
             parkdeck.modify(iterator, user, [&](auto& row) {
                 bool found = false;
@@ -211,13 +227,14 @@ public:
                 if(!found) {
                   row.timeclock.push_back(time_code);
                 }
-                require_auth(row.owner);
+                //require_auth(row.owner);
                 //end_summary(row.owner, " transferring ownership");
                 row.available = false;
-                row.owner = user;
+                row.owner = buyer;
             });
 
-            print("Parking Spot: ", spot_id, " in Zone: ", zone_id, " is owned by ", user, " for: ", time_code, ". Transaction on ", current_time_point().sec_since_epoch());
+            print("Parking Spot: ", spot_id, " in Zone: ", zone_id, " is owned by ", buyer, " for: ", time_code, ". Transaction on ", current_time_point().sec_since_epoch());
             send_summary(user, " successfully changed parking spot availability");
         }
+  }
 };
