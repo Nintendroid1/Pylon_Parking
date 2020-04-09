@@ -28,65 +28,77 @@ import RegisterTab from '../pages/register';
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
 import { MuiThemeProvider } from '@material-ui/core/styles';
+import SideBar from './SideBar';
+import clsx from 'clsx';
+import PylonIcon from '../images/pylon_path.js';
+import { withGetScreen } from 'react-getscreen';
+import 'typeface-roboto';
 
 const drawerWidth = 240;
 
 const styles = theme => ({
   root: {
-    display: 'flex',
-    flexGrow: 1
+    display: 'flex'
   },
   appBar: {
-    transition: theme.transitions.create(['margin', 'width'], {
+    boxShadow: 'none',
+    zIndex: theme.zIndex.drawer + 1,
+    transition: theme.transitions.create(['width', 'margin'], {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.leavingScreen
     })
   },
   appBarShift: {
-    width: `calc(100% - ${drawerWidth}px)`,
     marginLeft: drawerWidth,
-    transition: theme.transitions.create(['margin', 'width'], {
-      easing: theme.transitions.easing.easeOut,
+    transition: theme.transitions.create(['width', 'margin'], {
+      easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.enteringScreen
     })
   },
   menuButton: {
-    marginLeft: 12,
-    marginRight: 20
+    marginRight: 26
   },
   hide: {
     display: 'none'
   },
   drawer: {
     width: drawerWidth,
-    flexShrink: 0
+    flexShrink: 0,
+    whiteSpace: 'nowrap'
   },
-  drawerPaper: {
-    width: drawerWidth
+  drawerOpen: {
+    width: drawerWidth,
+    transition: theme.transitions.create('width', {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.enteringScreen
+    })
   },
-  drawerHeader: {
-    display: 'flex',
-    alignItems: 'center',
-    padding: '0 8px',
-    ...theme.mixins.toolbar,
-    justifyContent: 'flex-end'
-  },
-  content: {
-    flexGrow: 1,
-    padding: theme.spacing.unit * 3,
-    transition: theme.transitions.create('margin', {
+  drawerClose: {
+    transition: theme.transitions.create('width', {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.leavingScreen
     }),
-    marginLeft: 0
+    overflowX: 'hidden',
+    width: theme.spacing(7) + 1,
+    [theme.breakpoints.up('sm')]: {
+      width: theme.spacing(9) + 1
+    }
   },
-  contentShift: {
-    transition: theme.transitions.create('margin', {
-      easing: theme.transitions.easing.easeOut,
-      duration: theme.transitions.duration.enteringScreen
-    }),
-    marginLeft: drawerWidth
+  toolbar: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    padding: theme.spacing(0, 1),
+    // necessary for content to be below app bar
+    ...theme.mixins.toolbar
   },
+  content: {
+    padding: theme.spacing(3),
+    flexGrow: 1,
+    height: '100vh',
+    overflow: 'auto'
+  },
+  appBarSpacer: theme.mixins.toolbar,
   avatar: {
     flex: 1,
     marginRight: theme.spacing.unit,
@@ -108,6 +120,11 @@ const styles = theme => ({
   },
   logoutButton: {
     color: theme.palette.primary
+  },
+  logo: {
+    width: '25px',
+    height: 'auto',
+    marginRight: '15px'
   }
 });
 
@@ -130,6 +147,8 @@ function TabChooser({
   updateUser,
   isAdmin,
   updateAdmin,
+  isMobile,
+  isTablet,
   curTheme,
   ...props
 }) {
@@ -152,7 +171,7 @@ function TabChooser({
   // ReactJS docs recommend to use lazy initial state, see
   // https://reactjs.org/docs/hooks-reference.html#lazy-initial-state
   // whenever the computation of the initial state is involved.
-  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(!(isMobile() || isTablet()));
   const [themeSwitchState, setThemeSwitch] = useState(false);
   const [currentTab, selectTab] = useState(() =>
     findCurrentTabBasedOnPath(location)
@@ -180,7 +199,7 @@ function TabChooser({
   }
 
   function handleListSelect(value, path) {
-    setDrawerOpen(false);
+    // setDrawerOpen(false);
     history.push(path);
     selectTab(value);
     //handleTabChange(value);
@@ -272,7 +291,7 @@ function TabChooser({
       <>
         <Typography
           className={classes.logoutButton}
-          variant="h6"
+          variant="h7"
           align="right"
           color={color}
           style={{ flexGrow: 1 }}
@@ -285,7 +304,7 @@ function TabChooser({
             <AccountCircle className={classes.avatar} />
             <Typography
               variant="button"
-              style={{ color: '#FFFFFF', fontSize: 15 }}
+              style={{ color: '#FFFFFF', fontSize: 14 }}
             >
               {localStorage.olivia_pid}
             </Typography>
@@ -309,70 +328,12 @@ function TabChooser({
     );
   };
 
-  let drawerContent = (
-    <Drawer
-      className={classes.drawer}
-      variant="persistent"
-      anchor="left"
-      open={drawerOpen}
-      classes={{
-        paper: classes.drawerPaper
-      }}
-    >
-      <div className={classes.drawerHeader}>
-        <IconButton onClick={() => setDrawerOpen(false)}>
-          {<ChevronLeftIcon />}
-        </IconButton>
-      </div>
-      <FormControlLabel
-        control={
-          <Switch
-            value={themeSwitchState}
-            onChange={event => handleThemeChange(event.target.checked)}
-          />
-        }
-        label="Switch Theme"
-        className={classes.themeSwitch}
-      />
-
-      <Divider />
-      <List color="inherit">
-        {children.map((tab, index) =>
-          !tab.props.hidden &&
-          (!tab.props.reqLogin || (isLoggedIn && tab.props.reqLogin)) &&
-          (!tab.props.reqAdmin || (currentUser.admin && tab.props.reqAdmin)) ? (
-            <RRLink
-              className="list-link"
-              color="inherit"
-              to={{
-                pathname: tab.props.path,
-                key: index,
-                state: {
-                  from: history.location
-                }
-              }}
-              key={index}
-            >
-              <ListItem
-                button
-                color="inherit"
-                key={tab.props.path}
-                currenttab={currentTab}
-                value={currentTab}
-                onClick={() => handleListSelect(index, tab.props.path)}
-              >
-                <ListItemText
-                  className={classes.listItem}
-                  primary={tab.props.label}
-                  key={index}
-                />
-              </ListItem>
-            </RRLink>
-          ) : null
-        )}
-      </List>
-    </Drawer>
-  );
+  const toggleDrawer = () => {
+    setDrawerOpen(!drawerOpen);
+  };
+  const handleDrawerClose = () => {
+    setDrawerOpen(false);
+  };
 
   function customToolbar() {
     if (location.pathname === '/login' || location.pathname === '/register') {
@@ -389,62 +350,15 @@ function TabChooser({
           <IconButton
             color="inherit"
             aria-label="Menu"
-            onClick={() => setDrawerOpen(true)}
-            className={classNames(
-              classes.menuButton,
-              drawerOpen && classes.hide
-            )}
+            onClick={toggleDrawer}
+            edge="start"
+            className={classes.menuButton}
           >
             <MenuIcon />
           </IconButton>
-          <Typography variant="h6" color="inherit" noWrap>
-            {isLoggedIn ? (
-              <Tabs value={currentTab} onChange={handleTabChange}>
-                {children.map((tab, i) => {
-                  return !tab.props.hidden &&
-                    (!tab.props.reqLogin ||
-                      (currentUser.authenticated && tab.props.reqLogin)) &&
-                    (!tab.props.reqAdmin ||
-                      (currentUser.admin && tab.props.reqAdmin)) ? (
-                    <Tab
-                      component={RRLink}
-                      to={{
-                        pathname: tab.props.path,
-                        state: {
-                          from: history.location
-                        }
-                      }}
-                      key={tab.props.label}
-                      label={tab.props.label}
-                      className="link"
-                      style={{ fontSize: 16 }}
-                    />
-                  ) : null;
-                })}
-              </Tabs>
-            ) : (
-              <Tabs value={currentTab} onChange={handleTabChange}>
-                {children.map((tab, i) => {
-                  return !tab.props.reqLogin &&
-                    !tab.props.reqAdmin &&
-                    !tab.props.hidden ? (
-                    <Tab
-                      component={RRLink}
-                      to={{
-                        pathname: tab.props.path,
-                        state: {
-                          from: history.location
-                        }
-                      }}
-                      key={tab.props.label}
-                      label={tab.props.label}
-                      className="link"
-                      style={{ fontSize: 16 }}
-                    />
-                  ) : null;
-                })}
-              </Tabs>
-            )}
+          <PylonIcon className={classes.logo} />
+          <Typography style={{ fontFamily: 'Roboto' }}>
+            Pylon Parking
           </Typography>
           {isLoggedIn ? (
             <LogoutButton classes={classes} color="inherit" />
@@ -452,25 +366,36 @@ function TabChooser({
             <LoginButton />
           )}
         </Toolbar>
-        {drawerContent}
       </AppBar>
     );
-  }
-
-  if (isLoggedIn && currentUser.admin === undefined) {
-    //updateAdmin(currentUser.admin);
-    //alert(isAdmin);
-    //alert(currentUser.admin);
   }
 
   return (
     <>
       {customToolbar()}
+      {location.pathname === '/login' ||
+      location.pathname === '/register' ? null : (
+        <SideBar
+          classes={classes}
+          drawerOpen={drawerOpen}
+          drawerWidth={drawerWidth}
+          setDrawerOpen={setDrawerOpen}
+          toggleDrawer={toggleDrawer}
+          themeSwitchState={themeSwitchState}
+          handleListSelect={handleListSelect}
+          isLoggedIn={isLoggedIn}
+          handleThemeChange={handleThemeChange}
+          children={children}
+          currentUser={currentUser}
+          currentTab={currentTab}
+        />
+      )}
       <main
         className={classNames(classes.content, {
           [classes.contentShift]: drawerOpen
         })}
       >
+        <div className={classes.appBarSpacer} />
         <div className={classes.drawerHeader} />
         <RRSwitch>
           {children}
@@ -528,4 +453,6 @@ function TabChooser({
 // the 'withRouter' HOC will make 'location' (and 'history', and 'match) available
 // to the component.
 // See https://reacttraining.com/react-router/web/api/withRouter
-export default withRouter(withTheme(withStyles(styles)(TabChooser)));
+export default withGetScreen(
+  withRouter(withTheme(withStyles(styles)(TabChooser)))
+);
