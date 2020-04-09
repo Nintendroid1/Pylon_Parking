@@ -24,6 +24,7 @@ import SellPage from './pages/sell-page';
 import apiprefix from './pages/apiprefix';
 import ProfilePage from './pages/profile';
 import UpdateUserInfo from './pages/update-user-info';
+import UserInfo from './pages/user-info';
 
 import Typography from '@material-ui/core/Typography';
 import history from './history';
@@ -191,7 +192,7 @@ const App = ({ classes, ...props }) => {
                 hidden={true}
                 reqAdmin={false}
                 reqLogin={true}
-                render={() => <ProfilePage isLoggedIn={isLoggedIn} />}
+                render={() => <UserInfo isLoggedIn={isLoggedIn} socket={userSocket} />}
               />
               <Route
                 exact
