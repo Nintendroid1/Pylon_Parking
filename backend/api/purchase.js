@@ -129,6 +129,9 @@ router.post("/", (req, res) => {
       }
     });
   }
+  else {
+    res.status(401).json({message: "bad login"});
+  }
 });
 
 module.exports = router;
