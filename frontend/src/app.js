@@ -25,6 +25,7 @@ import apiprefix from './pages/apiprefix';
 import ProfilePage from './pages/profile';
 import UpdateUserInfo from './pages/update-user-info';
 import UserInfo from './pages/user-info';
+import BountySystem from './pages/bounty-system';
 
 import Typography from '@material-ui/core/Typography';
 import history from './history';
@@ -159,6 +160,16 @@ const App = ({ classes, ...props }) => {
                 reqAdmin={false}
                 reqLogin={false}
                 component={MainMap}
+              />
+              <Route 
+                exact
+                path="/bounty"
+                label="Go To Class"
+                key="/bounty"
+                hidden={false}
+                reqAdmin={false}
+                reqLogin={false}
+                component={BountySystem}
               />
               <Route
                 exact
