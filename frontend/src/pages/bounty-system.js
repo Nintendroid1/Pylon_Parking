@@ -22,6 +22,7 @@ import { Link } from 'react-router-dom';
 import apiprefix from './apiprefix';
 import { TimePicker } from './forms/parking-spot-components';
 import CustomSnackbar from '../ui/snackbars';
+import QrReader from 'react-qr-reader';
 import {
   compareMilitaryTime,
   convertMilitaryToEpoch,
@@ -38,6 +39,33 @@ import {
   MuiThemeProvider,
   createMuiTheme
 } from '@material-ui/core/styles';
+
+const QrReaderField = (
+  updateData,
+) => {
+
+  const handleOnScan = (data) => {
+    updateData(data);
+  };
+
+  const handleOnError = err => {
+    console.log(err);
+  };
+
+  /**
+   * delay: the delay between scans in milliseconds, pass in false to disable.
+   * legacyMode: default is false. Can allow user to upload photo.
+   */
+  return (
+    <>
+      <QrReader 
+        delay={300}
+        onError={handleOnError}
+        onScan={handleOnScan}
+      />
+    </>
+  );
+}
 
 const ReportField = (
   info,
@@ -77,6 +105,7 @@ const ReportField = (
     getInfo();
   }
 
+  // Default is qr reader.
   return (
     <>
       <CustomSnackbar 
@@ -85,6 +114,9 @@ const ReportField = (
         verticalPos={snackbarMessage.verticalPos}
         horizontalPos={snackbarMessage.horizontalPos}
         message={snackbarMessage.message}
+      />
+      <QrReaderField 
+        updateData={updateInfo}
       />
       <TextField
         label="Zone ID"
