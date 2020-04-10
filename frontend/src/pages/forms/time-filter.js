@@ -148,13 +148,7 @@ const DateFilter = ({ time, handleDateFilter, updateTime, ...props }) => {
   );
 };
 
-const CustomDatePicker = ({
-  time,
-  updateTime,
-  handleDateChange,
-  ...props
-}) => {
-
+const CustomDatePicker = ({ time, updateTime, handleDateChange, ...props }) => {
   return (
     <>
       <KeyboardDatePicker
@@ -213,7 +207,7 @@ const TimeFilter = ({
   const handleDateChange = newDate => {
     console.log(newDate);
 
-    const newDateObj = { 
+    const newDateObj = {
       date: newDate,
       startTime: '00:00',
       endTime: '24:00'
