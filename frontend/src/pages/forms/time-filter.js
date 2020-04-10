@@ -107,6 +107,7 @@ const compareMilitaryTime = (time1, time2) => {
 
 const convertEpochToMilitary = epoch => {
   const option = {
+    timeZone: 'UTC',
     hour12: false,
     hour: '2-digit',
     minute: '2-digit'
@@ -123,7 +124,7 @@ const convertMilitaryToEpoch = (date, time) => {
   const month = date.getMonth() + 1;
   const day = date.getDate();
 
-  return new Date(Date.UTC(year, month, day, hour, minute)).getTime();
+  return new Date(Date.UTC(year, month, day, hour, minute)).getTime() / 1000;
 };
 
 const convertEpochToNormal = epoch => {
