@@ -23,6 +23,7 @@ import apiprefix from './apiprefix';
 import { TimePicker } from './forms/parking-spot-components';
 import CustomSnackbar from '../ui/snackbars';
 import QrReader from 'react-qr-reader';
+import Button from '@material-ui/core/Button';
 import {
   compareMilitaryTime,
   convertMilitaryToEpoch,
@@ -40,12 +41,21 @@ import {
   createMuiTheme
 } from '@material-ui/core/styles';
 
-const QrReaderField = (
-  updateData,
-) => {
-
-  const handleOnScan = (data) => {
-    updateData(data);
+const styles = theme => ({
+  root: {
+    display: 'flex',
+    flexGrow: 1
+  },
+  reader: {
+    width: '400px',
+    marginBottom: '30px'
+  }
+});
+const QrReaderField = ({ className, updateData }) => {
+  const handleOnScan = data => {
+    if (data != null) {
+      updateData(data);
+    }
   };
 
   const handleOnError = err => {
@@ -58,22 +68,17 @@ const QrReaderField = (
    */
   return (
     <>
-      <QrReader 
+      <QrReader
+        className={className}
         delay={300}
         onError={handleOnError}
         onScan={handleOnScan}
       />
     </>
   );
-}
+};
 
-const ReportField = (
-  info,
-  updateInfo,
-  makeReport,
-  getInfo
-) => {
-
+const ReportField = ({ classes, info, updateInfo, makeReport, getInfo }) => {
   const hasInfo = info.license_info === '' ? false : true;
 
   const [isOpen, updateIsOpen] = useState(false);
@@ -84,17 +89,17 @@ const ReportField = (
   });
 
   const handleOnChange = prop => event => {
-    updateInfo({ ...info, [prop]: event.target.value })
-  }
+    updateInfo({ ...info, [prop]: event.target.value });
+  };
 
-  const handleOnClickReport = () => {
+  const handleOnClickGetInfo = () => {
     updateSnackbarMessage({
       ...snackbarMessage,
       message: 'Getting License Number'
     });
     updateIsOpen(true);
     makeReport();
-  }
+  };
 
   const handleOnClickReport = () => {
     updateSnackbarMessage({
@@ -103,28 +108,26 @@ const ReportField = (
     });
     updateIsOpen(true);
     getInfo();
-  }
+  };
 
   // Default is qr reader.
   return (
     <>
-      <CustomSnackbar 
+      <CustomSnackbar
         isOpen={isOpen}
         updateIsOpen={updateIsOpen}
         verticalPos={snackbarMessage.verticalPos}
         horizontalPos={snackbarMessage.horizontalPos}
         message={snackbarMessage.message}
       />
-      <QrReaderField 
-        updateData={updateInfo}
-      />
+      <QrReaderField updateData={updateInfo} className={classes.reader} />
       <TextField
         label="Zone ID"
         type="number"
         value={info.zone_id}
         onChange={handleOnChange('zone_id')}
         InputLabelProps={{
-          shrink: true,
+          shrink: true
         }}
         variant="outlined"
       />
@@ -134,38 +137,37 @@ const ReportField = (
         value={info.spot_id}
         onChange={handleOnChange('spot_id')}
         InputLabelProps={{
-          shrink: true,
+          shrink: true
         }}
         variant="outlined"
       />
-      <TextField 
+      <TextField
         disabled
-        label='License Number'
-        type='text'
+        label="License Number"
+        type="text"
         value={info.license_info}
-        variant='filled'
+        variant="filled"
       />
       <Button
-        variant='contained'
-        color='primary'
+        variant="contained"
+        color="primary"
         onClick={handleOnClickGetInfo}
       >
         Get Info!
       </Button>
       <Button
         disabled={!hasInfo}
-        variant='contained'
-        color='secondary'
+        variant="contained"
+        color="secondary"
         onClick={handleOnClickReport}
       >
         Report!
       </Button>
     </>
   );
-}
+};
 
-const BountySystem = () => {
-
+const BountySystem = ({ classes, ...props }) => {
   const [info, updateInfo] = useState({
     zone_id: 1,
     spot_id: 1,
@@ -179,7 +181,7 @@ const BountySystem = () => {
     const json = {
       zone_id: info.zone_id,
       spot_id: info.spot_id
-    }
+    };
 
     const response = await makeAPICall('GET', url, json);
     const respbody = await response.json();
@@ -189,14 +191,14 @@ const BountySystem = () => {
     } else {
       // Make some kind of error message.
     }
-  }
+  };
 
   const handleReport = async () => {
     const url = `${apiprefix}/bounty/report`;
     const json = {
       zone_id: info.zone_id,
       spot_id: info.spot_id
-    }
+    };
 
     const response = await makeAPICall('POST', url, json);
     const respbody = await response.json();
@@ -206,20 +208,21 @@ const BountySystem = () => {
     } else {
       // there was an error in the report.
     }
-  }
+  };
 
   return (
     <>
       <Typography>
-        <ReportField 
+        <ReportField
           info={info}
           updateInfo={updateInfo}
           makeReport={handleReport}
           getInfo={handleRequestLicenseInfo}
+          classes={classes}
         />
       </Typography>
     </>
   );
-}
+};
 
-export default BountySystem;
+export default withTheme(withStyles(styles)(BountySystem));
