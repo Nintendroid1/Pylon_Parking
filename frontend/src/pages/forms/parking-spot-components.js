@@ -165,28 +165,26 @@ const ConfirmationDialogFieldButton = props => {
       <Button variant="outlined" color={buttonColor} onClick={handleClickOpen}>
         {buttonMessage}
       </Button>
-      <form onSubmit={handleSubmit}>
         <Dialog open={open} onClose={handleClose}>
           <DialogTitle>{messageTitle}</DialogTitle>
           <DialogContent>
-            <Grid>{messageContent}</Grid>
-            <Grid>
-              <PrivateKeyField
-                privateKey={privateKey}
-                updatePrivateKey={updatePrivateKey}
-              />
-            </Grid>
+            <form onSubmit={handleSubmit}>
+              <Grid>{messageContent}</Grid>
+              <Grid>
+                <PrivateKeyField
+                  privateKey={privateKey}
+                  updatePrivateKey={updatePrivateKey}
+                />
+              </Grid>
+              <Button onClick={handleClose} color="primary">
+                Cancel
+              </Button>
+              <Button type="submit" color="primary">
+                Confirm
+              </Button>
+            </form>
           </DialogContent>
-          <DialogActions>
-            <Button onClick={handleClose} color="primary">
-              Cancel
-            </Button>
-            <Button type="submit" color="primary">
-              Confirm
-            </Button>
-          </DialogActions>
         </Dialog>
-      </form>
     </div>
   );
 };
