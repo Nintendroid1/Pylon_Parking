@@ -213,14 +213,14 @@ const TimeFilter = ({
   const handleDateChange = newDate => {
     console.log(newDate);
 
-    const newDate = { 
+    const newDateObj = { 
       date: newDate,
       startTime: '00:00',
       endTime: '24:00'
     };
 
-    updateCurrentTimeFilter(newDate);
-    onSubmit(newDate);
+    updateCurrentTimeFilter(newDateObj);
+    onSubmit(newDateObj);
   };
 
   return (
