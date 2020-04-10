@@ -152,8 +152,9 @@ const CustomDatePicker = ({ time, updateTime, handleDateChange, ...props }) => {
   return (
     <>
       <KeyboardDatePicker
+        showTodayButton={true}
         disableToolbar
-        variant="inline"
+        variant="dialog"
         format="MM/dd/yyyy"
         margin="normal"
         label="Date"
