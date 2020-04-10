@@ -13,9 +13,11 @@ import history from '../history';
 import { Link } from 'react-router-dom';
 import apiprefix from './apiprefix';
 import orderBy from 'lodash/orderBy';
-import { TimeFilter, convertMilitaryToEpoch, convertEpochToMilitary, convertMilitaryTimeToNormal } from './forms/time-filter';
 import Button from '@material-ui/core/Button';
 import {
+  TimeFilter,
+  convertMilitaryToEpoch,
+  convertEpochToMilitary,
   convertMilitaryTimeToNormal,
   sortByMilitaryTime,
   compareMilitaryTime
@@ -91,8 +93,12 @@ function TableData({ classes, ...props }) {
             </Link>
           </TableCell>
           <TableCell>{parkingSpot.spot_id}</TableCell>
-          <TableCell>{convertMilitaryTimeToNormal(parkingSpot.start_time)}</TableCell>
-          <TableCell>{convertMilitaryTimeToNormal(parkingSpot.end_time)}</TableCell>
+          <TableCell>
+            {convertMilitaryTimeToNormal(parkingSpot.start_time)}
+          </TableCell>
+          <TableCell>
+            {convertMilitaryTimeToNormal(parkingSpot.end_time)}
+          </TableCell>
         </TableRow>
       </>
     );
@@ -154,18 +160,24 @@ const handleParkingSpotTimeChange = (
   parkingInfo,
   currentTimeFilter
 ) => {
-
   const year = currentTimeFilter.date.getFullYear();
   const month = currentTimeFilter.date.getMonth();
   const day = currentTimeFilter.date.getDate();
   const [startTimeHour, startTimeMin] = currentTimeFilter.startTime.split(':');
   const [endTimeHour, endTimeMin] = currentTimeFilter.endTime.split(':');
 
-  const timeFilterStartTimeEpoch = new Date(Date.UTC(year, month, day, startTimeHour, startTimeMin));
-  const timeFilterEndTimeEpoch = new Date(Date.UTC(year, month, day, endTimeHour, endTimeMin));  
+  const timeFilterStartTimeEpoch = new Date(
+    Date.UTC(year, month, day, startTimeHour, startTimeMin)
+  );
+  const timeFilterEndTimeEpoch = new Date(
+    Date.UTC(year, month, day, endTimeHour, endTimeMin)
+  );
 
   // Ensures that updated parking spot info is within the filtering options the client wants.
-  if (timeFilterStartTimeEpoch <= parkingInfo.start_time && timeFilterEndTimeEpoch >= parkingInfo.end_time) {
+  if (
+    timeFilterStartTimeEpoch <= parkingInfo.start_time &&
+    timeFilterEndTimeEpoch >= parkingInfo.end_time
+  ) {
     const index = parkingSpotsInfo.findIndex(
       e => e.spot_id === parkingInfo.spot_id
     );
@@ -202,7 +214,7 @@ const Zone = ({
     date: Date.now(),
     startTime: '00:00',
     endTime: '23:59'
-  })
+  });
 
   // Expected url: ./list_parking_spots/:parkingLotId
   let tempUrl = window.location.pathname;
@@ -258,8 +270,8 @@ const Zone = ({
       // The functions acting upon this info expect the time to be in military time.
       // Suppose to send client a list of spots where the start and end time are open.
       resbody.parkingInfo.forEach(e => {
-        e.start_time = convertEpochToMilitary(e.start_time)
-        e.end_time = convertEpochToMilitary(e.end_time)
+        e.start_time = convertEpochToMilitary(e.start_time);
+        e.end_time = convertEpochToMilitary(e.end_time);
       });
       updateparkingSpotsInfo(resbody.parkingInfo);
       updateMessage(null);
@@ -283,7 +295,7 @@ const Zone = ({
         updateparkingSpotsInfo,
         data,
         currentTimeFilter
-      )
+      );
     });
   }, []);
 
@@ -295,7 +307,7 @@ const Zone = ({
             <div>{message}</div>
           ) : (
             <div>
-              <TimeFilter 
+              <TimeFilter
                 onSubmit={handleFiltering}
                 currentTimeFilter={currentTimeFilter}
                 updateCurrentTimeFilter={updateCurrentTimeFilter}
