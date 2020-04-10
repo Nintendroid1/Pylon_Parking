@@ -14,6 +14,7 @@ import {
   MuiThemeProvider,
   createMuiTheme
 } from '@material-ui/core/styles';
+import { KeyboardTimePicker } from '@material-ui/pickers';
 
 const styles = theme => ({
   root: {
@@ -149,6 +150,7 @@ const DateFilter = ({ time, handleDateFilter, updateTime, ...props }) => {
 
 const CustomDatePicker = ({ time, updateTime, ...props }) => {
   const handleDateChange = newDate => {
+    console.log(newDate);
     updateTime({ ...time, date: newDate });
   };
 
@@ -219,13 +221,17 @@ const TimeFilter = ({
               time={time.startTime}
               name={'startTime'}
               label={'Start Time'}
+              variant="inline"
             />
-            <TimePicker
+            <KeyboardTimePicker
               color="secondary"
               handleTimeChange={handleTimeChange}
               time={time.endTime}
               name={'endTime'}
               label={'End Time'}
+              type="hours"
+              minutesStep={15}
+              placeholder="05:00 AM"
             />
             <Button variant="contained" color="primary" onClick={handleSubmit}>
               Filter!
