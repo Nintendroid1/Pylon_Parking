@@ -211,7 +211,7 @@ const Zone = ({
   const [order, updateOrder] = useState('asc');
   const [columnToSort, updatecolumnToSort] = useState('spot_id');
   const [currentTimeFilter, updateCurrentTimeFilter] = useState({
-    date: Date.now(),
+    date: new Date(),
     startTime: '00:00',
     endTime: '23:59'
   });
