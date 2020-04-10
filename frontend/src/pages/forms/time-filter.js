@@ -197,7 +197,7 @@ const TimeFilter = ({
 
   const handleSubmit = event => {
     event.preventDefault();
-    onSubmit();
+    onSubmit(currentTimeFilter);
   };
 
   const handleTimeChange = event => {
