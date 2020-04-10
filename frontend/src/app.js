@@ -25,7 +25,6 @@ import apiprefix from './pages/apiprefix';
 import ProfilePage from './pages/profile';
 import UserInfo from './pages/user-info';
 import UpdateUserInfo from './pages/update-user-info';
-import UserInfo from './pages/user-info';
 import BountySystem from './pages/bounty-system';
 
 import Typography from '@material-ui/core/Typography';
@@ -38,6 +37,10 @@ import MapIcon from '@material-ui/icons/Map';
 import DashboardIcon from '@material-ui/icons/Dashboard';
 import HistoryIcon from '@material-ui/icons/History';
 import HomeIcon from '@material-ui/icons/Home';
+import ReportIcon from '@material-ui/icons/Report';
+import PersonOutlineIcon from '@material-ui/icons/PersonOutline';
+import LocalParkingIcon from '@material-ui/icons/LocalParking';
+import DirectionsCarIcon from '@material-ui/icons/DirectionsCar';
 
 const styles = theme => ({
   root: {
@@ -163,6 +166,7 @@ const App = ({ classes, ...props }) => {
                 reqAdmin={false}
                 reqLogin={false}
                 component={WelcomeTab}
+                order="1"
               />
               <Route
                 exact
@@ -174,16 +178,7 @@ const App = ({ classes, ...props }) => {
                 reqAdmin={false}
                 reqLogin={false}
                 component={MainMap}
-              />
-              <Route 
-                exact
-                path="/bounty"
-                label="Go To Class"
-                key="/bounty"
-                hidden={false}
-                reqAdmin={false}
-                reqLogin={false}
-                component={BountySystem}
+                order="2"
               />
               <Route
                 exact
@@ -195,6 +190,7 @@ const App = ({ classes, ...props }) => {
                 reqAdmin={false}
                 reqLogin={false}
                 hidden={false}
+                order="3-2"
                 render={() => (
                   <TransactionHistory socket={transactionHistorySocket} />
                 )}
@@ -209,16 +205,31 @@ const App = ({ classes, ...props }) => {
                 reqAdmin={false}
                 reqLogin={false}
                 hidden={false}
+                order="3-1"
                 component={Dashboard}
+              />
+              <Route
+                exact
+                path="/bounty"
+                label="Go To Class"
+                key="/bounty"
+                icon={<ReportIcon />}
+                hidden={false}
+                reqAdmin={false}
+                reqLogin={false}
+                order="4"
+                component={BountySystem}
               />
               <Route
                 exact
                 path="/my_spots"
                 label="My Spots"
                 key="/my_spots"
+                icon={<DirectionsCarIcon />}
                 reqAdmin={false}
                 reqLogin={true}
-                hidden={true}
+                hidden={false}
+                order="3-3"
                 render={() => (
                   <SellPage isLoggedIn={isLoggedIn} socket={userSocket} />
                 )}
@@ -228,14 +239,16 @@ const App = ({ classes, ...props }) => {
                 path="/profile"
                 label="Profile"
                 key="/profile"
-                hidden={true}
+                icon={<PersonOutlineIcon />}
+                hidden={false}
                 reqAdmin={false}
                 reqLogin={true}
+                order="3-4"
                 render={() => (
                   <ProfilePage socket={userSocket} isLoggedIn={isLoggedIn} />
                 )}
               />
-                  {/*render={() => <UserInfo isLoggedIn={isLoggedIn} socket={userSocket} />}*/}
+              {/*render={() => <UserInfo isLoggedIn={isLoggedIn} socket={userSocket} />}*/}
               <Route
                 exact
                 path="/profile/edit"

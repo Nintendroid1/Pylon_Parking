@@ -240,13 +240,16 @@ const ParkingSpot = ({
       spot: {
         spot_id: spot_id,
         zone_id: zone_id,
-        start_time: startUTCEpoch,
-        end_time: endUTCEpoch
+        start_time: `${Number(startUTCEpoch) / 1000}`,
+        end_time: `${Number(endUTCEpoch) / 1000}`
       }
     };
 
+    console.log(url);
     const response = await makeAPICall('POST', url, json);
+    console.log('WAIT2');
     const respbody = await response.json();
+    console.log(respbody);
 
     if (response.status === 200) {
       // Redirect them to invoice page.
