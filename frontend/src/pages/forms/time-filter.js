@@ -212,13 +212,15 @@ const TimeFilter = ({
 
   const handleDateChange = newDate => {
     console.log(newDate);
-    updateCurrentTimeFilter({ 
+
+    const newDate = { 
       date: newDate,
       startTime: '00:00',
       endTime: '24:00'
-    });
-    
-    onSubmit();
+    };
+
+    updateCurrentTimeFilter(newDate);
+    onSubmit(newDate);
   };
 
   return (

@@ -255,20 +255,13 @@ const Zone = ({
   //   updateMessage(null);
   // };
 
-  const handleFiltering = async () => {
+  const handleFiltering = async (value) => {
+    const { date, startTime, endTime } = value;
     // the month starts numbering from 0, so 0 is January, and 1 is February.
     const url = 'zones/';
 
-    const startUTCEpoch = convertMilitaryToEpoch(
-      currentTimeFilter.date,
-      currentTimeFilter.startTime
-    );
-    const endUTCEpoch = convertMilitaryToEpoch(
-      currentTimeFilter.date,
-      currentTimeFilter.endTime
-    );
-
-    updateMessage('Loading');
+    const startUTCEpoch = convertMilitaryToEpoch(date, startTime);
+    const endUTCEpoch = convertMilitaryToEpoch(date, endTime);
 
     const newURL = `${apiprefix}/zones/${zoneId}/?startTime=${startUTCEpoch}&endTime=${endUTCEpoch}`;
     let response = await makeAPICall('GET', newURL);
