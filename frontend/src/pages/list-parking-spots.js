@@ -244,8 +244,6 @@ const Zone = ({
   // };
 
   const handleFiltering = async () => {
-    const { date, startTime, endTime } = values;
-
     // the month starts numbering from 0, so 0 is January, and 1 is February.
     const url = 'zones/';
 
