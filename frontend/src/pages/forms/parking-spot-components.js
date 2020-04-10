@@ -157,9 +157,12 @@ const ConfirmationDialogFieldButton = props => {
 
   const handleSubmit = event => {
     event.preventDefault();
+    setOpen(false);
     handleOnConfirm(privateKey.privateKey);
   };
 
+  // Change from wrapping in form to make it a dialog with form inside.
+  /*
   return (
     <div>
       <Button variant="outlined" color={buttonColor} onClick={handleClickOpen}>
@@ -187,6 +190,34 @@ const ConfirmationDialogFieldButton = props => {
           </DialogActions>
         </Dialog>
       </form>
+    </div>
+  );*/
+
+  return (
+    <div>
+      <Button variant="outlined" color={buttonColor} onClick={handleClickOpen}>
+        {buttonMessage}
+      </Button>
+        <Dialog open={open} onClose={handleClose}>
+          <DialogTitle>{messageTitle}</DialogTitle>
+          <DialogContent>
+            <form onSubmit={handleSubmit}>
+              <Grid>{messageContent}</Grid>
+              <Grid>
+                <PrivateKeyField
+                  privateKey={privateKey}
+                  updatePrivateKey={updatePrivateKey}
+                />
+              </Grid>
+              <Button onClick={handleClose} color="primary">
+                Cancel
+              </Button>
+              <Button type="submit" color="primary">
+                Confirm
+              </Button>
+            </form>
+          </DialogContent>
+        </Dialog>
     </div>
   );
 };

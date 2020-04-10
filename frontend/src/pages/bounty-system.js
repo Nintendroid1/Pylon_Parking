@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { makeAPICall } from '../api';
+import { makeAPICall, makePlateRecogAPICall } from '../api';
 import PropTypes from 'prop-types';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
@@ -25,6 +25,7 @@ import CustomSnackbar from '../ui/snackbars';
 import QrReader from 'react-qr-reader';
 import Camera from 'react-html5-camera-photo';
 import 'react-html5-camera-photo/build/css/index.css';
+import jsQR from "jsqr";
 import {
   compareMilitaryTime,
   convertMilitaryToEpoch,
@@ -44,22 +45,22 @@ import {
 
 /*
 Code for coverting base 64 image to unit8clampedarray
+*/
+const BASE64_MARKER = ';base64,';
 
-var BASE64_MARKER = ';base64,';
-
-function convertDataURIToBinary(dataURI) {
-  var base64Index = dataURI.indexOf(BASE64_MARKER) + BASE64_MARKER.length;
-  var base64 = dataURI.substring(base64Index);
-  var raw = window.atob(base64);
-  var rawLength = raw.length;
-  var array = new Uint8Array(new ArrayBuffer(rawLength));
+const convertDataURIToBinary = (dataURI) => {
+  const base64Index = dataURI.indexOf(BASE64_MARKER) + BASE64_MARKER.length;
+  const base64 = dataURI.substring(base64Index);
+  const raw = window.atob(base64);
+  const rawLength = raw.length;
+  const array = new Uint8Array(new ArrayBuffer(rawLength));
 
   for(let i = 0; i < rawLength; i++) {
     array[i] = raw.charCodeAt(i);
   }
   return array;
 }
-*/
+
 
 /*
 for finding the width and height of the image, use:
@@ -79,10 +80,10 @@ has some example code for converting base 64 image to needed for jsqr.
 */
 
 const CaptureImage = props => {
-  const { updateImageUri } = props;
+  const { handleCameraClick } = props;
 
   const handleTakePhoto = dataUri => {
-    updateImageUri(dataUri);
+    handleCameraClick(dataUri);
   }
 
   return (
@@ -95,11 +96,11 @@ const CaptureImage = props => {
 }
 
 const QrReaderField = ({
-  updateData,
+  handleCameraClick
 }) => {
 
   const handleOnScan = (data) => {
-    updateData(data);
+    handleCameraClick(data);
   };
 
   const handleOnError = err => {
@@ -263,14 +264,29 @@ const BountySystem = () => {
     }
   }
 
+  const handleOnCameraClick = async (imageURI) => {
+    rawImage = convertDataURIToBinary(imageURI);
+
+    const temp = new Image();
+    temp.src = imageURI;
+
+    const imageWidth = temp.width;
+    const imageHeight = temp.height;
+
+    const code = jsQR(rawImage, imageWidth, imageHeight);
+    console.log(code);
+
+    const response = await makePlateRecogAPICall(imageURI);
+    const respbody = await response.json();
+
+    console.log(respbody);
+  };
+
   return (
     <>
       <Typography>
-        <ReportField 
-          info={info}
-          updateInfo={updateInfo}
-          makeReport={handleReport}
-          getInfo={handleRequestLicenseInfo}
+        <CaptureImage 
+          handleCameraClick={handleOnCameraClick}
         />
       </Typography>
     </>

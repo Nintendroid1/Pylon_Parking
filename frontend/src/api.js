@@ -24,6 +24,8 @@ export async function makeAPICall(method, url, body) {
 
 // the api token is: dd2e85cdffcb75b447a8cdbb1207565b46ca7b66
 // can only call 2500 times per month.
+//
+// http://docs.platerecognizer.com/?javascript#license-plate-recognition
 export async function makePlateRecogAPICall(image) {
   let image_path = '/path/to/car.jpg'
   let body = new FormData();
