@@ -151,14 +151,9 @@ const DateFilter = ({ time, handleDateFilter, updateTime, ...props }) => {
 const CustomDatePicker = ({
   time,
   updateTime,
-  handleOnDateChange,
+  handleDateChange,
   ...props
 }) => {
-  const handleDateChange = newDate => {
-    console.log(newDate);
-    updateTime({ ...time, date: newDate });
-    handleOnDateChange();
-  };
 
   return (
     <>
@@ -215,12 +210,14 @@ const TimeFilter = ({
     updateCurrentTimeFilter({ ...currentTimeFilter, [name]: value });
   };
 
-  const handleOnDateChange = event => {
-    updateCurrentTimeFilter({
-      ...currentTimeFilter,
+  const handleDateChange = newDate => {
+    console.log(newDate);
+    updateCurrentTimeFilter({ 
+      date: newDate,
       startTime: '00:00',
       endTime: '24:00'
     });
+    
     onSubmit();
   };
 
@@ -232,7 +229,7 @@ const TimeFilter = ({
             <CustomDatePicker
               updateTime={updateCurrentTimeFilter}
               time={currentTimeFilter}
-              handleOnDateChange={handleOnDateChange}
+              handleDateChange={handleDateChange}
             />
           </Grid>
           <Grid>
