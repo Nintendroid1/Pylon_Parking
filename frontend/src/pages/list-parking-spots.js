@@ -259,8 +259,14 @@ const Zone = ({
     // the month starts numbering from 0, so 0 is January, and 1 is February.
     const url = 'zones/';
 
-    const startUTCEpoch = convertMilitaryToEpoch(currentTimeFilter.date, currentTimeFilter.startTime);
-    const endUTCEpoch = convertMilitaryToEpoch(currentTimeFilter.date, currentTimeFilter.endTime);
+    const startUTCEpoch = convertMilitaryToEpoch(
+      currentTimeFilter.date,
+      currentTimeFilter.startTime
+    );
+    const endUTCEpoch = convertMilitaryToEpoch(
+      currentTimeFilter.date,
+      currentTimeFilter.endTime
+    );
 
     const newURL = `${apiprefix}/zones/${zoneId}/?startTime=${startUTCEpoch}&endTime=${endUTCEpoch}`;
     let response = await makeAPICall('GET', newURL);
