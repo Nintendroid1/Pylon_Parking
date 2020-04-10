@@ -14,6 +14,8 @@ import { Link } from 'react-router-dom';
 import apiprefix from './apiprefix';
 import orderBy from 'lodash/orderBy';
 import Button from '@material-ui/core/Button';
+import ExitToAppIcon from '@material-ui/icons/ExitToApp';
+import IconButton from '@material-ui/core/IconButton';
 import {
   TimeFilter,
   convertMilitaryToEpoch,
@@ -63,7 +65,8 @@ const styles = theme => ({
 const headerCells = [
   { id: 'spot_id', label: 'Spot #' },
   { id: 'start_time', label: 'Next Available Start Time' },
-  { id: 'end_time', label: 'Next Available End Time' }
+  { id: 'end_time', label: 'Next Available End Time' },
+  { id: 'details', label: 'Spot Details' }
   // { id: 'available', label: 'Is Available' }
   // { id: 'cost', label: 'Average Cost/15 minutes' }
 ];
@@ -98,6 +101,19 @@ function TableData({ classes, ...props }) {
           </TableCell>
           <TableCell>
             {convertMilitaryTimeToNormal(parkingSpot.end_time)}
+          </TableCell>
+          <TableCell>
+            <Link
+              className={classes.viewButton}
+              to={{
+                pathname: `/zones/${parkingSpot.zone_id}/spot/${parkingSpot.spot_id}`,
+                state: {
+                  from: history.location
+                }
+              }}
+            >
+              <IconButton>{<ExitToAppIcon />}</IconButton>
+            </Link>
           </TableCell>
         </TableRow>
       </>
@@ -255,7 +271,7 @@ const Zone = ({
   //   updateMessage(null);
   // };
 
-  const handleFiltering = async (value) => {
+  const handleFiltering = async value => {
     const { date, startTime, endTime } = value;
     // the month starts numbering from 0, so 0 is January, and 1 is February.
     const url = 'zones/';
