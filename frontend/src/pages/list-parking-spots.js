@@ -13,7 +13,7 @@ import history from '../history';
 import { Link } from 'react-router-dom';
 import apiprefix from './apiprefix';
 import orderBy from 'lodash/orderBy';
-import { TimeFilter, convertMilitaryToEpoch, convertEpochToMilitary } from './forms/time-filter';
+import { TimeFilter, convertMilitaryToEpoch, convertEpochToMilitary, convertMilitaryTimeToNormal } from './forms/time-filter';
 import Button from '@material-ui/core/Button';
 import {
   convertMilitaryTimeToNormal,
@@ -91,8 +91,8 @@ function TableData({ classes, ...props }) {
             </Link>
           </TableCell>
           <TableCell>{parkingSpot.spot_id}</TableCell>
-          <TableCell>{parkingSpot.start_time}</TableCell>
-          <TableCell>{parkingSpot.end_time}</TableCell>
+          <TableCell>{convertMilitaryTimeToNormal(parkingSpot.start_time)}</TableCell>
+          <TableCell>{convertMilitaryTimeToNormal(parkingSpot.end_time)}</TableCell>
         </TableRow>
       </>
     );
@@ -146,6 +146,8 @@ function MakeTable({
 // Should cause a rerender to occur because of state change, so do not need to worry
 // about sorting in this function.
 // Need to take care if they are filtering by some time range.
+
+// change it to use the custom made conversion functions instead.
 const handleParkingSpotTimeChange = (
   parkingSpotsInfo,
   updateparkingSpotsInfo,
@@ -241,20 +243,14 @@ const Zone = ({
   //   updateMessage(null);
   // };
 
-  const handleFiltering = async values => {
+  const handleFiltering = async () => {
     const { date, startTime, endTime } = values;
 
     // the month starts numbering from 0, so 0 is January, and 1 is February.
     const url = 'zones/';
 
-    // Converting military time to epoch from EDT to UTC.
     const startUTCEpoch = convertMilitaryToEpoch(date, startTime);
     const endUTCEpoch = convertMilitaryToEpoch(date, endTime);
-    updateCurrentTimeFilter({
-      date: date,
-      startTime: startTime,
-      endTime: endTime
-    })
 
     const newURL = `${apiprefix}/zones/${zoneId}/?startTime=${startUTCEpoch}&endTime=${endUTCEpoch}`;
     let response = await makeAPICall('GET', newURL);
@@ -301,7 +297,11 @@ const Zone = ({
             <div>{message}</div>
           ) : (
             <div>
-              <TimeFilter onSubmit={handleFiltering} />
+              <TimeFilter 
+                onSubmit={handleFiltering}
+                currentTimeFilter={currentTimeFilter}
+                updateCurrentTimeFilter={updateCurrentTimeFilter}
+              />
               <MakeTable
                 parkingInfo={parkingSpotsInfo}
                 onSortClick={handleSortRequest}

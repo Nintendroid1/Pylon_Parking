@@ -148,10 +148,11 @@ const DateFilter = ({ time, handleDateFilter, updateTime, ...props }) => {
   );
 };
 
-const CustomDatePicker = ({ time, updateTime, ...props }) => {
+const CustomDatePicker = ({ time, updateTime, handleOnDateChange, ...props }) => {
   const handleDateChange = newDate => {
     console.log(newDate);
     updateTime({ ...time, date: newDate });
+    handleOnDateChange();
   };
 
   return (
@@ -183,8 +184,8 @@ const TimeFilter = ({
   updateAdmin,
   ...props
 }) => {
-  const { onSubmit } = props;
-
+  const { onSubmit, currentTimeFilter, updateCurrentTimeFilter } = props;
+/*
   let today = new Date();
   let timeSplit = today.toTimeString().split(':');
   let currTime = timeSplit[0].concat(':', timeSplit[1]);
@@ -195,30 +196,39 @@ const TimeFilter = ({
     endTime: '24:00',
     privateKey: '',
     showPrivateKey: false
-  });
+  });*/
 
   const handleSubmit = event => {
     event.preventDefault();
-    onSubmit(time);
+    onSubmit();
   };
 
   const handleTimeChange = event => {
     let { name, value } = event.target;
-    updateTime({ ...time, [name]: value });
+    updateCurrentTimeFilter({ ...time, [name]: value });
   };
+
+  const handleOnDateChange = event => {
+    updateCurrentTimeFilter({ ...time, startTime: '00:00', endTime: '24:00' })
+    onSubmit();
+  }
 
   return (
     <>
       <MuiPickersUtilsProvider utils={DateFnsUtils}>
         <form>
           <Grid container justify="space-around">
-            <CustomDatePicker updateTime={updateTime} time={time} />
+            <CustomDatePicker 
+              updateTime={updateCurrentTimeFilter} 
+              time={currentTimeFilter}
+              handleOnDateChange={handleOnDateChange}
+            />
           </Grid>
           <Grid>
             <TimePicker
               color="secondary"
               handleTimeChange={handleTimeChange}
-              time={time.startTime}
+              time={currentTimeFilter.startTime}
               name={'startTime'}
               label={'Start Time'}
               variant="inline"
@@ -226,7 +236,7 @@ const TimeFilter = ({
             <KeyboardTimePicker
               color="secondary"
               handleTimeChange={handleTimeChange}
-              time={time.endTime}
+              time={currentTimeFilter.endTime}
               name={'endTime'}
               label={'End Time'}
               type="hours"
