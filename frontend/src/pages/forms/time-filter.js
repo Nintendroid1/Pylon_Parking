@@ -122,10 +122,10 @@ const convertEpochToMilitary = epoch => {
 const convertMilitaryToEpoch = (date, time) => {
   const [hour, minute] = time.split(':');
   const year = date.getFullYear();
-  const month = date.getMonth() + 1;
+  const month = date.getMonth();
   const day = date.getDate();
 
-  return new Date(Date.UTC(year, month, day, hour, minute)).getTime();
+  return new Date(Date.UTC(year, month, day, hour, minute)).getTime() / 1000;
 };
 
 const convertEpochToNormal = epoch => {
@@ -202,7 +202,7 @@ const TimeFilter = ({
 
   const handleSubmit = event => {
     event.preventDefault();
-    onSubmit();
+    onSubmit(currentTimeFilter);
   };
 
   const handleTimeChange = event => {
