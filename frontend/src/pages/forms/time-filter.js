@@ -125,7 +125,7 @@ const convertMilitaryToEpoch = (date, time) => {
   const month = date.getMonth() + 1;
   const day = date.getDate();
 
-  return new Date(Date.UTC(year, month, day, hour, minute)).getTime() / 1000;
+  return new Date(Date.UTC(year, month, day, hour, minute)).getTime();
 };
 
 const convertEpochToNormal = epoch => {

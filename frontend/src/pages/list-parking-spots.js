@@ -268,6 +268,8 @@ const Zone = ({
       currentTimeFilter.endTime
     );
 
+    updateMessage('Loading');
+
     const newURL = `${apiprefix}/zones/${zoneId}/?startTime=${startUTCEpoch}&endTime=${endUTCEpoch}`;
     let response = await makeAPICall('GET', newURL);
     let resbody = await response.json();
