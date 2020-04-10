@@ -181,7 +181,7 @@ const ConfirmationDialogFieldButton = props => {
             <Button onClick={handleClose} color="primary">
               Cancel
             </Button>
-            <Button type="submit" color="primary">
+            <Button onClick={handleSubmit} color="primary">
               Confirm
             </Button>
           </DialogActions>
