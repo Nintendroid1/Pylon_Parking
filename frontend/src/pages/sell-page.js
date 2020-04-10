@@ -170,18 +170,14 @@ const SellingParkingSpotTableBody = props => {
     end_time: '24:00',
     cost: 0
   });
-  const [privateKey, updatePrivateKey] = useState({
-    privateKey: '',
-    showPrivateKey: false
-  });
 
-  const handleOnConfirm = () => {
+  const handleOnConfirm = (privateKey) => {
     const index = parkingSpotsInfo.findIndex(
       e => e.spot_id === sellInfo.spot_id && e.zone_id === sellInfo.zone_id
     );
     const date = parkingSpotsInfo[index].date;
     updateSellInfo({ ...sellInfo, date: date });
-    handleSellRequest(sellInfo, privateKey.privateKey);
+    handleSellRequest(sellInfo, privateKey);
   };
 
   return (
@@ -213,8 +209,6 @@ const SellingParkingSpotTableBody = props => {
                       updateSellInfo
                     )}
                     handleOnConfirm={handleOnConfirm}
-                    privateKey={privateKey}
-                    updatePrivateKey={updatePrivateKey}
                     buttonColor="secondary"
                   />
                 </TableCell>

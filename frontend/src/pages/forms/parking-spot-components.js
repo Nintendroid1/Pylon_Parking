@@ -136,11 +136,14 @@ const ConfirmationDialogFieldButton = props => {
     messageTitle,
     messageContent,
     handleOnConfirm,
-    privateKey,
-    updatePrivateKey,
     buttonColor
   } = props;
   const [open, setOpen] = useState(false);
+
+  const [privateKey, updatePrivateKey] = useState({
+    privateKey: '',
+    showPrivateKey: false
+  })
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -202,10 +205,6 @@ const StartEndTime = props => {
   } = props;
 
   const [cost, updateCost] = useState('N/A');
-  const [privateKey, updatePrivateKey] = useState({
-    privateKey: '',
-    showPrivateKey: false
-  });
 
   const handleTimeChange = event => {
     let { name, value } = event.target;
@@ -238,8 +237,6 @@ const StartEndTime = props => {
           messageTitle={popUpTitle}
           messageContent={popUpContent}
           handleOnConfirm={handleOnConfirm}
-          privateKey={privateKey}
-          updatePrivateKey={updatePrivateKey}
           buttonColor="primary"
         />
       </Grid>

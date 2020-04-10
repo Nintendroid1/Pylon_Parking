@@ -64,6 +64,7 @@ const styles = theme => ({
 
 const headerCells = [
   { id: 'spot_id', label: 'Spot #' },
+  { id: 'price', label: 'Approximate Total Cost' }.
   { id: 'start_time', label: 'Next Available Start Time' },
   { id: 'end_time', label: 'Next Available End Time' },
   { id: 'details', label: 'Spot Details' }
@@ -71,31 +72,70 @@ const headerCells = [
   // { id: 'cost', label: 'Average Cost/15 minutes' }
 ];
 
+const popUpContent = infoList => {
+  return (
+    <>
+      <Table>
+        <TableBody>
+          {infoList.forEach(e => {
+            return (
+              <>
+                <TableRow>
+                  <TableCell>{`${e.name}: `}</TableCell>
+                  <TableCell>{e.value}</TableCell>
+                </TableRow>
+              </>
+            );
+          })}
+        </TableBody>
+      </Table>
+    </>
+  );
+};
+
 function TableData({ classes, ...props }) {
-  const data = props.parkingInfo.map(e => ({
+  const { parkingInfo, handleBuyRequest, zoneId, date } = props;
+  const data = parkingInfo.map(e => ({
     ...e
   }));
 
+  const handleOnConfirm = val => privateKey => {
+    handleBuyRequest(val, privateKey);
+  }
+
   return data.map(parkingSpot => {
+
+    const infoList = [
+      { name: 'Zone ID', value: zoneId },
+      { name: 'Spot ID', value: parkingSpot.spot_id },
+      { name: 'Date', value: date.toDateString() },
+      { name: 'Start Time', value: convertMilitaryTimeToNormal(parkingSpot.start_time) },
+      { name: 'End Time', value: convertMilitaryTimeToNormal(parkingSpot.start_time) },
+      { name: 'Approximate Total', value: parkingSpot.price }
+    ];
+
+    const requestParams = {
+      zone_id: zoneId,
+      date: date,
+      spot_id: parkingSpot.spot_id,
+      start_time: parkingSpot.start_time,
+      end_time: parkingSpot.end_time
+    }
+
     return (
       <>
         <TableRow>
           <TableCell>
-            <Link
-              className={classes.viewButton}
-              to={{
-                pathname: `/zones/${parkingSpot.zone_id}/spot/${parkingSpot.spot_id}`,
-                state: {
-                  from: history.location
-                }
-              }}
-            >
-              <Button variant="contained" color="primary" type="button">
-                View
-              </Button>
-            </Link>
+            <ConfirmationDialogFieldButton
+              buttonMessage={'Buy'}
+              messageTitle={'Confirmation'}
+              messageContent={popUpContent(infoList)}
+              handleOnConfirm={handleOnConfirm(requestParams)}
+              buttonColor="primary"
+            />
           </TableCell>
           <TableCell>{parkingSpot.spot_id}</TableCell>
+          <TableCell>{parkingSpot.price}</TableCell>
           <TableCell>
             {convertMilitaryTimeToNormal(parkingSpot.start_time)}
           </TableCell>
@@ -154,6 +194,9 @@ function MakeTable({
       <TableBody>
         <TableData
           classes={classes}
+          handleBuyRequest={handleBuyRequest}
+          zoneId={zoneId}
+          date={date}
           parkingInfo={
             columnToSort === 'start_time' || columnToSort === 'end_time'
               ? sortByMilitaryTime(parkingInfo, order, columnToSort)
@@ -297,6 +340,45 @@ const Zone = ({
     }
   };
 
+  const handleBuyRequest = async (parkingInfo, privateKey) => {
+    const startUTCEpoch = convertMilitaryToEpoch(parkingInfo.date, parkingInfo.start_time);
+    const endUTCEpoch = convertMilitaryToEpoch(parkingInfo.date, parkingInfo.end_time);
+
+    // Make api call to carry out transaction.
+    const url = `${apiprefix}/purchase`;
+    const json = {
+      pid: localStorage.olivia_pid,
+      spot: {
+        spot_id: spot_id,
+        zone_id: zone_id,
+        start_time: `${startUTCEpoch}`,
+        end_time: `${endUTCEpoch}`
+      }
+    };
+
+    console.log(url);
+    const response = await makeAPICall('POST', url, json);
+    console.log('WAIT2');
+    const respbody = await response.json();
+    console.log(respbody);
+
+    if (response.status === 200) {
+      // Redirect them to invoice page.
+      console.log('Successfully purchased spot!');
+      // Can have it as a snackbar that appears at the top of the page instead of redirection.
+    } else {
+      updateMessage(<div>{respbody.message}</div>);
+    }
+
+    // For testing purposes.
+    console.log(`
+      Start Time: ${time.start_time} \n
+      End Time: ${time.end_time} \n
+      Private Key: ${privateKey}
+    `);
+    // make smart contract and redirect to invoice.
+  };
+
   useEffect(() => {
     listParkingSpots();
   }, []);
@@ -316,6 +398,8 @@ const Zone = ({
     });
   }, []);
 
+  // There might be an issue with the date that is displayed on confirmation page
+  // because it is created in EDT, but never converted to UTC time.
   return (
     <>
       <div>
@@ -331,7 +415,10 @@ const Zone = ({
               />
               <MakeTable
                 parkingInfo={parkingSpotsInfo}
+                date={currentTimeFilter.date}
+                zoneId={zoneId}
                 onSortClick={handleSortRequest}
+                handleBuyRequest={handleBuyRequest}
                 columnToSort={columnToSort}
                 order={order}
                 classes={classes}
