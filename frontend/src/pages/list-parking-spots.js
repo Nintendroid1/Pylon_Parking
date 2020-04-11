@@ -349,8 +349,8 @@ const Zone = ({
     const json = {
       pid: localStorage.olivia_pid,
       spot: {
-        spot_id: spot_id,
-        zone_id: zone_id,
+        spot_id: parkingInfo.spot_id,
+        zone_id: parkingInfo.zone_id,
         start_time: `${startUTCEpoch}`,
         end_time: `${endUTCEpoch}`
       }
