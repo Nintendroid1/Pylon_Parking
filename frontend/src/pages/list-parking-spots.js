@@ -323,7 +323,7 @@ const Zone = ({
   //   updateMessage(null);
   // };
 
-  const handleFiltering = async value => {
+  const handleFiltering = async (value, checkBoxes) => {
     const { date, startTime, endTime } = value;
     // the month starts numbering from 0, so 0 is January, and 1 is February.
     const url = 'zones/';
@@ -331,7 +331,7 @@ const Zone = ({
     const startUTCEpoch = convertMilitaryToEpoch(date, startTime);
     const endUTCEpoch = convertMilitaryToEpoch(date, endTime);
 
-    const newURL = `${apiprefix}/zones/${zoneId}/?startTime=${startUTCEpoch}&endTime=${endUTCEpoch}`;
+    const newURL = `${apiprefix}/zones/${zoneId}/?startTime=${startUTCEpoch}&startExact=${checkBoxes.startTimeBox}&endTime=${endUTCEpoch}&endExact=${checkBoxes.endTimeBox}`;
     let response = await makeAPICall('GET', newURL);
     let resbody = await response.json();
 
@@ -364,8 +364,8 @@ const Zone = ({
     const json = {
       pid: localStorage.olivia_pid,
       spot: {
-        spot_id: 2,
-        zone_id: 1,
+        spot_id: parkingInfo.spot_id,
+        zone_id: parkingInfo.zone_id,
         start_time: `${startUTCEpoch}`,
         end_time: `${endUTCEpoch}`
       }

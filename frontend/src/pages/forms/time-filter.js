@@ -15,6 +15,11 @@ import {
   createMuiTheme
 } from '@material-ui/core/styles';
 import { KeyboardTimePicker } from '@material-ui/pickers';
+import Checkbox from '@material-ui/core/Checkbox';
+import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
+import CheckBoxIcon from '@material-ui/icons/CheckBox';
+import Favorite from '@material-ui/icons/Favorite';
+import FavoriteBorder from '@material-ui/icons/FavoriteBorder';
 
 const styles = theme => ({
   root: {
@@ -195,9 +200,19 @@ const TimeFilter = ({
     showPrivateKey: false
   });*/
 
+  const [checkBoxes, updateCheckBoxes] = useState({
+    startTimeBox: false,
+    endTimeBox: false
+  });
+
+  const handleChangeCheckBox = (event) => {
+    updateCheckBoxes({ ...checkBoxes, [event.target.name]: event.target.checked });
+  };
+
+
   const handleSubmit = event => {
     event.preventDefault();
-    onSubmit(currentTimeFilter);
+    onSubmit(currentTimeFilter, checkBoxes);
   };
 
   const handleTimeChange = event => {
@@ -214,8 +229,13 @@ const TimeFilter = ({
       endTime: '24:00'
     };
 
+    const resetCheckBoxes = {
+      startTimeBox: false,
+      endTimeBox: false
+    };
+
     updateCurrentTimeFilter(newDateObj);
-    onSubmit(newDateObj);
+    onSubmit(newDateObj, resetCheckBoxes);
   };
 
   return (
@@ -238,6 +258,19 @@ const TimeFilter = ({
               label={'Start Time'}
               variant="inline"
             />
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={checkBoxes}
+                  onChange={handleChangeCheckBox}
+                  name="startTimeBox"
+                  color="primary"
+                />
+              }
+              label="Exact Time"
+            />
+          </Grid>
+          <Grid>
             <TimePicker
               color="secondary"
               handleTimeChange={handleTimeChange}
@@ -246,6 +279,18 @@ const TimeFilter = ({
               label={'End Time'}
               variant="inline"
             />
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={checkBoxes}
+                  onChange={handleChangeCheckBox}
+                  name="endTimeBox"
+                  color="primary"
+                />
+              }
+              label="Exact Time"
+            />
+          </Grid>
             {/*<KeyboardTimePicker
               color="secondary"
               handleTimeChange={handleTimeChange}
@@ -256,6 +301,7 @@ const TimeFilter = ({
               minutesStep={15}
               placeholder="05:00 AM"
             />*/}
+          <Grid>
             <Button variant="contained" color="primary" onClick={handleSubmit}>
               Filter!
             </Button>
