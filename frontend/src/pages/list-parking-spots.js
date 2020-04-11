@@ -16,6 +16,7 @@ import orderBy from 'lodash/orderBy';
 import Button from '@material-ui/core/Button';
 import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 import IconButton from '@material-ui/core/IconButton';
+import { ConfirmationDialogFieldButton } from './forms/parking-spot-components';
 import {
   TimeFilter,
   convertMilitaryToEpoch,
@@ -64,7 +65,7 @@ const styles = theme => ({
 
 const headerCells = [
   { id: 'spot_id', label: 'Spot #' },
-  { id: 'price', label: 'Approximate Total Cost' }.
+  { id: 'price', label: 'Approximate Total Cost' },
   { id: 'start_time', label: 'Next Available Start Time' },
   { id: 'end_time', label: 'Next Available End Time' },
   { id: 'details', label: 'Spot Details' }
@@ -101,16 +102,21 @@ function TableData({ classes, ...props }) {
 
   const handleOnConfirm = val => privateKey => {
     handleBuyRequest(val, privateKey);
-  }
+  };
 
   return data.map(parkingSpot => {
-
     const infoList = [
       { name: 'Zone ID', value: zoneId },
       { name: 'Spot ID', value: parkingSpot.spot_id },
       { name: 'Date', value: date.toDateString() },
-      { name: 'Start Time', value: convertMilitaryTimeToNormal(parkingSpot.start_time) },
-      { name: 'End Time', value: convertMilitaryTimeToNormal(parkingSpot.start_time) },
+      {
+        name: 'Start Time',
+        value: convertMilitaryTimeToNormal(parkingSpot.start_time)
+      },
+      {
+        name: 'End Time',
+        value: convertMilitaryTimeToNormal(parkingSpot.start_time)
+      },
       { name: 'Approximate Total', value: parkingSpot.price }
     ];
 
@@ -120,7 +126,7 @@ function TableData({ classes, ...props }) {
       spot_id: parkingSpot.spot_id,
       start_time: parkingSpot.start_time,
       end_time: parkingSpot.end_time
-    }
+    };
 
     return (
       <>
@@ -167,6 +173,9 @@ function MakeTable({
   onSortClick,
   parkingInfo,
   classes,
+  handleBuyRequest,
+  zoneId,
+  date,
   ...props
 }) {
   return (
@@ -341,16 +350,22 @@ const Zone = ({
   };
 
   const handleBuyRequest = async (parkingInfo, privateKey) => {
-    const startUTCEpoch = convertMilitaryToEpoch(parkingInfo.date, parkingInfo.start_time);
-    const endUTCEpoch = convertMilitaryToEpoch(parkingInfo.date, parkingInfo.end_time);
+    const startUTCEpoch = convertMilitaryToEpoch(
+      parkingInfo.date,
+      parkingInfo.start_time
+    );
+    const endUTCEpoch = convertMilitaryToEpoch(
+      parkingInfo.date,
+      parkingInfo.end_time
+    );
 
     // Make api call to carry out transaction.
     const url = `${apiprefix}/purchase`;
     const json = {
       pid: localStorage.olivia_pid,
       spot: {
-        spot_id: spot_id,
-        zone_id: zone_id,
+        spot_id: 2,
+        zone_id: 1,
         start_time: `${startUTCEpoch}`,
         end_time: `${endUTCEpoch}`
       }
@@ -371,11 +386,11 @@ const Zone = ({
     }
 
     // For testing purposes.
-    console.log(`
-      Start Time: ${time.start_time} \n
-      End Time: ${time.end_time} \n
-      Private Key: ${privateKey}
-    `);
+   // console.log(`
+    //   Start Time: ${time.start_time} \n
+    //   End Time: ${time.end_time} \n
+    //   Private Key: ${privateKey}
+    // `);
     // make smart contract and redirect to invoice.
   };
 
