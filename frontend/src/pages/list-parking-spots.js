@@ -337,11 +337,23 @@ const Zone = ({
     const startUTCEpoch = convertMilitaryToEpoch(date, startTime);
     const endUTCEpoch = convertMilitaryToEpoch(date, endTime);
 
-    const newURL = `${apiprefix}/zones/${zoneId}/?startTime=${startUTCEpoch}&startExact=${checkBoxes.startTimeBox}&endTime=${endUTCEpoch}&endExact=${checkBoxes.endTimeBox}`;
+    const newURL = `${apiprefix}/zones/${zoneId}/?startTime=${startUTCEpoch}&endTime=${endUTCEpoch}`;
     let response = await makeAPICall('GET', newURL);
     let resbody = await response.json();
 
     if (response.status === 200) {
+
+      respbody.parkingInfo.filter(e => {
+        if (checkBoxes.startTimeBox && checkBoxes.endTimeBox && e.start_time === startUTCEpoch && e.end_time === endUTCEpoch) {
+          return true;
+        } else if (checkBoxes.startTimeBox && e.start_time === startUTCEpoch) {
+          return true;
+        } else if (checkBoxes.endTimeBox && e.end_time === endUTCEpoch) {
+          return true;
+        }
+        return false;
+      })
+
       // The functions acting upon this info expect the time to be in military time.
       // Suppose to send client a list of spots where the start and end time are open.
       resbody.parkingInfo.forEach(e => {
