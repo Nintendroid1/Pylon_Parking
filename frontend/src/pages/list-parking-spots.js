@@ -310,6 +310,7 @@ const Zone = ({
       resbody.parkingInfo.forEach(e => {
         e.start_time = convertEpochToMilitary(e.start_time);
         e.end_time = convertEpochToMilitary(e.end_time);
+        e.price = Number(e.price).toFixed(3);
       });
       updateparkingSpotsInfo(resbody.parkingInfo);
       updateMessage(null);
@@ -341,6 +342,7 @@ const Zone = ({
       resbody.parkingInfo.forEach(e => {
         e.start_time = convertEpochToMilitary(e.start_time);
         e.end_time = convertEpochToMilitary(e.end_time);
+        e.price = Number(e.price).toFixed(3);
       });
       updateparkingSpotsInfo(resbody.parkingInfo);
       updateMessage(null);
