@@ -183,6 +183,11 @@ function MakeTable({
       <TableHead>
         <TableRow>
           <TableCell>
+            {`Date: ${date.toDateString()}`}
+          </TableCell>
+        </TableRow>
+        <TableRow>
+          <TableCell>
             <span />
           </TableCell>
           {headerCells.map(headerCell => (
