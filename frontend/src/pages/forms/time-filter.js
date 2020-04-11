@@ -124,6 +124,10 @@ const convertEpochToMilitary = epoch => {
   return temp_date.toLocaleTimeString('en-US', option);
 };
 
+const getCurrentTimeInUTC = () => {
+  return new Date(Date.now() - (4 * 60 * 60 * 1000));
+}
+
 // Expects military time.
 const convertMilitaryToEpoch = (date, time) => {
   const [hour, minute] = time.split(':');
@@ -394,6 +398,7 @@ export {
   convertEpochToMilitary,
   convertEpochToNormal,
   convertMilitaryToEpoch,
+  getCurrentTimeInUTC,
   DateFilter
 };
 

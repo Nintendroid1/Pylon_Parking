@@ -23,9 +23,10 @@ import {
   convertEpochToMilitary,
   convertMilitaryTimeToNormal,
   sortByMilitaryTime,
+  getCurrentTimeInUTC,
   compareMilitaryTime
 } from './forms/time-filter';
-
+import queryString from 'query-string';
 import {
   withStyles,
   withTheme,
@@ -193,6 +194,11 @@ function MakeTable({
       <TableHead>
         <TableRow>
           <TableCell>
+            {`Date: ${date.toDateString()}`}
+          </TableCell>
+        </TableRow>
+        <TableRow>
+          <TableCell>
             <span />
           </TableCell>
           {headerCells.map(headerCell => (
@@ -288,15 +294,26 @@ const Zone = ({
   const [parkingSpotsInfo, updateparkingSpotsInfo] = useState(null);
   const [order, updateOrder] = useState('asc');
   const [columnToSort, updatecolumnToSort] = useState('spot_id');
+
+  // Expected url: ./list_parking_spots/:parkingLotId/?date=month-day-year
+  let tempUrl = window.location.pathname;
+  let zoneId = Number(tempUrl.substring(tempUrl.lastIndexOf('/') + 1));
+
+  let urlDate = queryString.parse(window.location.search.substring(1)).date;
+  let tempDate = getCurrentTimeInUTC();
+
+  if (urlDate !== undefined) {
+    let month = Number(urlDate.substring(0, 2));
+    let day = Number(urlDate.substring(2, 4));
+    let year = Number(urlDate.substring(4));
+    tempDate = new Date(Date.UTC(year, month, day));
+  }
+
   const [currentTimeFilter, updateCurrentTimeFilter] = useState({
-    date: new Date(),
+    date: tempDate,
     startTime: '00:00',
     endTime: '23:59'
   });
-
-  // Expected url: ./list_parking_spots/:parkingLotId
-  let tempUrl = window.location.pathname;
-  let zoneId = Number(tempUrl.substring(tempUrl.lastIndexOf('/') + 1));
 
   const handleSortRequest = property => {
     const isAsc = columnToSort === property && order === 'asc';
@@ -306,8 +323,11 @@ const Zone = ({
 
   // GET   /api/zones/:zone_id
   const listParkingSpots = async () => {
-    const url = `${apiprefix}/zones/${zoneId}`;
-    let response = await makeAPICall('GET', url);
+    const startUTCEpoch = convertMilitaryToEpoch(tempDate, '00:00');
+    const endUTCEpoch = convertMilitaryToEpoch(tempDate, '23:59');
+    const newURL = `${apiprefix}/zones/${zoneId}/?startTime=${startUTCEpoch}&endTime=${endUTCEpoch}`;
+
+    let response = await makeAPICall('GET', newURL);
     let resbody = await response.json();
     console.log('RESPPPPP');
     // spot_id
@@ -336,17 +356,35 @@ const Zone = ({
 
   const handleFiltering = async (value, checkBoxes) => {
     const { date, startTime, endTime } = value;
+
+    month = date.getMonth();
+    year = date.getFullYear();
+    day = date.getDate();
+    const newDate = `${month}${day}${year}`;
+    history.push(`/zones/${zoneId}/?date=${newDate}`);
+
     // the month starts numbering from 0, so 0 is January, and 1 is February.
     const url = 'zones/';
 
     const startUTCEpoch = convertMilitaryToEpoch(date, startTime);
     const endUTCEpoch = convertMilitaryToEpoch(date, endTime);
 
-    const newURL = `${apiprefix}/zones/${zoneId}/?startTime=${startUTCEpoch}&startExact=${checkBoxes.startTimeBox}&endTime=${endUTCEpoch}&endExact=${checkBoxes.endTimeBox}`;
+    const newURL = `${apiprefix}/zones/${zoneId}/?startTime=${startUTCEpoch}&endTime=${endUTCEpoch}`;
     let response = await makeAPICall('GET', newURL);
     let resbody = await response.json();
 
     if (response.status === 200) {
+      respbody.parkingInfo.filter(e => {
+        if (checkBoxes.startTimeBox && checkBoxes.endTimeBox && e.start_time === startUTCEpoch && e.end_time === endUTCEpoch) {
+          return true;
+        } else if (checkBoxes.startTimeBox && e.start_time === startUTCEpoch) {
+          return true;
+        } else if (checkBoxes.endTimeBox && e.end_time === endUTCEpoch) {
+          return true;
+        }
+        return false;
+      })
+
       // The functions acting upon this info expect the time to be in military time.
       // Suppose to send client a list of spots where the start and end time are open.
       resbody.parkingInfo.forEach(e => {
