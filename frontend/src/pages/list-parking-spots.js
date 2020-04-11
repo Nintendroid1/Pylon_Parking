@@ -32,6 +32,7 @@ import {
   MuiThemeProvider,
   createMuiTheme
 } from '@material-ui/core/styles';
+import HokieKoinIcon from '../images/hokie_coin.js';
 
 const styles = theme => ({
   root: {
@@ -43,6 +44,12 @@ const styles = theme => ({
   viewButton: {
     color: '#FF0000',
     textDecoration: 'none'
+  },
+  hokieKoin: {
+    width: '15px',
+    height: 'auto',
+    marginLeft: '5px',
+    fill: 'black'
   }
 });
 
@@ -141,7 +148,10 @@ function TableData({ classes, ...props }) {
             />
           </TableCell>
           <TableCell>{parkingSpot.spot_id}</TableCell>
-          <TableCell>{parkingSpot.price}</TableCell>
+          <TableCell>
+            {parkingSpot.price}
+            <HokieKoinIcon isInverted={true} className={classes.hokieKoin} />
+          </TableCell>
           <TableCell>
             {convertMilitaryTimeToNormal(parkingSpot.start_time)}
           </TableCell>
@@ -388,7 +398,7 @@ const Zone = ({
     }
 
     // For testing purposes.
-   // console.log(`
+    // console.log(`
     //   Start Time: ${time.start_time} \n
     //   End Time: ${time.end_time} \n
     //   Private Key: ${privateKey}
