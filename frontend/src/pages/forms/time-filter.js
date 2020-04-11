@@ -262,7 +262,7 @@ const TimeFilter = ({
             <FormControlLabel
               control={
                 <Checkbox
-                  checked={checkBoxes}
+                  checked={checkBoxes.startTimeBox}
                   onChange={handleChangeCheckBox}
                   name="startTimeBox"
                   color="primary"
@@ -283,7 +283,7 @@ const TimeFilter = ({
             <FormControlLabel
               control={
                 <Checkbox
-                  checked={checkBoxes}
+                  checked={checkBoxes.endTimeBox}
                   onChange={handleChangeCheckBox}
                   name="endTimeBox"
                   color="primary"
