@@ -193,9 +193,7 @@ function MakeTable({
     <Table stickyHeader>
       <TableHead>
         <TableRow>
-          <TableCell>
-            {`Date: ${date.toDateString()}`}
-          </TableCell>
+          <TableCell>{`Date: ${date.toDateString()}`}</TableCell>
         </TableRow>
         <TableRow>
           <TableCell>
@@ -357,9 +355,9 @@ const Zone = ({
   const handleFiltering = async (value, checkBoxes) => {
     const { date, startTime, endTime } = value;
 
-    month = date.getMonth();
-    year = date.getFullYear();
-    day = date.getDate();
+    const month = date.getMonth();
+    const year = date.getFullYear();
+    const day = date.getDate();
     const newDate = `${month}${day}${year}`;
     history.push(`/zones/${zoneId}/?date=${newDate}`);
 
@@ -374,8 +372,13 @@ const Zone = ({
     let resbody = await response.json();
 
     if (response.status === 200) {
-      respbody.parkingInfo.filter(e => {
-        if (checkBoxes.startTimeBox && checkBoxes.endTimeBox && e.start_time === startUTCEpoch && e.end_time === endUTCEpoch) {
+      resbody.parkingInfo.filter(e => {
+        if (
+          checkBoxes.startTimeBox &&
+          checkBoxes.endTimeBox &&
+          e.start_time === startUTCEpoch &&
+          e.end_time === endUTCEpoch
+        ) {
           return true;
         } else if (checkBoxes.startTimeBox && e.start_time === startUTCEpoch) {
           return true;
@@ -383,7 +386,7 @@ const Zone = ({
           return true;
         }
         return false;
-      })
+      });
 
       // The functions acting upon this info expect the time to be in military time.
       // Suppose to send client a list of spots where the start and end time are open.
