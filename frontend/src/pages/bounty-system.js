@@ -121,7 +121,7 @@ const popUpContent = info => {
     <>
       <Table>
         <TableBody>
-          {infoList.forEach(e => {
+          {infoList.map(e => {
             return (
               <>
                 <TableRow>

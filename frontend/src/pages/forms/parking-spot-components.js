@@ -141,7 +141,7 @@ const ConfirmationDialogFieldButton = ({
 }) => {
   const [open, setOpen] = useState(false);
 
-  if (requireKey === 'undefined') {
+  if (typeof requireKey === 'undefined') {
     requireKey = true;
   }
 

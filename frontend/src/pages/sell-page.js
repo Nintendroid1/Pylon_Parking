@@ -169,7 +169,7 @@ const popUpContent = sellInfoList => {
     <>
       <Table>
         <TableBody>
-          {sellInfoList.forEach(e => {
+          {sellInfoList.map(e => {
             return (
               <>
                 <TableRow>
