@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { makeAPICall } from '../api';
+import { makeAPICall, makePlateRecogAPICall } from '../api';
 import PropTypes from 'prop-types';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
@@ -23,7 +23,10 @@ import apiprefix from './apiprefix';
 import { TimePicker } from './forms/parking-spot-components';
 import CustomSnackbar from '../ui/snackbars';
 import QrReader from 'react-qr-reader';
-import Button from '@material-ui/core/Button';
+import Camera from 'react-html5-camera-photo';
+import { PNG } from "pngjs";
+import 'react-html5-camera-photo/build/css/index.css';
+import jsQR from "jsqr";
 import {
   compareMilitaryTime,
   convertMilitaryToEpoch,
@@ -41,21 +44,64 @@ import {
   createMuiTheme
 } from '@material-ui/core/styles';
 
-const styles = theme => ({
-  root: {
-    display: 'flex',
-    flexGrow: 1
-  },
-  reader: {
-    width: '400px',
-    marginBottom: '30px'
+/*
+Code for coverting base 64 image to unit8clampedarray
+*/
+const BASE64_MARKER = ';base64,';
+
+const convertDataURIToBinary = (dataURI) => {
+  const base64Index = dataURI.indexOf(BASE64_MARKER) + BASE64_MARKER.length;
+  const base64 = dataURI.substring(base64Index);
+  const raw = window.atob(base64);
+  const rawLength = raw.length;
+  const array = new Uint8Array(new ArrayBuffer(rawLength));
+
+  for(let i = 0; i < rawLength; i++) {
+    array[i] = raw.charCodeAt(i);
   }
-});
-const QrReaderField = ({ className, updateData }) => {
-  const handleOnScan = data => {
-    if (data != null) {
-      updateData(data);
-    }
+  return array;
+}
+
+
+/*
+for finding the width and height of the image, use:
+
+var i = new Image(); 
+
+i.onload = function(){
+ alert( i.width+", "+i.height );
+};
+
+i.src = imageData; 
+*/
+
+/*
+https://github.com/cozmo/jsQR/issues/96
+has some example code for converting base 64 image to needed for jsqr.
+*/
+
+const CaptureImage = props => {
+  const { handleCameraClick } = props;
+
+  const handleTakePhoto = dataUri => {
+    handleCameraClick(dataUri);
+  }
+
+  return (
+    <>
+      <Camera 
+        onTakePhoto={(dataUri) => { handleTakePhoto(dataUri); }}
+      />
+    </>
+  );
+}
+
+const QrReaderField = ({
+  handleCameraClick
+}) => {
+
+  const handleOnScan = (data) => {
+    handleCameraClick(data);
   };
 
   const handleOnError = err => {
@@ -76,7 +122,15 @@ const QrReaderField = ({ className, updateData }) => {
       />
     </>
   );
-};
+}
+
+/*
+const ReportField = ({
+  info,
+  updateInfo,
+  makeReport,
+  getInfo
+}) => {
 
 const ReportField = ({ classes, info, updateInfo, makeReport, getInfo }) => {
   const hasInfo = info.license_info === '' ? false : true;
@@ -165,8 +219,8 @@ const ReportField = ({ classes, info, updateInfo, makeReport, getInfo }) => {
       </Button>
     </>
   );
-};
-
+}
+*/
 const BountySystem = ({ classes, ...props }) => {
   const [info, updateInfo] = useState({
     zone_id: 1,
@@ -210,15 +264,35 @@ const BountySystem = ({ classes, ...props }) => {
     }
   };
 
+  const handleOnCameraClick = async (imageURI) => {
+    const dataUri = imageURI;
+    const png = PNG.sync.read(
+      Buffer.from(dataUri.slice("data:image/png;base64,".length), "base64")
+    );
+    const code = jsQR(Uint8ClampedArray.from(png.data), png.width, png.height);
+    /*
+    const rawImage = convertDataURIToBinary(imageURI);
+
+    const temp = new Image();
+    temp.src = imageURI;
+
+    const imageWidth = temp.width;
+    const imageHeight = temp.height;
+
+    const code = jsQR(rawImage, imageWidth, imageHeight);
+    console.log(code);*/
+
+    const response = await makePlateRecogAPICall(imageURI);
+    const respbody = await response.json();
+
+    console.log(respbody);
+  };
+
   return (
     <>
       <Typography>
-        <ReportField
-          info={info}
-          updateInfo={updateInfo}
-          makeReport={handleReport}
-          getInfo={handleRequestLicenseInfo}
-          classes={classes}
+        <CaptureImage 
+          handleCameraClick={handleOnCameraClick}
         />
       </Typography>
     </>
