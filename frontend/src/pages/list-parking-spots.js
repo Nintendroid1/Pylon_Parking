@@ -357,9 +357,15 @@ const Zone = ({
   const handleFiltering = async (value, checkBoxes) => {
     const { date, startTime, endTime } = value;
 
-    const month = date.getMonth().toString().length === 1 ? '0' + date.getMonth().toString() : date.getMonth().toString();
+    const month =
+      date.getMonth().toString().length === 1
+        ? '0' + date.getMonth().toString()
+        : date.getMonth().toString();
     const year = date.getFullYear();
-    const day = date.getDate().toString().length === 1 ? '0' + date.getDate().toString() : date.getDate().toString();
+    const day =
+      date.getDate().toString().length === 1
+        ? '0' + date.getDate().toString()
+        : date.getDate().toString();
     const newDate = `${month}${day}${year}`;
     history.push(`/zones/${zoneId}?date=${newDate}`);
 

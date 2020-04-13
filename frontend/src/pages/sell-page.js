@@ -196,22 +196,22 @@ const SellingParkingSpotTableBody = props => {
     cost: 0
   });
 
-  const handleOnConfirm = (privateKey) => {
+  const handleOnConfirm = privateKey => {
     handleSellRequest(sellInfo, privateKey);
-  }
+  };
 
   const handleSellInfo = () => {
     const index = parkingSpotsInfo.findIndex(
       e => e.spot_id === sellInfo.spot_id && e.zone_id === sellInfo.zone_id
     );
 
-    const parkingSpotToSell = parkingSpotsInfo[index];
-    updateSellInfo({ ...sellInfo, date: parkingSpotToSell.date });
+    const parkingSpot = parkingSpotsInfo[index];
+    updateSellInfo({ ...sellInfo, date: parkingSpot.date });
 
     const sellInfoList = [
       { name: 'Zone ID', value: sellInfo.zone_id },
       { name: 'Spot ID', value: sellInfo.spot_id },
-      { name: 'Date', value: parkingSpotToSell.date.toDateString() },
+      { name: 'Date', value: parkingSpot.date.toDateString() },
       {
         name: 'Start Time',
         value: convertMilitaryTimeToNormal(sellInfo.start_time)
@@ -222,7 +222,7 @@ const SellingParkingSpotTableBody = props => {
       },
       { name: 'Total Price To Sell For', value: sellInfo.cost }
     ];
-    
+
     return (
       <>
         <ConfirmationDialogFieldButton
@@ -244,9 +244,7 @@ const SellingParkingSpotTableBody = props => {
           return (
             <>
               <TableRow>
-                <TableCell>
-                  {parkingSpot.uniqueId}
-                </TableCell>
+                <TableCell>{parkingSpot.uniqueId}</TableCell>
                 <TableCell>{parkingSpot.zone_name}</TableCell>
                 <TableCell>
                   {convertMilitaryTimeToNormal(parkingSpot.start_time)}

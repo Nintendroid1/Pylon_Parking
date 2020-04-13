@@ -130,18 +130,18 @@ const TimePicker = ({
   );
 };
 
-const ConfirmationDialogFieldButton = props => {
-  const {
-    buttonMessage,
-    messageTitle,
-    messageContent,
-    handleOnConfirm,
-    buttonColor,
-    requireKey
-  } = props;
+const ConfirmationDialogFieldButton = ({
+  buttonMessage,
+  messageTitle,
+  messageContent,
+  handleOnConfirm,
+  buttonColor,
+  requireKey,
+  ...props
+}) => {
   const [open, setOpen] = useState(false);
 
-  if (requireKey === undefined) {
+  if (typeof requireKey === 'undefined') {
     requireKey = true;
   }
 
@@ -185,8 +185,7 @@ const ConfirmationDialogFieldButton = props => {
                   updatePrivateKey={updatePrivateKey}
                 />
               </Grid>
-            ) : null
-            }
+            ) : null}
             <Button onClick={handleClose} color="primary">
               Cancel
             </Button>
