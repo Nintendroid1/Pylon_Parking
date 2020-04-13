@@ -270,17 +270,10 @@ const BountySystem = ({ classes, ...props }) => {
       Buffer.from(dataUri.slice("data:image/png;base64,".length), "base64")
     );
     const code = jsQR(Uint8ClampedArray.from(png.data), png.width, png.height);
-    /*
-    const rawImage = convertDataURIToBinary(imageURI);
 
-    const temp = new Image();
-    temp.src = imageURI;
-
-    const imageWidth = temp.width;
-    const imageHeight = temp.height;
-
-    const code = jsQR(rawImage, imageWidth, imageHeight);
-    console.log(code);*/
+    // Do error checking of code where only make api call if qr code is valid.
+    // the data in the qr code will be of the form zone_id-spot_id.
+    const [zone_id, spot_id] = code.data.split('-');
 
     const response = await makePlateRecogAPICall(imageURI);
     const respbody = await response.json();
