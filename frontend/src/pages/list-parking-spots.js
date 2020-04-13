@@ -300,7 +300,7 @@ const Zone = ({
   let urlDate = queryString.parse(window.location.search.substring(1)).date;
   let tempDate = getCurrentTimeInUTC();
 
-  if (urlDate !== undefined && url.Date.length === 8) {
+  if (urlDate !== undefined && urlDate.length === 8) {
     let month = Number(urlDate.substring(0, 2));
     let day = Number(urlDate.substring(2, 4));
     let year = Number(urlDate.substring(4));
