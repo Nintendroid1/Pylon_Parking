@@ -12,6 +12,7 @@ import Check from '@material-ui/icons/Check';
 import NavigateLeftIcon from '@material-ui/icons/NavigateBefore';
 import NavigateRightIcon from '@material-ui/icons/NavigateNext';
 import { Typography, CircularProgress, TextField } from '@material-ui/core';
+import DialogContentText from '@material-ui/core/DialogContentText';
 import RequireAuthentication from '../RequireAuthentication';
 import queryString from 'query-string';
 import IconButton from '@material-ui/core/IconButton';
@@ -20,12 +21,18 @@ import Grid from '@material-ui/core/Grid';
 import history from '../history';
 import { Link } from 'react-router-dom';
 import apiprefix from './apiprefix';
+import Dialog from '@material-ui/core/Dialog';
+import Grid from '@material-ui/core/Grid';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogTitle from '@material-ui/core/DialogTitle';
 import { TimePicker } from './forms/parking-spot-components';
 import CustomSnackbar from '../ui/snackbars';
 import QrReader from 'react-qr-reader';
 import Camera from 'react-html5-camera-photo';
 import { PNG } from "pngjs";
 import 'react-html5-camera-photo/build/css/index.css';
+import DialogActions from '@material-ui/core/DialogActions';
 import jsQR from "jsqr";
 import {
   compareMilitaryTime,
@@ -92,6 +99,106 @@ const CaptureImage = props => {
       <Camera 
         onTakePhoto={(dataUri) => { handleTakePhoto(dataUri); }}
       />
+    </>
+  );
+}
+
+const popUpContent = info => {
+
+  const infoList = [
+    { name: 'Zone ID', value: `${info.zone_id}` },
+    { name: 'Spot ID', value: `${info.spot_id}` },
+    { name: 'License Plate Number', value: `${info.license_info}` },
+  ];
+
+  return (
+    <>
+      <Table>
+        <TableBody>
+          {infoList.forEach(e => {
+            return (
+              <>
+                <TableRow>
+                  <TableCell>{`${e.name}: `}</TableCell>
+                  <TableCell>{e.value}</TableCell>
+                </TableRow>
+              </>
+            );
+          })}
+        </TableBody>
+      </Table>
+    </>
+  );
+};
+
+const ReportField = props => {
+  const { handleReport } = props;
+
+  const [open, setOpen] = useState(false);
+  const [info, updateInfo] = useState({
+    zone_id: -1,
+    spot_id: -1,
+    license_info: ''
+  })
+
+  const handleClose = () => {
+    setOpen(false);
+  };
+
+  const handleSubmit = event => {
+    event.preventDefault();
+    setOpen(false);
+    handleReport(info);
+  };
+
+  const handleOnCameraClick = async (imageURI) => {
+    const dataUri = imageURI;
+    const png = PNG.sync.read(
+      Buffer.from(dataUri.slice("data:image/png;base64,".length), "base64")
+    );
+    const code = jsQR(Uint8ClampedArray.from(png.data), png.width, png.height);
+
+    // Do error checking of code where only make api call if qr code is valid.
+    // the data in the qr code will be of the form zone_id-spot_id.
+    const [zone_id, spot_id] = code.data.split('-');
+
+    const response = await makePlateRecogAPICall(imageURI);
+    const respbody = await response.json();
+
+    console.log(respbody);
+
+    // make a dialog for confirmation of the info.
+    updateInfo({
+      zone_id: zone_id,
+      spot_id: spot_id,
+      license_info: respbody.results[0].plate
+    })
+    setOpen(true);
+  };
+
+  return (
+    <>
+      <CaptureImage
+        handleCameraClick={handleOnCameraClick}
+      />
+      <Dialog open={open} onClose={handleClose}>
+          <DialogTitle>Confirm Report Info</DialogTitle>
+          <DialogContent>
+            <DialogContentText>
+              <Table>
+                {popUpContent(info)}
+              </Table>
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleClose} color="primary">
+              Cancel
+            </Button>
+            <Button onClick={handleSubmit} color="primary">
+              Confirm
+            </Button>
+          </DialogActions>
+        </Dialog>
     </>
   );
 }
@@ -222,14 +329,9 @@ const ReportField = ({ classes, info, updateInfo, makeReport, getInfo }) => {
 }
 */
 const BountySystem = ({ classes, ...props }) => {
-  const [info, updateInfo] = useState({
-    zone_id: 1,
-    spot_id: 1,
-    license_info: ''
-  });
-
   const [message, updateMessage] = useState(null);
 
+  /*
   const handleRequestLicenseInfo = async () => {
     const url = `${apiprefix}/bounty/info`;
     const json = {
@@ -245,13 +347,14 @@ const BountySystem = ({ classes, ...props }) => {
     } else {
       // Make some kind of error message.
     }
-  };
+  };*/
 
-  const handleReport = async () => {
+  const handleReport = async (info) => {
     const url = `${apiprefix}/bounty/report`;
     const json = {
       zone_id: info.zone_id,
-      spot_id: info.spot_id
+      spot_id: info.spot_id,
+      license_info: info.license_info
     };
 
     const response = await makeAPICall('POST', url, json);
@@ -264,28 +367,11 @@ const BountySystem = ({ classes, ...props }) => {
     }
   };
 
-  const handleOnCameraClick = async (imageURI) => {
-    const dataUri = imageURI;
-    const png = PNG.sync.read(
-      Buffer.from(dataUri.slice("data:image/png;base64,".length), "base64")
-    );
-    const code = jsQR(Uint8ClampedArray.from(png.data), png.width, png.height);
-
-    // Do error checking of code where only make api call if qr code is valid.
-    // the data in the qr code will be of the form zone_id-spot_id.
-    const [zone_id, spot_id] = code.data.split('-');
-
-    const response = await makePlateRecogAPICall(imageURI);
-    const respbody = await response.json();
-
-    console.log(respbody);
-  };
-
   return (
     <>
       <Typography>
-        <CaptureImage 
-          handleCameraClick={handleOnCameraClick}
+        <ReportField 
+          handleReport={handleReport}
         />
       </Typography>
     </>
