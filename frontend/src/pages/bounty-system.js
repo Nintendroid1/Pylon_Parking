@@ -24,6 +24,7 @@ import { TimePicker } from './forms/parking-spot-components';
 import CustomSnackbar from '../ui/snackbars';
 import QrReader from 'react-qr-reader';
 import Camera from 'react-html5-camera-photo';
+import { PNG } from "pngjs";
 import 'react-html5-camera-photo/build/css/index.css';
 import jsQR from "jsqr";
 import {
@@ -265,7 +266,13 @@ const BountySystem = () => {
   }
 
   const handleOnCameraClick = async (imageURI) => {
-    rawImage = convertDataURIToBinary(imageURI);
+    const dataUri = imageURI;
+    const png = PNG.sync.read(
+      Buffer.from(dataUri.slice("data:image/png;base64,".length), "base64")
+    );
+    const code = jsQR(Uint8ClampedArray.from(png.data), png.width, png.height);
+    /*
+    const rawImage = convertDataURIToBinary(imageURI);
 
     const temp = new Image();
     temp.src = imageURI;
@@ -279,7 +286,7 @@ const BountySystem = () => {
     const response = await makePlateRecogAPICall(imageURI);
     const respbody = await response.json();
 
-    console.log(respbody);
+    console.log(respbody);*/
   };
 
   return (
