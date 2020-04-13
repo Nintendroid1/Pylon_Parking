@@ -141,7 +141,7 @@ const ConfirmationDialogFieldButton = ({
 }) => {
   const [open, setOpen] = useState(false);
 
-  if (requireKey === 'undefined') {
+  if (typeof requireKey === 'undefined') {
     requireKey = true;
   }
 
@@ -212,10 +212,12 @@ const ConfirmationDialogFieldButton = ({
           <form onSubmit={handleSubmit}>
             <Grid>{messageContent}</Grid>
             <Grid>
-              <PrivateKeyField
-                privateKey={privateKey}
-                updatePrivateKey={updatePrivateKey}
-              />
+              {requireKey ? (
+                <PrivateKeyField
+                  privateKey={privateKey}
+                  updatePrivateKey={updatePrivateKey}
+                />
+              ) : null}
             </Grid>
             <Button onClick={handleClose} color="primary">
               Cancel
