@@ -166,7 +166,6 @@ const App = ({ classes, ...props }) => {
                 reqAdmin={false}
                 reqLogin={false}
                 component={WelcomeTab}
-                order="1"
               />
               <Route
                 exact
@@ -178,36 +177,72 @@ const App = ({ classes, ...props }) => {
                 reqAdmin={false}
                 reqLogin={false}
                 component={MainMap}
-                order="2"
               />
-              <Route
-                exact
-                path="/transaction_history"
-                label="Transaction History"
-                key="/transaction_history"
-                panelGroup="profile"
-                icon={<HistoryIcon />}
+              <div
+                id="group"
+                key="profile-group"
+                headerLabel="My Profile"
+                reqLogin={true}
                 reqAdmin={false}
-                reqLogin={false}
                 hidden={false}
-                order="3-2"
-                render={() => (
-                  <TransactionHistory socket={transactionHistorySocket} />
-                )}
-              />
-              <Route
-                exact
-                path="/dashboard"
-                label="Dashboard"
-                key="/dashboard"
-                panelGroup="profile"
-                icon={<DashboardIcon />}
-                reqAdmin={false}
-                reqLogin={false}
-                hidden={false}
-                order="3-1"
-                component={Dashboard}
-              />
+                icon={<PersonOutlineIcon />}
+              >
+                <Route
+                  exact
+                  path="/dashboard"
+                  label="Dashboard"
+                  key="/dashboard"
+                  panelGroup="profile"
+                  icon={<DashboardIcon />}
+                  reqAdmin={false}
+                  reqLogin={false}
+                  hidden={false}
+                  component={Dashboard}
+                />
+                <Route
+                  exact
+                  path="/transaction_history"
+                  label="Transaction History"
+                  key="/transaction_history"
+                  panelGroup="profile"
+                  icon={<HistoryIcon />}
+                  reqAdmin={false}
+                  reqLogin={false}
+                  hidden={false}
+                  render={() => (
+                    <TransactionHistory
+                      classes={classes}
+                      socket={transactionHistorySocket}
+                    />
+                  )}
+                />
+                <Route
+                  exact
+                  path="/my_spots"
+                  label="My Spots"
+                  key="/my_spots"
+                  icon={<DirectionsCarIcon />}
+                  reqAdmin={false}
+                  reqLogin={true}
+                  hidden={false}
+                  render={() => (
+                    <SellPage isLoggedIn={isLoggedIn} socket={userSocket} />
+                  )}
+                />
+                <Route
+                  exact
+                  path="/profile"
+                  label="Profile"
+                  key="/profile"
+                  icon={<PersonOutlineIcon />}
+                  hidden={false}
+                  reqAdmin={false}
+                  reqLogin={true}
+                  render={() => (
+                    <ProfilePage socket={userSocket} isLoggedIn={isLoggedIn} />
+                  )}
+                />
+              </div>
               <Route
                 exact
                 path="/bounty"
@@ -217,36 +252,7 @@ const App = ({ classes, ...props }) => {
                 hidden={false}
                 reqAdmin={false}
                 reqLogin={false}
-                order="4"
                 component={BountySystem}
-              />
-              <Route
-                exact
-                path="/my_spots"
-                label="My Spots"
-                key="/my_spots"
-                icon={<DirectionsCarIcon />}
-                reqAdmin={false}
-                reqLogin={true}
-                hidden={false}
-                order="3-3"
-                render={() => (
-                  <SellPage isLoggedIn={isLoggedIn} socket={userSocket} />
-                )}
-              />
-              <Route
-                exact
-                path="/profile"
-                label="Profile"
-                key="/profile"
-                icon={<PersonOutlineIcon />}
-                hidden={false}
-                reqAdmin={false}
-                reqLogin={true}
-                order="3-4"
-                render={() => (
-                  <ProfilePage socket={userSocket} isLoggedIn={isLoggedIn} />
-                )}
               />
               {/*render={() => <UserInfo isLoggedIn={isLoggedIn} socket={userSocket} />}*/}
               <Route
