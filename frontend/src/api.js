@@ -27,9 +27,8 @@ export async function makeAPICall(method, url, body) {
 //
 // http://docs.platerecognizer.com/?javascript#license-plate-recognition
 export async function makePlateRecogAPICall(image) {
-  let image_path = '/path/to/car.jpg'
   let body = new FormData();
-  body.append('upload', fs.createReadStream(image_path));
+  body.append('upload', image);
   // Or body.append('upload', base64Image);
   body.append('regions', 'us'); // Change to your country
 
