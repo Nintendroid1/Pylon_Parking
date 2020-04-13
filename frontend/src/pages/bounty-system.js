@@ -22,7 +22,6 @@ import history from '../history';
 import { Link } from 'react-router-dom';
 import apiprefix from './apiprefix';
 import Dialog from '@material-ui/core/Dialog';
-import Grid from '@material-ui/core/Grid';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogTitle from '@material-ui/core/DialogTitle';
@@ -30,10 +29,9 @@ import { TimePicker } from './forms/parking-spot-components';
 import CustomSnackbar from '../ui/snackbars';
 import QrReader from 'react-qr-reader';
 import Camera from 'react-html5-camera-photo';
-import { PNG } from "pngjs";
+import { PNG } from 'pngjs';
 import 'react-html5-camera-photo/build/css/index.css';
-import DialogActions from '@material-ui/core/DialogActions';
-import jsQR from "jsqr";
+import jsQR from 'jsqr';
 import {
   compareMilitaryTime,
   convertMilitaryToEpoch,
@@ -56,19 +54,18 @@ Code for coverting base 64 image to unit8clampedarray
 */
 const BASE64_MARKER = ';base64,';
 
-const convertDataURIToBinary = (dataURI) => {
+const convertDataURIToBinary = dataURI => {
   const base64Index = dataURI.indexOf(BASE64_MARKER) + BASE64_MARKER.length;
   const base64 = dataURI.substring(base64Index);
   const raw = window.atob(base64);
   const rawLength = raw.length;
   const array = new Uint8Array(new ArrayBuffer(rawLength));
 
-  for(let i = 0; i < rawLength; i++) {
+  for (let i = 0; i < rawLength; i++) {
     array[i] = raw.charCodeAt(i);
   }
   return array;
-}
-
+};
 
 /*
 for finding the width and height of the image, use:
@@ -92,23 +89,24 @@ const CaptureImage = props => {
 
   const handleTakePhoto = dataUri => {
     handleCameraClick(dataUri);
-  }
+  };
 
   return (
     <>
-      <Camera 
-        onTakePhoto={(dataUri) => { handleTakePhoto(dataUri); }}
+      <Camera
+        onTakePhoto={dataUri => {
+          handleTakePhoto(dataUri);
+        }}
       />
     </>
   );
-}
+};
 
 const popUpContent = info => {
-
   const infoList = [
     { name: 'Zone ID', value: `${info.zone_id}` },
     { name: 'Spot ID', value: `${info.spot_id}` },
-    { name: 'License Plate Number', value: `${info.license_info}` },
+    { name: 'License Plate Number', value: `${info.license_info}` }
   ];
 
   return (
@@ -139,7 +137,7 @@ const ReportField = props => {
     zone_id: -1,
     spot_id: -1,
     license_info: ''
-  })
+  });
 
   const handleClose = () => {
     setOpen(false);
@@ -151,10 +149,10 @@ const ReportField = props => {
     handleReport(info);
   };
 
-  const handleOnCameraClick = async (imageURI) => {
+  const handleOnCameraClick = async imageURI => {
     const dataUri = imageURI;
     const png = PNG.sync.read(
-      Buffer.from(dataUri.slice("data:image/png;base64,".length), "base64")
+      Buffer.from(dataUri.slice('data:image/png;base64,'.length), 'base64')
     );
     const code = jsQR(Uint8ClampedArray.from(png.data), png.width, png.height);
 
@@ -172,42 +170,35 @@ const ReportField = props => {
       zone_id: zone_id,
       spot_id: spot_id,
       license_info: respbody.results[0].plate
-    })
+    });
     setOpen(true);
   };
 
   return (
     <>
-      <CaptureImage
-        handleCameraClick={handleOnCameraClick}
-      />
+      <CaptureImage handleCameraClick={handleOnCameraClick} />
       <Dialog open={open} onClose={handleClose}>
-          <DialogTitle>Confirm Report Info</DialogTitle>
-          <DialogContent>
-            <DialogContentText>
-              <Table>
-                {popUpContent(info)}
-              </Table>
-            </DialogContentText>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={handleClose} color="primary">
-              Cancel
-            </Button>
-            <Button onClick={handleSubmit} color="primary">
-              Confirm
-            </Button>
-          </DialogActions>
-        </Dialog>
+        <DialogTitle>Confirm Report Info</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            <Table>{popUpContent(info)}</Table>
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose} color="primary">
+            Cancel
+          </Button>
+          <Button onClick={handleSubmit} color="primary">
+            Confirm
+          </Button>
+        </DialogActions>
+      </Dialog>
     </>
   );
-}
+};
 
-const QrReaderField = ({
-  handleCameraClick
-}) => {
-
-  const handleOnScan = (data) => {
+const QrReaderField = ({ handleCameraClick }) => {
+  const handleOnScan = data => {
     handleCameraClick(data);
   };
 
@@ -229,7 +220,7 @@ const QrReaderField = ({
       />
     </>
   );
-}
+};
 
 /*
 const ReportField = ({
@@ -349,7 +340,7 @@ const BountySystem = ({ classes, ...props }) => {
     }
   };*/
 
-  const handleReport = async (info) => {
+  const handleReport = async info => {
     const url = `${apiprefix}/bounty/report`;
     const json = {
       zone_id: info.zone_id,
@@ -370,9 +361,7 @@ const BountySystem = ({ classes, ...props }) => {
   return (
     <>
       <Typography>
-        <ReportField 
-          handleReport={handleReport}
-        />
+        <ReportField handleReport={handleReport} />
       </Typography>
     </>
   );
