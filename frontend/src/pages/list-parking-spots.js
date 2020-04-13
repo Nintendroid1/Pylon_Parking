@@ -33,6 +33,7 @@ import {
   MuiThemeProvider,
   createMuiTheme
 } from '@material-ui/core/styles';
+import HokieKoinIcon from '../images/hokie_coin.js';
 
 const styles = theme => ({
   root: {
@@ -44,6 +45,12 @@ const styles = theme => ({
   viewButton: {
     color: '#FF0000',
     textDecoration: 'none'
+  },
+  hokieKoin: {
+    width: '15px',
+    height: 'auto',
+    marginLeft: '5px',
+    fill: 'black'
   }
 });
 
@@ -142,7 +149,10 @@ function TableData({ classes, ...props }) {
             />
           </TableCell>
           <TableCell>{parkingSpot.spot_id}</TableCell>
-          <TableCell>{parkingSpot.price}</TableCell>
+          <TableCell>
+            {parkingSpot.price}
+            <HokieKoinIcon isInverted={true} className={classes.hokieKoin} />
+          </TableCell>
           <TableCell>
             {convertMilitaryTimeToNormal(parkingSpot.start_time)}
           </TableCell>
@@ -183,9 +193,7 @@ function MakeTable({
     <Table stickyHeader>
       <TableHead>
         <TableRow>
-          <TableCell>
-            {`Date: ${date.toDateString()}`}
-          </TableCell>
+          <TableCell>{`Date: ${date.toDateString()}`}</TableCell>
         </TableRow>
         <TableRow>
           <TableCell>
@@ -347,9 +355,9 @@ const Zone = ({
   const handleFiltering = async (value, checkBoxes) => {
     const { date, startTime, endTime } = value;
 
-    month = date.getMonth();
-    year = date.getFullYear();
-    day = date.getDate();
+    const month = date.getMonth();
+    const year = date.getFullYear();
+    const day = date.getDate();
     const newDate = `${month}${day}${year}`;
     history.push(`/zones/${zoneId}?date=${newDate}`);
 
@@ -364,8 +372,13 @@ const Zone = ({
     let resbody = await response.json();
 
     if (response.status === 200) {
-      respbody.parkingInfo.filter(e => {
-        if (checkBoxes.startTimeBox && checkBoxes.endTimeBox && e.start_time === startUTCEpoch && e.end_time === endUTCEpoch) {
+      resbody.parkingInfo.filter(e => {
+        if (
+          checkBoxes.startTimeBox &&
+          checkBoxes.endTimeBox &&
+          e.start_time === startUTCEpoch &&
+          e.end_time === endUTCEpoch
+        ) {
           return true;
         } else if (checkBoxes.startTimeBox && e.start_time === startUTCEpoch) {
           return true;
@@ -373,7 +386,7 @@ const Zone = ({
           return true;
         }
         return false;
-      })
+      });
 
       // The functions acting upon this info expect the time to be in military time.
       // Suppose to send client a list of spots where the start and end time are open.
@@ -426,7 +439,7 @@ const Zone = ({
     }
 
     // For testing purposes.
-   // console.log(`
+    // console.log(`
     //   Start Time: ${time.start_time} \n
     //   End Time: ${time.end_time} \n
     //   Private Key: ${privateKey}
