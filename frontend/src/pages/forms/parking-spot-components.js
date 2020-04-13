@@ -136,9 +136,14 @@ const ConfirmationDialogFieldButton = props => {
     messageTitle,
     messageContent,
     handleOnConfirm,
-    buttonColor
+    buttonColor,
+    requireKey
   } = props;
   const [open, setOpen] = useState(false);
+
+  if (requireKey === undefined) {
+    requireKey = true;
+  }
 
   const [privateKey, updatePrivateKey] = useState({
     privateKey: '',
@@ -173,12 +178,15 @@ const ConfirmationDialogFieldButton = props => {
         <DialogContent>
           <form onSubmit={handleSubmit}>
             <Grid>{messageContent}</Grid>
-            <Grid>
-              <PrivateKeyField
-                privateKey={privateKey}
-                updatePrivateKey={updatePrivateKey}
-              />
-            </Grid>
+            {requireKey ? (
+              <Grid>
+                <PrivateKeyField
+                  privateKey={privateKey}
+                  updatePrivateKey={updatePrivateKey}
+                />
+              </Grid>
+            ) : null
+            }
             <Button onClick={handleClose} color="primary">
               Cancel
             </Button>

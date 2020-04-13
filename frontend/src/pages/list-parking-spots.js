@@ -304,7 +304,9 @@ const Zone = ({
     let month = Number(urlDate.substring(0, 2));
     let day = Number(urlDate.substring(2, 4));
     let year = Number(urlDate.substring(4));
-    tempDate = new Date(Date.UTC(year, month, day));
+
+    // Time picker displays time in local time, so need to convert to EDT for now.
+    tempDate = new Date(Date.UTC(year, month, day) + 4 * 60 * 60 * 1000);
   }
 
   const [currentTimeFilter, updateCurrentTimeFilter] = useState({
@@ -355,9 +357,9 @@ const Zone = ({
   const handleFiltering = async (value, checkBoxes) => {
     const { date, startTime, endTime } = value;
 
-    const month = date.getUTCMonth().toString().length === 1 ? '0' + date.getMonth().toString() : date.getMonth().toString();
-    const year = date.getUTCFullYear();
-    const day = date.getUTCDate().toString().length === 1 ? '0' + date.getDate().toString() : date.getDate().toString();
+    const month = date.getMonth().toString().length === 1 ? '0' + date.getMonth().toString() : date.getMonth().toString();
+    const year = date.getFullYear();
+    const day = date.getDate().toString().length === 1 ? '0' + date.getDate().toString() : date.getDate().toString();
     const newDate = `${month}${day}${year}`;
     history.push(`/zones/${zoneId}?date=${newDate}`);
 

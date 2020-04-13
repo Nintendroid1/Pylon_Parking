@@ -228,9 +228,7 @@ const TimeFilter = ({
   const handleDateChange = newDate => {
     console.log(newDate);
 
-    // newDate is in local time, but the handler expects utc time
-    newDate = new Date(newDate.getTime() + 4 * 60 * 60 * 1000);
-
+    // newDate is in local time
     const newDateObj = {
       date: newDate,
       startTime: '00:00',
