@@ -5,6 +5,10 @@ import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
 import TableHead from '@material-ui/core/TableHead';
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogTitle from '@material-ui/core/DialogTitle';
 import TableFooter from '@material-ui/core/TableFooter';
 import TableRow from '@material-ui/core/TableRow';
 import TablePagination from '@material-ui/core/TablePagination';
@@ -160,6 +164,27 @@ const SellingMessageContent = (
   );
 };
 
+const popUpContent = sellInfoList => {
+  return (
+    <>
+      <Table>
+        <TableBody>
+          {sellInfoList.forEach(e => {
+            return (
+              <>
+                <TableRow>
+                  <TableCell>{`${e.name}: `}</TableCell>
+                  <TableCell>{e.value}</TableCell>
+                </TableRow>
+              </>
+            );
+          })}
+        </TableBody>
+      </Table>
+    </>
+  );
+};
+
 const SellingParkingSpotTableBody = props => {
   const { parkingSpotsInfo, handleSellRequest } = props;
   const [sellInfo, updateSellInfo] = useState({
@@ -172,12 +197,44 @@ const SellingParkingSpotTableBody = props => {
   });
 
   const handleOnConfirm = (privateKey) => {
+    handleSellRequest(sellInfo, privateKey);
+  }
+
+  const handleSellInfo = () => {
     const index = parkingSpotsInfo.findIndex(
       e => e.spot_id === sellInfo.spot_id && e.zone_id === sellInfo.zone_id
     );
-    const date = parkingSpotsInfo[index].date;
-    updateSellInfo({ ...sellInfo, date: date });
-    handleSellRequest(sellInfo, privateKey);
+
+    const parkingSpotToSell = parkingSpotsInfo[index];
+    updateSellInfo({ ...sellInfo, date: parkingSpotToSell.date });
+
+    const sellInfoList = [
+      { name: 'Zone ID', value: sellInfo.zone_id },
+      { name: 'Spot ID', value: sellInfo.spot_id },
+      { name: 'Date', value: parkingSpotToSell.date.toDateString() },
+      {
+        name: 'Start Time',
+        value: convertMilitaryTimeToNormal(sellInfo.start_time)
+      },
+      {
+        name: 'End Time',
+        value: convertMilitaryTimeToNormal(sellInfo.start_time)
+      },
+      { name: 'Total Price To Sell For', value: sellInfo.cost }
+    ];
+    
+    return (
+      <>
+        <ConfirmationDialogFieldButton
+          buttonMessage="Sell"
+          messageTitle={`Sell Parking Spot ${parkingSpot.zone_id}-${parkingSpot.spot_id}`}
+          requireKey={true}
+          messageContent={popUpContent(sellInfoList)}
+          handleOnConfirm={handleOnConfirm}
+          buttonColor="secondary"
+        />
+      </>
+    );
   };
 
   return (
@@ -202,13 +259,14 @@ const SellingParkingSpotTableBody = props => {
                   <ConfirmationDialogFieldButton
                     buttonMessage="Sell"
                     messageTitle={`Sell Parking Spot ${parkingSpot.zone_id}-${parkingSpot.spot_id}`}
+                    requireKey={false}
                     messageContent={SellingMessageContent(
                       parkingSpot.start_time,
                       parkingSpot.end_time,
                       sellInfo,
                       updateSellInfo
                     )}
-                    handleOnConfirm={handleOnConfirm}
+                    handleOnConfirm={handleSellInfo}
                     buttonColor="secondary"
                   />
                 </TableCell>
