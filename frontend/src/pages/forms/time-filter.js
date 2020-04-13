@@ -169,7 +169,7 @@ const CustomDatePicker = ({ time, updateTime, handleDateChange, ...props }) => {
         margin="normal"
         label="Date"
         value={time.date}
-        onChange={handleDateChange}
+        onChange={date => handleDateChange(date)}
         KeyboardButtonProps={{
           'aria-label': 'change date'
         }}
@@ -227,6 +227,9 @@ const TimeFilter = ({
 
   const handleDateChange = newDate => {
     console.log(newDate);
+
+    // newDate is in local time, but the handler expects utc time
+    newDate = new Date(newDate.getTime() + 4 * 60 * 60 * 1000);
 
     const newDateObj = {
       date: newDate,
