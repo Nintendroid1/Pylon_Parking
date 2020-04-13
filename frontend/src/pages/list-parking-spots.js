@@ -351,7 +351,7 @@ const Zone = ({
     year = date.getFullYear();
     day = date.getDate();
     const newDate = `${month}${day}${year}`;
-    history.push(`/zones/${zoneId}/?date=${newDate}`);
+    history.push(`/zones/${zoneId}?date=${newDate}`);
 
     // the month starts numbering from 0, so 0 is January, and 1 is February.
     const url = 'zones/';
