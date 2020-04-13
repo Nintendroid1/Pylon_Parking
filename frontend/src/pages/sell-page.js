@@ -46,6 +46,9 @@ const styles = theme => ({
   root: {
     display: 'flex',
     flexGrow: 1
+  },
+  circProgress: {
+    marginTop: '200px'
   }
 });
 
@@ -241,11 +244,13 @@ const SellingParkingSpotTableBody = props => {
     <>
       <TableBody>
         {parkingSpotsInfo.map((parkingSpot, i) => {
+          console.log(parkingSpot);
           return (
             <>
               <TableRow>
                 <TableCell>{parkingSpot.uniqueId}</TableCell>
                 <TableCell>{parkingSpot.zone_name}</TableCell>
+                <TableCell>{parkingSpot.dateString}</TableCell>
                 <TableCell>
                   {convertMilitaryTimeToNormal(parkingSpot.start_time)}
                 </TableCell>
@@ -284,6 +289,7 @@ const SellingParkingSpotTableHeader = () => {
         <TableRow>
           <TableCell>Parking Spot ID</TableCell>
           <TableCell>Zone Name</TableCell>
+          <TableCell>Date</TableCell>
           <TableCell>Start Time</TableCell>
           <TableCell>End Time</TableCell>
           <TableCell>Average Price Per 15 minutes</TableCell>
@@ -312,11 +318,11 @@ const SellingParkingSpotTable = props => {
   );
 };
 
-const SellPage = ({ socket, isLoggedIn, ...props }) => {
+const SellPage = ({ socket, isLoggedIn, classes, ...props }) => {
   const [message, updateMessage] = useState(
     <>
       <Typography align="center" style={{ marginTop: '40px' }} variant="h4">
-        Loading
+        <CircularProgress size={100} className={classes.circProgress} />
       </Typography>
     </>
   );
@@ -349,9 +355,11 @@ const SellPage = ({ socket, isLoggedIn, ...props }) => {
       respbody.parkingSpotsInfo.forEach(e => {
         console.log(e);
         e.uniqueId = `${e.zone_id}-${e.spot_id}`;
-        e.date = new Date(Date.UTC(e.stat_time));
+        e.date = new Date(Number(e.start_time) * 1000);
+        e.dateString = new Date(Number(e.start_time) * 1000).toLocaleDateString('en-US');
         e.start_time = convertEpochToMilitary(e.start_time);
         e.end_time = convertEpochToMilitary(e.end_time);
+        console.log(e.date);
       });
 
       updateSpotsOwned(respbody.parkingSpotsInfo);
