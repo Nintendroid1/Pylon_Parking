@@ -48,6 +48,14 @@ import {
   MuiThemeProvider,
   createMuiTheme
 } from '@material-ui/core/styles';
+import Button from '@material-ui/core/Button';
+const styles = theme => ({
+  root: {
+    display: 'flex',
+    flexGrow: 1
+  },
+  appBarSpacer: theme.mixins.toolbar
+});
 
 /*
 Code for coverting base 64 image to unit8clampedarray
@@ -160,17 +168,17 @@ const ReportField = props => {
     // the data in the qr code will be of the form zone_id-spot_id.
     const [zone_id, spot_id] = code.data.split('-');
 
-    const response = await makePlateRecogAPICall(imageURI);
-    const respbody = await response.json();
+    // const response = await makePlateRecogAPICall(imageURI);
+    // const respbody = await response.json();
 
-    console.log(respbody);
+    // console.log(respbody);
 
     // make a dialog for confirmation of the info.
-    updateInfo({
-      zone_id: zone_id,
-      spot_id: spot_id,
-      license_info: respbody.results[0].plate
-    });
+    // updateInfo({
+    //   zone_id: zone_id,
+    //   spot_id: spot_id,
+    //   license_info: respbody.results[0].plate
+    // });
     setOpen(true);
   };
 
@@ -197,7 +205,7 @@ const ReportField = props => {
   );
 };
 
-const QrReaderField = ({ handleCameraClick }) => {
+const QrReaderField = ({ handleCameraClick, className }) => {
   const handleOnScan = data => {
     handleCameraClick(data);
   };
