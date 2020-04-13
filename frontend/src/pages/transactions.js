@@ -24,6 +24,7 @@ import {
   MuiThemeProvider,
   createMuiTheme
 } from '@material-ui/core/styles';
+import CircularProgress from '@material-ui/core/CircularProgress';
 
 const styles = theme => ({
   root: {
@@ -32,6 +33,9 @@ const styles = theme => ({
   },
   tabLink: {
     color: theme.palette.secondary.main
+  },
+  circProgress: {
+    marginTop: '200px'
   }
 });
 
@@ -258,8 +262,10 @@ const updateNumEntryInfo = (
 };
 
 // Must change epoch if any to military time.
-const TransactionHistory = ({ socket, ...props }) => {
-  const [message, updateMessage] = useState('Loading');
+const TransactionHistory = ({ socket, classes, ...props }) => {
+  const [message, updateMessage] = useState(
+    <CircularProgress size={100} className={classes.circProgress} />
+  );
   const [listOfTransactions, updateListOfTransactions] = useState([]);
   const [page, updatePage] = useState(0);
   const [numEntriesPerPage, updateNumEntriesPerPage] = useState(10);
@@ -332,7 +338,7 @@ const TransactionHistory = ({ socket, ...props }) => {
     <>
       <div>
         {message ? (
-          <Typography>{message}</Typography>
+          <Typography align="center">{message}</Typography>
         ) : (
           <Typography>
             <TransactionTable
