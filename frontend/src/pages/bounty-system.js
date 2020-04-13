@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { makeAPICall } from '../api';
+import { makeAPICall, makePlateRecogAPICall } from '../api';
 import PropTypes from 'prop-types';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
@@ -12,6 +12,7 @@ import Check from '@material-ui/icons/Check';
 import NavigateLeftIcon from '@material-ui/icons/NavigateBefore';
 import NavigateRightIcon from '@material-ui/icons/NavigateNext';
 import { Typography, CircularProgress, TextField } from '@material-ui/core';
+import DialogContentText from '@material-ui/core/DialogContentText';
 import RequireAuthentication from '../RequireAuthentication';
 import queryString from 'query-string';
 import IconButton from '@material-ui/core/IconButton';
@@ -20,10 +21,19 @@ import Grid from '@material-ui/core/Grid';
 import history from '../history';
 import { Link } from 'react-router-dom';
 import apiprefix from './apiprefix';
+import Dialog from '@material-ui/core/Dialog';
+import Grid from '@material-ui/core/Grid';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogTitle from '@material-ui/core/DialogTitle';
 import { TimePicker } from './forms/parking-spot-components';
 import CustomSnackbar from '../ui/snackbars';
 import QrReader from 'react-qr-reader';
-import Button from '@material-ui/core/Button';
+import Camera from 'react-html5-camera-photo';
+import { PNG } from "pngjs";
+import 'react-html5-camera-photo/build/css/index.css';
+import DialogActions from '@material-ui/core/DialogActions';
+import jsQR from "jsqr";
 import {
   compareMilitaryTime,
   convertMilitaryToEpoch,
@@ -41,21 +51,164 @@ import {
   createMuiTheme
 } from '@material-ui/core/styles';
 
-const styles = theme => ({
-  root: {
-    display: 'flex',
-    flexGrow: 1
-  },
-  reader: {
-    width: '400px',
-    marginBottom: '30px'
+/*
+Code for coverting base 64 image to unit8clampedarray
+*/
+const BASE64_MARKER = ';base64,';
+
+const convertDataURIToBinary = (dataURI) => {
+  const base64Index = dataURI.indexOf(BASE64_MARKER) + BASE64_MARKER.length;
+  const base64 = dataURI.substring(base64Index);
+  const raw = window.atob(base64);
+  const rawLength = raw.length;
+  const array = new Uint8Array(new ArrayBuffer(rawLength));
+
+  for(let i = 0; i < rawLength; i++) {
+    array[i] = raw.charCodeAt(i);
   }
-});
-const QrReaderField = ({ className, updateData }) => {
-  const handleOnScan = data => {
-    if (data != null) {
-      updateData(data);
-    }
+  return array;
+}
+
+
+/*
+for finding the width and height of the image, use:
+
+var i = new Image(); 
+
+i.onload = function(){
+ alert( i.width+", "+i.height );
+};
+
+i.src = imageData; 
+*/
+
+/*
+https://github.com/cozmo/jsQR/issues/96
+has some example code for converting base 64 image to needed for jsqr.
+*/
+
+const CaptureImage = props => {
+  const { handleCameraClick } = props;
+
+  const handleTakePhoto = dataUri => {
+    handleCameraClick(dataUri);
+  }
+
+  return (
+    <>
+      <Camera 
+        onTakePhoto={(dataUri) => { handleTakePhoto(dataUri); }}
+      />
+    </>
+  );
+}
+
+const popUpContent = info => {
+
+  const infoList = [
+    { name: 'Zone ID', value: `${info.zone_id}` },
+    { name: 'Spot ID', value: `${info.spot_id}` },
+    { name: 'License Plate Number', value: `${info.license_info}` },
+  ];
+
+  return (
+    <>
+      <Table>
+        <TableBody>
+          {infoList.forEach(e => {
+            return (
+              <>
+                <TableRow>
+                  <TableCell>{`${e.name}: `}</TableCell>
+                  <TableCell>{e.value}</TableCell>
+                </TableRow>
+              </>
+            );
+          })}
+        </TableBody>
+      </Table>
+    </>
+  );
+};
+
+const ReportField = props => {
+  const { handleReport } = props;
+
+  const [open, setOpen] = useState(false);
+  const [info, updateInfo] = useState({
+    zone_id: -1,
+    spot_id: -1,
+    license_info: ''
+  })
+
+  const handleClose = () => {
+    setOpen(false);
+  };
+
+  const handleSubmit = event => {
+    event.preventDefault();
+    setOpen(false);
+    handleReport(info);
+  };
+
+  const handleOnCameraClick = async (imageURI) => {
+    const dataUri = imageURI;
+    const png = PNG.sync.read(
+      Buffer.from(dataUri.slice("data:image/png;base64,".length), "base64")
+    );
+    const code = jsQR(Uint8ClampedArray.from(png.data), png.width, png.height);
+
+    // Do error checking of code where only make api call if qr code is valid.
+    // the data in the qr code will be of the form zone_id-spot_id.
+    const [zone_id, spot_id] = code.data.split('-');
+
+    const response = await makePlateRecogAPICall(imageURI);
+    const respbody = await response.json();
+
+    console.log(respbody);
+
+    // make a dialog for confirmation of the info.
+    updateInfo({
+      zone_id: zone_id,
+      spot_id: spot_id,
+      license_info: respbody.results[0].plate
+    })
+    setOpen(true);
+  };
+
+  return (
+    <>
+      <CaptureImage
+        handleCameraClick={handleOnCameraClick}
+      />
+      <Dialog open={open} onClose={handleClose}>
+          <DialogTitle>Confirm Report Info</DialogTitle>
+          <DialogContent>
+            <DialogContentText>
+              <Table>
+                {popUpContent(info)}
+              </Table>
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleClose} color="primary">
+              Cancel
+            </Button>
+            <Button onClick={handleSubmit} color="primary">
+              Confirm
+            </Button>
+          </DialogActions>
+        </Dialog>
+    </>
+  );
+}
+
+const QrReaderField = ({
+  handleCameraClick
+}) => {
+
+  const handleOnScan = (data) => {
+    handleCameraClick(data);
   };
 
   const handleOnError = err => {
@@ -76,7 +229,15 @@ const QrReaderField = ({ className, updateData }) => {
       />
     </>
   );
-};
+}
+
+/*
+const ReportField = ({
+  info,
+  updateInfo,
+  makeReport,
+  getInfo
+}) => {
 
 const ReportField = ({ classes, info, updateInfo, makeReport, getInfo }) => {
   const hasInfo = info.license_info === '' ? false : true;
@@ -165,17 +326,12 @@ const ReportField = ({ classes, info, updateInfo, makeReport, getInfo }) => {
       </Button>
     </>
   );
-};
-
+}
+*/
 const BountySystem = ({ classes, ...props }) => {
-  const [info, updateInfo] = useState({
-    zone_id: 1,
-    spot_id: 1,
-    license_info: ''
-  });
-
   const [message, updateMessage] = useState(null);
 
+  /*
   const handleRequestLicenseInfo = async () => {
     const url = `${apiprefix}/bounty/info`;
     const json = {
@@ -191,13 +347,14 @@ const BountySystem = ({ classes, ...props }) => {
     } else {
       // Make some kind of error message.
     }
-  };
+  };*/
 
-  const handleReport = async () => {
+  const handleReport = async (info) => {
     const url = `${apiprefix}/bounty/report`;
     const json = {
       zone_id: info.zone_id,
-      spot_id: info.spot_id
+      spot_id: info.spot_id,
+      license_info: info.license_info
     };
 
     const response = await makeAPICall('POST', url, json);
@@ -213,12 +370,8 @@ const BountySystem = ({ classes, ...props }) => {
   return (
     <>
       <Typography>
-        <ReportField
-          info={info}
-          updateInfo={updateInfo}
-          makeReport={handleReport}
-          getInfo={handleRequestLicenseInfo}
-          classes={classes}
+        <ReportField 
+          handleReport={handleReport}
         />
       </Typography>
     </>
