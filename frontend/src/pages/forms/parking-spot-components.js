@@ -143,7 +143,7 @@ const ConfirmationDialogFieldButton = props => {
   const [privateKey, updatePrivateKey] = useState({
     privateKey: '',
     showPrivateKey: false
-  })
+  });
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -201,7 +201,8 @@ const StartEndTime = props => {
     popUpTitle,
     popUpContent,
     handleOnConfirm,
-    calculateCost
+    calculateCost,
+    noButton
   } = props;
 
   const [cost, updateCost] = useState('N/A');
@@ -232,13 +233,15 @@ const StartEndTime = props => {
           name={'endTime'}
           label={'End Time'}
         />
-        <ConfirmationDialogFieldButton
-          buttonMessage={buttonName}
-          messageTitle={popUpTitle}
-          messageContent={popUpContent}
-          handleOnConfirm={handleOnConfirm}
-          buttonColor="primary"
-        />
+        {noButton ? null : (
+          <ConfirmationDialogFieldButton
+            buttonMessage={buttonName}
+            messageTitle={popUpTitle}
+            messageContent={popUpContent}
+            handleOnConfirm={handleOnConfirm}
+            buttonColor="primary"
+          />
+        )}
       </Grid>
       <Grid>
         <CostField cost={cost} />
