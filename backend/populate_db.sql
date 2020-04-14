@@ -101,67 +101,33 @@ VALUES
     ('eggcorn','eggc','eggcorn@vt.edu','Dion','Salinas','0'),
     ('gewgawyvinyl','gewg','gewgawyvinyl@vt.edu','Alaya','Warner','0');
 
-INSERT INTO parking_times(zone_id, spot_id, time_code, user_pid, availability)
-VALUES
-(2, 1, 1587355200, 'admin', True),
-(2, 1, 1587356100, 'admin', True),
-(2, 1, 1587357000, 'admin', True),
-(2, 1, 1587357900, 'admin', True),
-(2, 1, 1587358800, 'admin', True),
-(2, 2, 1587355200, 'admin', True),
-(2, 2, 1587356100, 'admin', True),
-(2, 2, 1587357000, 'admin', True),
-(2, 2, 1587357900, 'admin', True),
-(2, 2, 1587358800, 'admin', True),
-(2, 3, 1587355200, 'admin', True),
-(2, 3, 1587356100, 'admin', True),
-(2, 3, 1587357000, 'admin', True),
-(2, 3, 1587357900, 'admin', True),
-(2, 3, 1587358800, 'admin', True),
-(2, 4, 1587355200, 'admin', True),
-(2, 4, 1587356100, 'admin', True),
-(2, 4, 1587357000, 'admin', True),
-(2, 4, 1587357900, 'admin', True),
-(2, 4, 1587358800, 'admin', True),
-(3, 1, 1587355200, 'muffinsApay', True),
-(3, 1, 1587356100, 'muffinsApay', True),
-(3, 1, 1587357000, 'muffinsApay', True),
-(3, 1, 1587357900, 'muffinsApay', True),
-(3, 1, 1587358800, 'muffinsApay', True),
-(3, 2, 1587355200, 'muffinsApay', True),
-(3, 2, 1587356100, 'muffinsApay', True),
-(3, 2, 1587357000, 'muffinsApay', True),
-(3, 2, 1587357900, 'muffinsApay', True),
-(3, 2, 1587358800, 'muffinsApay', True),
-(1, 1, 1587355200, 'muffinsApay', True),
-(1, 1, 1587356100, 'muffinsApay', True),
-(1, 1, 1587357000, 'muffinsApay', True),
-(1, 1, 1587357900, 'muffinsApay', True),
-(1, 1, 1587358800, 'muffinsApay', True),
-(1, 2, 1585693800, 'eggcorn', True),
-(1, 2, 1585694700, 'eggcorn', True),
-(1, 2, 1585695600, 'eggcorn', True),
-(1, 2, 1585696500, 'eggcorn', True),
-(1, 2, 1585697400, 'eggcorn', True),
-(1, 2, 1585698300, 'eggcorn', True),
-(1, 2, 1585699200, 'eggcorn', True),
-(1, 2, 1585700100, 'eggcorn', True),
-(1, 2, 1585701000, 'eggcorn', True),
-(1, 2, 1585701900, 'eggcorn', True),
-(1, 2, 1585702800, 'eggcorn', True),
-(1, 2, 1585703700, 'eggcorn', True),
-(1, 2, 1585704600, 'eggcorn', True),
-(1, 2, 1585705500, 'eggcorn', True),
-(1, 2, 1585706400, 'eggcorn', True),
-(1, 2, 1585707300, 'eggcorn', True),
-(1, 2, 1585708200, 'eggcorn', True),
-(1, 2, 1585709100, 'eggcorn', True),
-(1, 2, 1585710000, 'eggcorn', True),
-(1, 2, 1585710900, 'eggcorn', True),
-(1, 2, 1585711800, 'eggcorn', True),
-(1, 2, 1585712700, 'eggcorn', True),
-(1, 2, 1587355200, 'eggcorn', True),
-(1, 2, 1587356100, 'eggcorn', True),
-(1, 2, 1587357000, 'eggcorn', True),
-(1, 2, 1587357900, 'eggcorn', True),
-(1, 2, 1587358800, 'eggcorn', True);
+--Fill spot listings with default value
+with
+    start_date as (
+        select extract(
+            epoch from DATE '03-01-2020 12:00 AM'
+        )
+    ),
+    end_date as (
+        select extract(
+            epoch from DATE '05-20-2020 11:59 PM'
+        )
+    )
+INSERT INTO parking_times(zone_id, spot_id, time_code, availability)
+SELECT
+    2, 1, generate_series((select date_part::INTEGER from start_date), (select date_part::INTEGER from end_date), 900), True;
+
+with
+    start_date as (
+        select extract(
+            epoch from DATE '03-01-2020 12:00 AM'
+        )
+    ),
+    end_date as (
+        select extract(
+            epoch from DATE '05-20-2020 11:59 PM'
+        )
+    )
+INSERT INTO parking_times(zone_id, spot_id, time_code, availability)
+SELECT
+    2, 2, generate_series((select date_part::INTEGER from start_date), (select date_part::INTEGER from end_date), 900), True;

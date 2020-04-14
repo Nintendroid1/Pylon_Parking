@@ -34,7 +34,7 @@ CREATE TABLE parking_times
 	zone_ID INT NOT NULL,
 	spot_ID INT NOT NULL,
 	time_code INT,
-	user_PID VARCHAR(100),
+	user_PID VARCHAR(100) DEFAULT 'admin',
 	availability boolean,
 	price DECIMAL(16, 10) DEFAULT 4.20,
 	PRIMARY KEY (spot_ID, zone_ID, time_code),
