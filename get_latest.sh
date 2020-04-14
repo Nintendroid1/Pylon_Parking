@@ -32,6 +32,7 @@ function get_latest_backend() {
 
 if [ -z $(git status --untracked-files=no --porcelain) ]
 then
+    git pull
     # Get the latest tags
     echo "Fetching latest tags..."
     git fetch --tags
