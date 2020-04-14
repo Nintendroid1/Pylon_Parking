@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { makeAPICall, makePlateRecogAPICall } from '../api';
+import { makeAPICall, makeImageAPICall } from '../api';
 import PropTypes from 'prop-types';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
@@ -174,12 +174,8 @@ const ReportField = props => {
 
     // the data in the qr code will be of the form zone_id-spot_id.
     // const [zone_id, spot_id] = code.data.split('-');
-
-    const json = {
-      image: imageURI
-    }
     const url = `${apiprefix}/bounty-system`;
-    const response = await makeAPICall('POST', url, json);
+    const response = await makeImageAPICall('POST', url, imageURI);
     const respbody = await response.json();
 
     console.log(respbody);
