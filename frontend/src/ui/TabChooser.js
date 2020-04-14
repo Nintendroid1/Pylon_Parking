@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
-import Drawer from '@material-ui/core/Drawer';
 import IconButton from '@material-ui/core/IconButton';
 import AccountCircle from '@material-ui/icons/AccountCircle';
 import MenuIcon from '@material-ui/icons/Menu';
 import ListItemText from '@material-ui/core/ListItemText';
 import Typography from '@material-ui/core/Typography';
 import { Link as RRLink } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { withRouter, Switch as RRSwitch } from 'react-router-dom';
 import { withStyles, withTheme } from '@material-ui/core/styles';
 import { Tabs, Tab } from '@material-ui/core';
@@ -115,11 +115,25 @@ const styles = theme => ({
   themeSwitch: {
     marginLeft: theme.spacing.unit
   },
-  listItem: {
-    color: theme.palette.text.primary
-  },
   logoutButton: {
     color: theme.palette.primary
+  },
+  zoneLink: {
+    fontSize: '20px',
+    color: 'white',
+    textDecoration: 'none',
+    '&:hover': {
+      textDecoration: 'underline'
+    }
+  },
+  logoLink: {
+    color: 'white',
+    display: 'flex',
+    textDecoration: 'none',
+    flexWrap: 'wrap'
+  },
+  listItem: {
+    color: theme.palette.text.primary
   },
   logo: {
     width: '25px',
@@ -160,10 +174,22 @@ function TabChooser({
   // Find the index of the child whose path matches the pathname in the
   // location object.  Return 0 (defaults to first tab) if not found.
   function findCurrentTabBasedOnPath(location) {
-    const selectedTab = children.findIndex(
-      tab => tab.props.path === location.pathname
-    );
-    return selectedTab === -1 ? 0 : selectedTab;
+    var selectedTab = `-1`;
+    children.forEach((tab, index) => {
+      if (tab.props.path === location.pathname) {
+        selectedTab = `${index}`;
+        return;
+      } else if (typeof tab.props.children !== 'undefined') {
+        tab.props.children.forEach((nested_tab, nested_index) => {
+          if (nested_tab.props.path === location.pathname) {
+            selectedTab = `${index}-${nested_index}`;
+            return;
+          }
+        });
+      }
+    });
+    console.log(selectedTab);
+    return selectedTab; // === -1 ? -1 : selectedTab;
   }
   // When the app boots and the tab chooser is rendered for the first time,
   // derive the initial tab state from the current location (received via
@@ -193,15 +219,27 @@ function TabChooser({
 
   function pathFromTabIndex(value) {
     const tabRes = children.find((tab, index) => {
-      return index === value;
+      if (index === value) {
+        return true;
+      } else if (typeof tab.props.children !== 'undefined') {
+        return tab.props.children.find((nested_tab, nested_index) => {
+          if (`${index}-${nested_index}` === value) {
+            return true;
+          }
+        });
+      }
     });
     return tabRes.props.path;
   }
 
   function handleListSelect(value, path) {
-    // setDrawerOpen(false);
+    if (isMobile() || isTablet()) {
+      setDrawerOpen(false);
+    }
     history.push(path);
     selectTab(value);
+    console.log(currentTab);
+    console.log(value);
     //handleTabChange(value);
   }
 
@@ -219,6 +257,10 @@ function TabChooser({
     updateLogin(false);
     window.location.href = `${process.env.PUBLIC_URL}/`;
   } // apply HOC*/
+
+  function hasChildren(tab) {
+    return typeof tab.props.children !== 'undefined';
+  }
 
   let LoginButton = ({ color, ...props }) => {
     return (
@@ -356,10 +398,20 @@ function TabChooser({
           >
             <MenuIcon />
           </IconButton>
-          <PylonIcon className={classes.logo} />
-          <Typography style={{ fontFamily: 'Roboto' }}>
-            Pylon Parking
-          </Typography>
+          <Link
+            className={classes.logoLink}
+            to={{
+              pathname: `/`,
+              state: {
+                from: history.location
+              }
+            }}
+          >
+            <PylonIcon className={classes.logo} />
+            <Typography style={{ fontFamily: 'Roboto' }}>
+              Pylon Parking
+            </Typography>
+          </Link>
           {isLoggedIn ? (
             <LogoutButton classes={classes} color="inherit" />
           ) : (
@@ -398,7 +450,13 @@ function TabChooser({
         <div className={classes.appBarSpacer} />
         <div className={classes.drawerHeader} />
         <RRSwitch>
-          {children}
+          {children.map((tab, index) => {
+            if (!hasChildren(tab)) {
+              return tab;
+            } else {
+              return tab.props.children;
+            }
+          })}
           <Route exact path="/login" hidden={true}>
             <LoginTab
               updateLogin={updateLogin}
