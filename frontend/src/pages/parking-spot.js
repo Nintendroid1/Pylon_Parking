@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import clsx from 'clsx';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
@@ -21,14 +22,66 @@ import {
 } from './forms/time-filter';
 import {
   withStyles,
+  withTheme,
+  useTheme,
   MuiThemeProvider,
   createMuiTheme
 } from '@material-ui/core/styles';
+import Box from '@material-ui/core/Box';
+import Grid from '@material-ui/core/Grid';
+import Paper from '@material-ui/core/Paper';
+import SimpleChart from '../ui/SimpleChart';
+import CssBaseline from '@material-ui/core/CssBaseline';
+import Container from '@material-ui/core/Container';
 
 const styles = theme => ({
   root: {
+    display: 'flex'
+  },
+  toolbar: {
+    paddingRight: 24 // keep right padding when drawer closed
+  },
+  toolbarIcon: {
     display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    padding: '0 8px',
+    ...theme.mixins.toolbar
+  },
+  appBar: {
+    zIndex: theme.zIndex.drawer + 1,
+    transition: theme.transitions.create(['width', 'margin'], {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.leavingScreen
+    })
+  },
+  menuButton: {
+    marginRight: 36
+  },
+  menuButtonHidden: {
+    display: 'none'
+  },
+  title: {
     flexGrow: 1
+  },
+  appBarSpacer: theme.mixins.toolbar,
+  content: {
+    flexGrow: 1,
+    height: '100vh',
+    overflow: 'auto'
+  },
+  container: {
+    paddingTop: theme.spacing(1),
+    paddingBottom: theme.spacing(1)
+  },
+  paper: {
+    padding: theme.spacing(2),
+    display: 'flex',
+    overflow: 'auto',
+    flexDirection: 'column'
+  },
+  fixedHeight: {
+    height: 300
   }
 });
 
@@ -124,6 +177,7 @@ const ParkingSpot = ({
   }*/
 
   const { socket } = props;
+  const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
 
   let today = new Date();
   let timeSplit = today.toTimeString().split(':');
@@ -140,6 +194,20 @@ const ParkingSpot = ({
     end_time: '24:00'
   });
 
+  const theme = useTheme();
+  // Data and options for price graph
+  let [series, updateSeries] = useState([
+    {
+      name: 'series-1',
+      data: []
+    }
+  ]);
+  let options = {
+    xaxis: {
+      categories: []
+    }
+  };
+
   const listParkingSpotTimes = async () => {
     const url = `${apiprefix}/zones/${zone_id}/spot/${spot_id}`;
     let response = await makeAPICall('GET', url);
@@ -150,20 +218,20 @@ const ParkingSpot = ({
         e.start_time = convertEpochToMilitary(e.start_time);
         e.end_time = convertEpochToMilitary(e.end_time);
       });
+      updateSeries([
+        {
+          name: 'prices',
+          data: resbody.parkingInfo.map(spot => spot.price)
+        }
+      ]);
 
+      // console.log(resbody.parkingInfo);
       updateparkingSpotInfo(resbody.parkingInfo);
       updateMessage(null);
     } else {
       updateMessage(<div>Fail</div>);
     }
   };
-
-  /*
-  const listParkingSpotTimes = () => {
-    updateparkingSpotInfo(TempInput);
-    updateMessage(null);
-  };
-  */
 
   const calculatePricePerTimeSlot = (timeSlot, start_time, end_time) => {
     // If timeSlot's start time is after the start time the client wants, then use
@@ -292,38 +360,62 @@ const ParkingSpot = ({
     );
   }, []);
 
+  function spotTimeChart() {
+    return (
+      <>
+        <div>
+          <Typography>
+            {message ? (
+              <div>{message}</div>
+            ) : (
+              <div>
+                <MuiPickersUtilsProvider utils={DateFnsUtils}>
+                  <DateFilter
+                    updateTime={updateTime}
+                    time={time}
+                    handleDateFilter={handleDateFiltering}
+                    updateTime={updateTime}
+                  />
+                  <StartEndTime
+                    time={time}
+                    updateTime={updateTime}
+                    noButton={true}
+                    //buttonName={'Buy!'}
+                    calculateCost={calculatePrice}
+                    handleOnConfirm={handleBuyRequest}
+                    popUpTitle={'Confirmation'}
+                    popUpContent={popUpMessage}
+                  />
+                </MuiPickersUtilsProvider>
+                <MakeTable parkingInfo={parkingSpotInfo} />
+              </div>
+            )}
+          </Typography>
+        </div>
+      </>
+    );
+  }
+
   return (
-    <>
-      <div>
-        <Typography>
-          {message ? (
-            <div>{message}</div>
-          ) : (
-            <div>
-              <MuiPickersUtilsProvider utils={DateFnsUtils}>
-                <DateFilter
-                  updateTime={updateTime}
-                  time={time}
-                  handleDateFilter={handleDateFiltering}
-                  updateTime={updateTime}
-                />
-                <StartEndTime
-                  time={time}
-                  updateTime={updateTime}
-                  buttonName={'Buy!'}
-                  calculateCost={calculatePrice}
-                  handleOnConfirm={handleBuyRequest}
-                  popUpTitle={'Confirmation'}
-                  popUpContent={popUpMessage}
-                />
-              </MuiPickersUtilsProvider>
-              <MakeTable parkingInfo={parkingSpotInfo} />
-            </div>
-          )}
-        </Typography>
-      </div>
-    </>
+    <div className={classes.root}>
+      <CssBaseline />
+      <Container maxWidth="lg" className={classes.container}>
+        <Grid container alignContent="center" spacing={3}>
+          {/* Chart */}
+          <Grid item xs={12}>
+            <Paper className={fixedHeightPaper}>
+              <SimpleChart series={series} options={options} />
+            </Paper>
+          </Grid>
+          {/* Recent Deposits */}
+          {/* Recent Orders */}
+          <Grid item xs={12}>
+            <Paper className={classes.paper}>{spotTimeChart()}</Paper>
+          </Grid>
+        </Grid>
+      </Container>
+    </div>
   );
 };
 
-export default withStyles(styles)(ParkingSpot);
+export default withTheme(withStyles(styles)(ParkingSpot));
