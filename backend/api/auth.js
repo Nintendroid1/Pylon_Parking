@@ -54,5 +54,9 @@ const requireAuthenticationWithPredicate = pred => (req, res, next) => {
 };
 
 module.exports = {
+  requireAdmin: requireAuthenticationWithPredicate({
+    test: user => user.admin === 1 || user.admin,
+    message: 'needs admin permissions'
+  }),
   requireLogin: requireAuthenticationWithPredicate({test: () => true})
 }
