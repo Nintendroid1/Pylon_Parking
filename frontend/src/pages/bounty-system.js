@@ -174,11 +174,15 @@ const ReportField = props => {
 
     // the data in the qr code will be of the form zone_id-spot_id.
     // const [zone_id, spot_id] = code.data.split('-');
-    const url = `${apiprefix}/bounty-system`;
-    const response = await makeImageAPICall('POST', url, imageURI);
-    const respbody = await response.json();
+    try{
+      const url = `${apiprefix}/bounty-system`;
+      const response = await makeImageAPICall('POST', url, imageURI);
+      const respbody = await response.json();
 
     console.log(respbody);
+    } catch (err) {
+      console.log(err.stack);
+    }
 
     // make a dialog for confirmation of the info.
     // updateInfo({
