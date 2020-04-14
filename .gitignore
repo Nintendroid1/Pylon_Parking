@@ -25,6 +25,8 @@ yarn-error.log*
 # Ignore debug script
 start_debug.sh
 
+package-lock.json
+
 # Ignore vim stuff
 *.sw?
 *.vim
