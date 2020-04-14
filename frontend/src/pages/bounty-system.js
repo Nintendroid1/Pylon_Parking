@@ -42,7 +42,7 @@ import {
   roundUpToNearest15
 } from './forms/time-filter';
 import Box from '@material-ui/core/Box';
-import { ConfirmationDialogFieldButton } from './forms/parking-spot-components';
+import { ErrorDialog } from './forms/parking-spot-components';
 import {
   withStyles,
   withTheme,
@@ -142,6 +142,8 @@ const ReportField = props => {
   const { handleReport } = props;
 
   const [open, setOpen] = useState(false);
+  const [openErrorDialog, setOpenErrorDialog] = useState(false);
+  const [errorMessage, updateErrorMessage] = useState('');
   const [info, updateInfo] = useState({
     zone_id: -1,
     spot_id: -1,
@@ -167,35 +169,48 @@ const ReportField = props => {
 
     // Do error checking of code where only make api call if qr code is valid.
     if (code === null) {
+      // error message.
       console.log('no qr code found');
+      updateErrorMessage('The QR Code was invalid. Please take a better picture you pleb.');
+      setOpenErrorDialog(true);
     } else {
       // the data in the qr code will be of the form zone_id-spot_id.
       const [zone_id, spot_id] = code.data.split('-');
+      // the data in the qr code will be of the form zone_id-spot_id.
+      // const [zone_id, spot_id] = code.data.split('-');
+      try {
+        const url = `${apiprefix}/bounty-system`;
+        const response = await makeImageAPICall('POST', url, imageURI);
+        const respbody = await response.json();
+
+        if (response.status === 200) {
+          // make a dialog for confirmation of the info.
+          updateInfo({
+            zone_id: 2,
+            spot_id: 1,
+            license_info: respbody.results[0].plate
+          });
+        } else {
+          setOpenErrorDialog(true);
+          updateErrorMessage('The license plate was unable to be read. I dare u take another picture, I double dog dare you.')
+        }
+        
+      } catch (err) {
+        console.log(err.stack);
+      }
+
+      setOpen(true);
     }
-
-    // the data in the qr code will be of the form zone_id-spot_id.
-    // const [zone_id, spot_id] = code.data.split('-');
-    try {
-      const url = `${apiprefix}/bounty-system`;
-      const response = await makeImageAPICall('POST', url, imageURI);
-      const respbody = await response.json();
-
-      // make a dialog for confirmation of the info.
-      updateInfo({
-        zone_id: 2,
-        spot_id: 1,
-        license_info: respbody.results[0].plate
-      });
-    } catch (err) {
-      console.log(err.stack);
-    }
-
-    setOpen(true);
   };
 
   return (
     <>
       <CaptureImage handleCameraClick={handleOnCameraClick} />
+      <ErrorDialog 
+        message={errorMessage}
+        open={openErrorDialog}
+        setOpen={setOpenErrorDialog}
+      />
       <Dialog open={open} onClose={handleClose}>
         <DialogTitle>Confirm Report Info</DialogTitle>
         <DialogContent>

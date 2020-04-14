@@ -130,6 +130,32 @@ const TimePicker = ({
   );
 };
 
+const ErrorDialog = (props) => {
+  const { message, open, setOpen } = props;
+  
+  const handleClose = () => {
+    setOpen(false);
+  }
+
+  return (
+    <>
+      <Dialog open={open} onClose={handleClose}>
+        <DialogTitle>Error</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            {message}
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose} color="primary">
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </>
+  );
+}
+
 const ConfirmationDialogFieldButton = ({
   buttonMessage,
   messageTitle,
@@ -295,5 +321,6 @@ export {
   ConfirmationDialogFieldButton,
   PrivateKeyField,
   CostField,
-  TimePicker
+  TimePicker,
+  ErrorDialog
 };

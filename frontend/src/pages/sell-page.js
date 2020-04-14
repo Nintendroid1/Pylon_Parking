@@ -32,7 +32,8 @@ import {
   convertEpochToMilitary,
   convertMilitaryTimeToNormal,
   isTimeMultipleOf15,
-  roundUpToNearest15
+  roundUpToNearest15,
+  militaryTimeDifference
 } from './forms/time-filter';
 import Box from '@material-ui/core/Box';
 import { ConfirmationDialogFieldButton } from './forms/parking-spot-components';
@@ -69,8 +70,8 @@ const tempParkingSpots = [
 ];
 
 const SellingMessageContent = (
-  parkingSpotstart_time,
-  parkingSpotend_time,
+  parkingSpotStartTime,
+  parkingSpotEndTime,
   sellInfo,
   updateSellInfo
 ) => {
@@ -86,6 +87,8 @@ const SellingMessageContent = (
     end_timeErrorMessage: ''
   });
 
+  const [totalCost, UpdateTotalCost] = useState(0);
+
   // Need to include error handling for time.
   const handleTimeChange = event => {
     let { name, value } = event.target;
@@ -96,12 +99,13 @@ const SellingMessageContent = (
 
     updateSellInfo({ ...sellInfo, [name]: value });
 
-    let today = new Date();
+    // this is not true because parking spots can be in the future.
+    let today = new Date(Date.now());
     let timeSplit = today.toTimeString().split(':');
     let currTime = timeSplit[0].concat(':', timeSplit[1]);
 
     // chosen start time is before parking spot start time.
-    if (name === 'start_time' && compareMilitaryTime(value, currTime) < 0) {
+    if (name === 'start_time' && compareMilitaryTime(value, currTime) < 0 && compareMilitaryTime(value, parkingSpotStartTime) < 0) {
       updateValidTime({
         ...validTime,
         start_timeHasError: true,
@@ -112,7 +116,7 @@ const SellingMessageContent = (
     // chosen end time is after parking spot end time.
     else if (
       name === 'end_time' &&
-      compareMilitaryTime(value, parkingSpotend_time) > 0
+      compareMilitaryTime(value, parkingSpotEndTime) > 0
     ) {
       updateValidTime({
         ...validTime,
@@ -137,33 +141,68 @@ const SellingMessageContent = (
       });
     } else {
       updateSellInfo({ ...sellInfo, price: Number(cost) });
+      // update the total cost.
+      if (!validCost.hasError && !validTime.start_timeHasError && !validTime.end_timeHasError) {
+        const timeDiff = militaryTimeDifference(sellInfo.start_time, sellInfo.end_time);
+        const totalCost = Number(cost) * timeDiff / 15;
+        UpdateTotalCost(totalCost);
+      }
     }
   };
 
   return (
     <>
-      <TimePicker
-        isRequired={true}
-        handleTimeChange={handleTimeChange}
-        time={sellInfo.start_time}
-        name={'start_time'}
-        label={'Start Time'}
-      />
-      <TimePicker
-        isRequired={true}
-        handleTimeChange={handleTimeChange}
-        time={sellInfo.end_time}
-        name={'end_time'}
-        label={'End Time'}
-      />
-      <TextField
-        required
-        error={validCost.hasError}
-        label={'Cost Per 15 minutes'}
-        value={sellInfo.price}
-        helperText={validCost.errorMessage}
-        onChange={handleOnChangeCost}
-      />
+      <Table>
+        <TableBody>
+          <TableRow>
+            <TableCell>Start Time:</TableCell>
+            <TableCell>
+              <TimePicker
+                isRequired={true}
+                handleTimeChange={handleTimeChange}
+                time={sellInfo.start_time}
+                name={'start_time'}
+                label={'Start Time'}
+              />
+            </TableCell>
+          </TableRow>
+          <TableRow>
+            <TableCell>End Time:</TableCell>
+            <TableCell>
+              <TimePicker
+                isRequired={true}
+                handleTimeChange={handleTimeChange}
+                time={sellInfo.start_time}
+                name={'end_time'}
+                label={'End Time'}
+              />
+            </TableCell>
+          </TableRow>
+          <TableRow>
+            <TableCell>Price Per 15 To Sell At:</TableCell>
+            <TableCell>
+              <TextField
+                required
+                error={validCost.hasError}
+                label={'Cost Per 15 minutes'}
+                value={sellInfo.price}
+                helperText={validCost.errorMessage}
+                onChange={handleOnChangeCost}
+              />
+            </TableCell>
+          </TableRow>
+          <TableRow>
+            <TableCell>Total Price For Entire Time Period:</TableCell>
+            <TableCell>
+              <TextField
+                disabled
+                label={'Total Cost'}
+                value={totalCost}
+              />
+            </TableCell>
+          </TableRow>
+        </TableBody>
+      </Table>
     </>
   );
 };
@@ -204,35 +243,40 @@ const SellingParkingSpotTableBody = props => {
     handleSellRequest(sellInfo, privateKey);
   };
 
-  const handleSellInfo = () => {
+  const handleSellInfo = (spotInfo) => () => {
     console.log(sellInfo);
     const index = parkingSpotsInfo.findIndex(
-      e => e.spot_id === sellInfo.spot_id && e.zone_id === sellInfo.zone_id
+      e => e.spot_id === spotInfo.spot_id && e.zone_id === spotInfo.zone_id
     );
 
-    const parkingSpot = parkingSpotsInfo[index];
-    updateSellInfo({ ...sellInfo, date: parkingSpot.date });
+    updateSellInfo({ 
+      ...sellInfo, 
+      date: parkingSpotsInfo[index].date,
+      spot_id: spotInfo.spot_id,
+      zone_id: spotInfo.zone_id
+    });
 
-    const sellInfoList = [
+    // Not sure if the sellInfo is update yet, last time it was not.
+    let sellInfoList = [
       { name: 'Zone ID', value: sellInfo.zone_id },
       { name: 'Spot ID', value: sellInfo.spot_id },
-      { name: 'Date', value: parkingSpot.date.toDateString() },
+      { name: 'Date', value: sellInfo.date.toDateString() },
       {
         name: 'Start Time',
         value: convertMilitaryTimeToNormal(sellInfo.start_time)
       },
       {
         name: 'End Time',
-        value: convertMilitaryTimeToNormal(sellInfo.start_time)
+        value: convertMilitaryTimeToNormal(sellInfo.end_time)
       },
-      { name: 'Total Price To Sell For', value: sellInfo.cost }
+      { name: 'Price per 15 To Sell For', value: sellInfo.cost }
     ];
 
     return (
       <>
         <ConfirmationDialogFieldButton
           buttonMessage="Sell"
-          messageTitle={`Sell Parking Spot ${parkingSpot.zone_id}-${parkingSpot.spot_id}`}
+          messageTitle={`Sell Parking Spot ${parkingSpot.uniqueId}`}
           requireKey={true}
           messageContent={popUpContent(sellInfoList)}
           handleOnConfirm={handleOnConfirm}
@@ -261,7 +305,7 @@ const SellingParkingSpotTableBody = props => {
                       sellInfo,
                       updateSellInfo
                     )}
-                    handleOnConfirm={handleSellInfo}
+                    handleOnConfirm={handleSellInfo(parkingSpot)}
                     buttonColor="secondary"
                   />
                 </TableCell>
@@ -369,7 +413,7 @@ const SellPage = ({ socket, isLoggedIn, classes, ...props }) => {
     }
   };
 
-  const handleSellRequest = (sellInfo, privatekey) => {
+  const handleSellRequest = async (sellInfo, privatekey) => {
     // Make sure that the date field is correct.
     console.log(sellInfo.date);
     const startUTCEpoch = convertMilitaryToEpoch(
@@ -382,6 +426,34 @@ const SellPage = ({ socket, isLoggedIn, classes, ...props }) => {
     );
 
     // Make api request.
+    /*
+    date: Date.now(),
+    spot_id: -1,
+    zone_id: -1,
+    start_time: '24:00',
+    end_time: '24:00',
+    cost: 0
+    */
+    const url = `${apiprefix}/sell`;
+    const json = {
+      pid: localStorage.olivia_pid,
+      spot: {
+        spot_id: sellInfo.spot_id,
+        zone_id: sellInfo.zone_id,
+        start_time: startUTCEpoch,
+        end_time: endUTCEpoch,
+        price: cost // price is per 15.
+      }
+    }
+
+    const response = await makeAPICall('POST', url, json);
+    const respbody = await response.json();
+
+    if (response.status === 200) {
+      // Do something.
+    } else {
+      // Do something.
+    }
   };
 
   // Need another socket event for when parking spot is sold.
