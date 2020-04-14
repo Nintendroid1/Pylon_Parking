@@ -142,6 +142,7 @@ const ReportField = props => {
   const { handleReport } = props;
 
   const [open, setOpen] = useState(false);
+  const [openErrorDialog, setOpenErrorDialog] = useState(false);
   const [info, updateInfo] = useState({
     zone_id: -1,
     spot_id: -1,
@@ -167,6 +168,7 @@ const ReportField = props => {
 
     // Do error checking of code where only make api call if qr code is valid.
     if (code === null) {
+      // error message.
       console.log('no qr code found');
     } else {
       // the data in the qr code will be of the form zone_id-spot_id.
