@@ -32,7 +32,8 @@ import {
   convertEpochToMilitary,
   convertMilitaryTimeToNormal,
   isTimeMultipleOf15,
-  roundUpToNearest15
+  roundUpToNearest15,
+  militaryTimeDifference
 } from './forms/time-filter';
 import Box from '@material-ui/core/Box';
 import { ConfirmationDialogFieldButton } from './forms/parking-spot-components';
@@ -69,8 +70,8 @@ const tempParkingSpots = [
 ];
 
 const SellingMessageContent = (
-  parkingSpotstart_time,
-  parkingSpotend_time,
+  parkingSpotStartTime,
+  parkingSpotEndTime,
   sellInfo,
   updateSellInfo
 ) => {
@@ -98,12 +99,13 @@ const SellingMessageContent = (
 
     updateSellInfo({ ...sellInfo, [name]: value });
 
-    let today = new Date();
+    // this is not true because parking spots can be in the future.
+    let today = new Date(Date.now());
     let timeSplit = today.toTimeString().split(':');
     let currTime = timeSplit[0].concat(':', timeSplit[1]);
 
     // chosen start time is before parking spot start time.
-    if (name === 'start_time' && compareMilitaryTime(value, currTime) < 0) {
+    if (name === 'start_time' && compareMilitaryTime(value, currTime) < 0 && compareMilitaryTime(value, parkingSpotStartTime) < 0) {
       updateValidTime({
         ...validTime,
         start_timeHasError: true,
@@ -114,7 +116,7 @@ const SellingMessageContent = (
     // chosen end time is after parking spot end time.
     else if (
       name === 'end_time' &&
-      compareMilitaryTime(value, parkingSpotend_time) > 0
+      compareMilitaryTime(value, parkingSpotEndTime) > 0
     ) {
       updateValidTime({
         ...validTime,
@@ -140,6 +142,11 @@ const SellingMessageContent = (
     } else {
       updateSellInfo({ ...sellInfo, price: Number(cost) });
       // update the total cost.
+      if (!validCost.hasError && !validTime.start_timeHasError && !validTime.end_timeHasError) {
+        const timeDiff = militaryTimeDifference(sellInfo.start_time, sellInfo.end_time);
+        const totalCost = Number(cost) * timeDiff / 15;
+        UpdateTotalCost(totalCost);
+      }
     }
   };
 

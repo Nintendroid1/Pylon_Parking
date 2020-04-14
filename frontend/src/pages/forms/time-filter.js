@@ -32,6 +32,7 @@ const styles = theme => ({
 // Number of seconds between UTC time and EST time.
 const UTCToESTInSec = 4 * 60 * 60;
 
+// returns time in minutes.
 const militaryTimeDifference = (startTime, endTime) => {
   let [startTimeHour, startTimeMinute] = startTime
     .split(':')
