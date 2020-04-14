@@ -13,7 +13,6 @@ router.post("/", upload.single('image'), function (req, res) {
     body.append('upload', req.body.image);
     // Or body.append('upload', base64Image);
     body.append('regions', 'us'); // Change to your country
-    console.log("FETCH...");
     fetch("https://api.platerecognizer.com/v1/plate-reader/", {
         method: 'POST',
         headers: {
@@ -23,7 +22,7 @@ router.post("/", upload.single('image'), function (req, res) {
     }).then(res => res.json())
     .then(json => {
       console.log(json)
-      res.status(200).json({ license_info: json.results.plate });
+      res.status(200).json({ ...json });
     })
     .catch((err) => {
       console.log(err);
