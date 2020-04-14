@@ -19,15 +19,13 @@ export async function makeAPICall(method, url, body) {
 }
 
 export async function makeImageAPICall(method, url, body) {
-  const headers = {
-    'Content-Type': 'multipart/form-data'
-  };
+  const headers = {};
   const token = localStorage.olivia_token;
-  let data = new FormData();
-  data.append('image', body);
   if (token) {
     headers['Authorization'] = `Bearer ${token}`;
   }
+  let data = new FormData();
+  data.append('image', body);
   try {
     let req = fetch(url, {
       method,
