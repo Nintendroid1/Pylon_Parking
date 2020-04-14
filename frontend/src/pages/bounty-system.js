@@ -172,10 +172,12 @@ const ReportField = props => {
       const [zone_id, spot_id] = code.data.split('-');
     }
 
-    const url = `${apiprefix}/bounty-system/?image=${imageURI}`;
-    console.log(url);
     try {
-      const response = await makeAPICall('GET', url);
+      const json = {
+        image: imageURI
+      };
+      const url = `${apiprefix}/bounty-system`;
+      const response = await makeAPICall('POST', url, json);
       const respbody = await response.json();
 
       console.log(respbody);
