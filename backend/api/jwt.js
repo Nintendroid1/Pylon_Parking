@@ -6,7 +6,7 @@ const secret = "verysecretpasswordthatsdefinatelynotinthesource";
 function createJWT(userName, admin_status) {
   return jwt.sign(
     {
-      exp: Math.floor(Date.now() / 1000) + 60 * 60,
+      exp: Math.floor(Date.now() / 1000) + (60 * 60 * 24 * 7),
       pid: userName,
       admin: admin_status
     },
