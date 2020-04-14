@@ -15,7 +15,8 @@ import TablePagination from '@material-ui/core/TablePagination';
 import Check from '@material-ui/icons/Check';
 import NavigateLeftIcon from '@material-ui/icons/NavigateBefore';
 import NavigateRightIcon from '@material-ui/icons/NavigateNext';
-import { Typography, CircularProgress, TextField } from '@material-ui/core';
+import { Typography, TextField } from '@material-ui/core';
+import CircularProgress from '@material-ui/core/CircularProgress';
 import RequireAuthentication from '../RequireAuthentication';
 import queryString from 'query-string';
 import IconButton from '@material-ui/core/IconButton';
@@ -321,7 +322,7 @@ const SellingParkingSpotTable = props => {
 const SellPage = ({ socket, isLoggedIn, classes, ...props }) => {
   const [message, updateMessage] = useState(
     <>
-      <Typography align="center" style={{ marginTop: '40px' }} variant="h4">
+      <Typography align="center">
         <CircularProgress size={100} className={classes.circProgress} />
       </Typography>
     </>
