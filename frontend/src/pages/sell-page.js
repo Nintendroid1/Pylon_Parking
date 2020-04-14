@@ -191,6 +191,7 @@ const popUpContent = sellInfoList => {
 
 const SellingParkingSpotTableBody = props => {
   const { parkingSpotsInfo, handleSellRequest } = props;
+  /*
   const [sellInfo, updateSellInfo] = useState({
     date: Date.now(),
     spot_id: -1,
@@ -198,34 +199,34 @@ const SellingParkingSpotTableBody = props => {
     start_time: '24:00',
     end_time: '24:00',
     cost: 0
-  });
+  });*/
 
-  const handleOnConfirm = privateKey => {
-    handleSellRequest(sellInfo, privateKey);
+  const handleOnConfirm = spotToSellInfo => privateKey => {
+    handleSellRequest(spotToSellInfo, privateKey);
   };
 
-  const handleSellInfo = () => {
+  const handleSellInfo = (spotInfo) => () => {
     console.log(sellInfo);
     const index = parkingSpotsInfo.findIndex(
-      e => e.spot_id === sellInfo.spot_id && e.zone_id === sellInfo.zone_id
+      e => e.spot_id === spotInfo.spot_id && e.zone_id === spotInfo.zone_id
     );
 
-    const parkingSpot = parkingSpotsInfo[index];
-    updateSellInfo({ ...sellInfo, date: parkingSpot.date });
+    spotInfo.date = parkingSpotsInfo[index].date;
+    //updateSellInfo({ ...spotInfo, date: spotInfo.date });
 
     const sellInfoList = [
-      { name: 'Zone ID', value: sellInfo.zone_id },
-      { name: 'Spot ID', value: sellInfo.spot_id },
-      { name: 'Date', value: parkingSpot.date.toDateString() },
+      { name: 'Zone ID', value: spotInfo.zone_id },
+      { name: 'Spot ID', value: spotInfo.spot_id },
+      { name: 'Date', value: spotInfo.date.toDateString() },
       {
         name: 'Start Time',
-        value: convertMilitaryTimeToNormal(sellInfo.start_time)
+        value: convertMilitaryTimeToNormal(spotInfo.start_time)
       },
       {
         name: 'End Time',
-        value: convertMilitaryTimeToNormal(sellInfo.start_time)
+        value: convertMilitaryTimeToNormal(spotInfo.end_time)
       },
-      { name: 'Total Price To Sell For', value: sellInfo.cost }
+      { name: 'Price per 15 To Sell For', value: spotInfo.cost }
     ];
 
     return (
@@ -235,7 +236,7 @@ const SellingParkingSpotTableBody = props => {
           messageTitle={`Sell Parking Spot ${parkingSpot.uniqueId}`}
           requireKey={true}
           messageContent={popUpContent(sellInfoList)}
-          handleOnConfirm={handleOnConfirm}
+          handleOnConfirm={handleOnConfirm(spotInfo)}
           buttonColor="secondary"
         />
       </>
@@ -261,7 +262,7 @@ const SellingParkingSpotTableBody = props => {
                       sellInfo,
                       updateSellInfo
                     )}
-                    handleOnConfirm={handleSellInfo}
+                    handleOnConfirm={handleSellInfo(parkingSpot)}
                     buttonColor="secondary"
                   />
                 </TableCell>
