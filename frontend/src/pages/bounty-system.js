@@ -25,6 +25,7 @@ import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogTitle from '@material-ui/core/DialogTitle';
+import Paper from '@material-ui/core/Paper';
 import { TimePicker } from './forms/parking-spot-components';
 import CustomSnackbar from '../ui/snackbars';
 // import QrReader from 'react-qr-reader';
@@ -174,22 +175,21 @@ const ReportField = props => {
 
     // the data in the qr code will be of the form zone_id-spot_id.
     // const [zone_id, spot_id] = code.data.split('-');
-    try{
+    try {
       const url = `${apiprefix}/bounty-system`;
       const response = await makeImageAPICall('POST', url, imageURI);
       const respbody = await response.json();
 
-    console.log(respbody);
+      // make a dialog for confirmation of the info.
+      updateInfo({
+        zone_id: 2,
+        spot_id: 1,
+        license_info: respbody.results[0].plate
+      });
     } catch (err) {
       console.log(err.stack);
     }
 
-    // make a dialog for confirmation of the info.
-    // updateInfo({
-    //   zone_id: zone_id,
-    //   spot_id: spot_id,
-    //   license_info: respbody.results[0].plate
-    // });
     setOpen(true);
   };
 
@@ -382,7 +382,9 @@ const BountySystem = ({ classes, ...props }) => {
   return (
     <>
       <Typography>
-        <ReportField handleReport={handleReport} />
+        <Paper>
+          <ReportField handleReport={handleReport} />
+        </Paper>
       </Typography>
     </>
   );

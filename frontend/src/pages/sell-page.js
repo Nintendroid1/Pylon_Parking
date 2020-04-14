@@ -357,7 +357,7 @@ const SellPage = ({ socket, isLoggedIn, classes, ...props }) => {
         console.log(e);
         e.uniqueId = `${e.zone_id}-${e.spot_id}`;
         e.date = new Date(Number(e.start_time) * 1000);
-        e.dateString = new Date(Number(e.start_time) * 1000).toLocaleDateString('en-US', { timeZone = 'UTC' });
+        e.dateString = new Date(Number(e.start_time) * 1000).toLocaleDateString('en-US', { timeZone: 'UTC' });
         e.start_time = convertEpochToMilitary(e.start_time);
         e.end_time = convertEpochToMilitary(e.end_time);
         console.log(e.date);
