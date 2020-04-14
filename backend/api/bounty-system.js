@@ -29,3 +29,13 @@ router.get("/bounty-system", (req, res) => {
     });
   }
 });
+
+router.post("/bounty-system/report", (req, res) => {
+  /*
+    - req.body.zone_id = zone id for the reported spot.
+    - req.body.spot_id = spot id for the reported spot.
+    - req.body.license_info = license plate info of the car parked here.
+  */
+});
+
+module.exports = router;
