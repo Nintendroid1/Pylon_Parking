@@ -249,7 +249,12 @@ const SellingParkingSpotTableBody = props => {
       e => e.spot_id === spotInfo.spot_id && e.zone_id === spotInfo.zone_id
     );
 
-    updateSellInfo({ ...sellInfo, date: parkingSpotsInfo[index].date });
+    updateSellInfo({ 
+      ...sellInfo, 
+      date: parkingSpotsInfo[index].date,
+      spot_id: spotInfo.spot_id,
+      zone_id: spotInfo.zone_id
+    });
 
     // Not sure if the sellInfo is update yet, last time it was not.
     let sellInfoList = [
