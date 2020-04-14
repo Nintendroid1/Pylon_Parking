@@ -27,7 +27,7 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import { TimePicker } from './forms/parking-spot-components';
 import CustomSnackbar from '../ui/snackbars';
-import QrReader from 'react-qr-reader';
+// import QrReader from 'react-qr-reader';
 import Camera from 'react-html5-camera-photo';
 import { PNG } from 'pngjs';
 import 'react-html5-camera-photo/build/css/index.css';
@@ -165,17 +165,17 @@ const ReportField = props => {
     const code = jsQR(Uint8ClampedArray.from(png.data), png.width, png.height);
 
     // Do error checking of code where only make api call if qr code is valid.
-    if (code.data === null) {
+    if (code === null) {
       console.log('no qr code found');
+    } else {
+      // the data in the qr code will be of the form zone_id-spot_id.
+      const [zone_id, spot_id] = code.data.split('-');
     }
 
-    // the data in the qr code will be of the form zone_id-spot_id.
-    const [zone_id, spot_id] = code.data.split('-');
+    const response = await makePlateRecogAPICall(imageURI);
+    const respbody = await response.json();
 
-    // const response = await makePlateRecogAPICall(imageURI);
-    // const respbody = await response.json();
-
-    // console.log(respbody);
+    console.log(respbody);
 
     // make a dialog for confirmation of the info.
     // updateInfo({
@@ -209,30 +209,32 @@ const ReportField = props => {
   );
 };
 
-const QrReaderField = ({ handleCameraClick, className }) => {
-  const handleOnScan = data => {
-    handleCameraClick(data);
-  };
+// TODO
+// Delete this after we are sure it is useless
+// const QrReaderField = ({ handleCameraClick, className }) => {
+//   const handleOnScan = data => {
+//     handleCameraClick(data);
+//   };
 
-  const handleOnError = err => {
-    console.log(err);
-  };
+//   const handleOnError = err => {
+//     console.log(err);
+//   };
 
-  /**
-   * delay: the delay between scans in milliseconds, pass in false to disable.
-   * legacyMode: default is false. Can allow user to upload photo.
-   */
-  return (
-    <>
-      <QrReader
-        className={className}
-        delay={300}
-        onError={handleOnError}
-        onScan={handleOnScan}
-      />
-    </>
-  );
-};
+//   /**
+//    * delay: the delay between scans in milliseconds, pass in false to disable.
+//    * legacyMode: default is false. Can allow user to upload photo.
+//    */
+//   return (
+//     <>
+//       <QrReader
+//         className={className}
+//         delay={300}
+//         onError={handleOnError}
+//         onScan={handleOnScan}
+//       />
+//     </>
+//   );
+// };
 
 /*
 const ReportField = ({
