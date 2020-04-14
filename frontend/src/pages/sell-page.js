@@ -86,6 +86,8 @@ const SellingMessageContent = (
     end_timeErrorMessage: ''
   });
 
+  const [totalCost, UpdateTotalCost] = useState(0);
+
   // Need to include error handling for time.
   const handleTimeChange = event => {
     let { name, value } = event.target;
@@ -137,33 +139,63 @@ const SellingMessageContent = (
       });
     } else {
       updateSellInfo({ ...sellInfo, price: Number(cost) });
+      // update the total cost.
     }
   };
 
   return (
     <>
-      <TimePicker
-        isRequired={true}
-        handleTimeChange={handleTimeChange}
-        time={sellInfo.start_time}
-        name={'start_time'}
-        label={'Start Time'}
-      />
-      <TimePicker
-        isRequired={true}
-        handleTimeChange={handleTimeChange}
-        time={sellInfo.end_time}
-        name={'end_time'}
-        label={'End Time'}
-      />
-      <TextField
-        required
-        error={validCost.hasError}
-        label={'Cost Per 15 minutes'}
-        value={sellInfo.price}
-        helperText={validCost.errorMessage}
-        onChange={handleOnChangeCost}
-      />
+      <Table>
+        <TableBody>
+          <TableRow>
+            <TableCell>Start Time:</TableCell>
+            <TableCell>
+              <TimePicker
+                isRequired={true}
+                handleTimeChange={handleTimeChange}
+                time={sellInfo.start_time}
+                name={'start_time'}
+                label={'Start Time'}
+              />
+            </TableCell>
+          </TableRow>
+          <TableRow>
+            <TableCell>End Time:</TableCell>
+            <TableCell>
+              <TimePicker
+                isRequired={true}
+                handleTimeChange={handleTimeChange}
+                time={sellInfo.start_time}
+                name={'end_time'}
+                label={'End Time'}
+              />
+            </TableCell>
+          </TableRow>
+          <TableRow>
+            <TableCell>Price Per 15 To Sell At:</TableCell>
+            <TableCell>
+              <TextField
+                required
+                error={validCost.hasError}
+                label={'Cost Per 15 minutes'}
+                value={sellInfo.price}
+                helperText={validCost.errorMessage}
+                onChange={handleOnChangeCost}
+              />
+            </TableCell>
+          </TableRow>
+          <TableRow>
+            <TableCell>Total Price For Entire Time Period:</TableCell>
+            <TableCell>
+              <TextField
+                disabled
+                label={'Total Cost'}
+                value={totalCost}
+              />
+            </TableCell>
+          </TableRow>
+        </TableBody>
+      </Table>
     </>
   );
 };
@@ -191,7 +223,6 @@ const popUpContent = sellInfoList => {
 
 const SellingParkingSpotTableBody = props => {
   const { parkingSpotsInfo, handleSellRequest } = props;
-  /*
   const [sellInfo, updateSellInfo] = useState({
     date: Date.now(),
     spot_id: -1,
@@ -199,10 +230,10 @@ const SellingParkingSpotTableBody = props => {
     start_time: '24:00',
     end_time: '24:00',
     cost: 0
-  });*/
+  });
 
-  const handleOnConfirm = spotToSellInfo => privateKey => {
-    handleSellRequest(spotToSellInfo, privateKey);
+  const handleOnConfirm = privateKey => {
+    handleSellRequest(sellInfo, privateKey);
   };
 
   const handleSellInfo = (spotInfo) => () => {
@@ -211,22 +242,22 @@ const SellingParkingSpotTableBody = props => {
       e => e.spot_id === spotInfo.spot_id && e.zone_id === spotInfo.zone_id
     );
 
-    spotInfo.date = parkingSpotsInfo[index].date;
-    //updateSellInfo({ ...spotInfo, date: spotInfo.date });
+    updateSellInfo({ ...sellInfo, date: parkingSpotsInfo[index].date });
 
-    const sellInfoList = [
-      { name: 'Zone ID', value: spotInfo.zone_id },
-      { name: 'Spot ID', value: spotInfo.spot_id },
-      { name: 'Date', value: spotInfo.date.toDateString() },
+    // Not sure if the sellInfo is update yet, last time it was not.
+    let sellInfoList = [
+      { name: 'Zone ID', value: sellInfo.zone_id },
+      { name: 'Spot ID', value: sellInfo.spot_id },
+      { name: 'Date', value: sellInfo.date.toDateString() },
       {
         name: 'Start Time',
-        value: convertMilitaryTimeToNormal(spotInfo.start_time)
+        value: convertMilitaryTimeToNormal(sellInfo.start_time)
       },
       {
         name: 'End Time',
-        value: convertMilitaryTimeToNormal(spotInfo.end_time)
+        value: convertMilitaryTimeToNormal(sellInfo.end_time)
       },
-      { name: 'Price per 15 To Sell For', value: spotInfo.cost }
+      { name: 'Price per 15 To Sell For', value: sellInfo.cost }
     ];
 
     return (
@@ -236,7 +267,7 @@ const SellingParkingSpotTableBody = props => {
           messageTitle={`Sell Parking Spot ${parkingSpot.uniqueId}`}
           requireKey={true}
           messageContent={popUpContent(sellInfoList)}
-          handleOnConfirm={handleOnConfirm(spotInfo)}
+          handleOnConfirm={handleOnConfirm}
           buttonColor="secondary"
         />
       </>
