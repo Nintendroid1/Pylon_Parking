@@ -231,7 +231,7 @@ const SellingParkingSpotTableBody = props => {
       <>
         <ConfirmationDialogFieldButton
           buttonMessage="Sell"
-          messageTitle={`Sell Parking Spot ${parkingSpot.zone_id}-${parkingSpot.spot_id}`}
+          messageTitle={`Sell Parking Spot ${parkingSpot.uniqueId}`}
           requireKey={true}
           messageContent={popUpContent(sellInfoList)}
           handleOnConfirm={handleOnConfirm}
@@ -371,7 +371,7 @@ const SellPage = ({ socket, isLoggedIn, classes, ...props }) => {
     }
   };
 
-  const handleSellRequest = (sellInfo, privatekey) => {
+  const handleSellRequest = async (sellInfo, privatekey) => {
     // Make sure that the date field is correct.
     console.log(sellInfo.date);
     const startUTCEpoch = convertMilitaryToEpoch(
@@ -384,6 +384,34 @@ const SellPage = ({ socket, isLoggedIn, classes, ...props }) => {
     );
 
     // Make api request.
+    /*
+    date: Date.now(),
+    spot_id: -1,
+    zone_id: -1,
+    start_time: '24:00',
+    end_time: '24:00',
+    cost: 0
+    */
+    const url = `${apiprefix}/sell`;
+    const json = {
+      pid: localStorage.olivia_pid,
+      spot: {
+        spot_id: sellInfo.spot_id,
+        zone_id: sellInfo.zone_id,
+        start_time: startUTCEpoch,
+        end_time: endUTCEpoch,
+        price: cost // price is per 15.
+      }
+    }
+
+    const response = await makeAPICall('POST', url, json);
+    const respbody = await response.json();
+
+    if (response.status === 200) {
+      // Do something.
+    } else {
+      // Do something.
+    }
   };
 
   // Need another socket event for when parking spot is sold.
