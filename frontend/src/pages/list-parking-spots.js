@@ -233,7 +233,7 @@ function MakeTable({
 
 /**
  * Called by socket when spot is made available.
- * 
+ *
  * @param {*} parkingSpotsInfo current list of parking spots.
  * @param {*} updateparkingSpotsInfo update current list of spots.
  * @param {*} parkingInfo new parking spot sent by socket.
@@ -263,16 +263,21 @@ const handleParkingSpotAvailable = (
     !(parkingInfo.end_time < timeFilterStartTimeEpoch) &&
     !(timeFilterEndTimeEpoch < parkingInfo.start_time)
   ) {
-
     // Get snippet of valid data.
 
     // For start time, if new data start time is after filter start time,
     // then keep it, otherwise, use filter time.
-    parkingInfo.start_time = timeFilterStartTimeEpoch < parkingInfo.start_time ? parkingInfo.start_time : timeFilterStartTimeEpoch;
+    parkingInfo.start_time =
+      timeFilterStartTimeEpoch < parkingInfo.start_time
+        ? parkingInfo.start_time
+        : timeFilterStartTimeEpoch;
 
     // For end time, if new data end time is before filter end time, then
     // keep it, otherwise, use filter time.
-    parkingInfo.end_time = parkingInfo.end_time < timeFilterEndTimeEpoch ? parkingInfo.end_time : timeFilterEndTimeEpoch;
+    parkingInfo.end_time =
+      parkingInfo.end_time < timeFilterEndTimeEpoch
+        ? parkingInfo.end_time
+        : timeFilterEndTimeEpoch;
 
     // check if spot is in the list.
     const index = parkingSpotsInfo.findIndex(
@@ -284,15 +289,25 @@ const handleParkingSpotAvailable = (
 
     // the parking spot is in the list, concatentate if possible.
     if (index !== -1) {
-      // For start time, if new data start time equals end time, then 
+      // For start time, if new data start time equals end time, then
       // new start time is old start time and new end time is new end time.
-      if (compareMilitaryTime(parkingInfo.start_time, parkingSpotsInfo[index].end_time) === 0) {
+      if (
+        compareMilitaryTime(
+          parkingInfo.start_time,
+          parkingSpotsInfo[index].end_time
+        ) === 0
+      ) {
         parkingInfo.start_time = parkingSpotsInfo[index].start_time;
       }
 
       // For end time, if new data end time equals old start time, then
       // new start time is new start time and new end time is old end time.
-      if (compareMilitaryTime(parkingInfo.end_time, parkingSpotsInfo[index].start_time) === 0) {
+      if (
+        compareMilitaryTime(
+          parkingInfo.end_time,
+          parkingSpotsInfo[index].start_time
+        ) === 0
+      ) {
         parkingInfo.end_time = parkingSpotsInfo[index].end_time;
       }
     }
@@ -303,14 +318,14 @@ const handleParkingSpotAvailable = (
     } else {
       parkingSpotsInfo[index] = parkingInfo;
     }
-    
+
     updateparkingSpotsInfo(parkingSpotsInfo);
   }
 };
 
 /**
  * Called when a parking spot is made unavailable.
- * 
+ *
  * @param {*} parkingSpotsInfo current list of parking spots.
  * @param {*} updateparkingSpotsInfo update current list of spots.
  * @param {*} parkingInfo list of new parking spots for change spot only.
@@ -348,7 +363,7 @@ const handleParkingSpotUnavailable = (
     parkingInfo.start_time = convertEpochToMilitary(parkingInfo.start_time);
     parkingInfo.endTime = convertEpochToMilitary(parkingInfo.end_time);
     if (index !== -1) {
-      
+
       if (compareMilitaryTime(parkingSpotsInfo[index].start_time, parkingInfo.start_time))
 
       parkingInfo.price = Number(parkingInfo.price).toFixed(3);
@@ -358,8 +373,6 @@ const handleParkingSpotUnavailable = (
 
     }
   }*/
-
-  
 };
 
 const Zone = ({
@@ -554,12 +567,13 @@ const Zone = ({
       //console.log("Big Test ASDFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF");
       //console.log(data);
       // data should also include info on whether it is a spot being made available or unavailable.
-      handleParkingSpotTimeChange(
-        parkingSpotsInfo,
-        updateparkingSpotsInfo,
-        data,
-        currentTimeFilter
-      );
+      // TODO
+      // handleParkingSpotTimeChange(
+      //   parkingSpotsInfo,
+      //   updateparkingSpotsInfo,
+      //   data,
+      //   currentTimeFilter
+      // );
     });
   }, []);
 
