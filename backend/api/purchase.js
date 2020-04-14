@@ -3,13 +3,15 @@ const router = express.Router();
 const jwt = require("./jwt");
 const db = require("../db");
 const socketAPI = require("../realtime/socket-broadcaster");
+const { requireLogin } = require("./auth.js");
 
 router.use(express.json());
 
-router.post("/", (req, res) => {
-  if (jwt.verifyJWT(req.body.token, req.body.pid)) {
+router.post("/", requireLogin, (req, res) => {
+  // if (jwt.verifyJWT(req.body.token, req.body.pid)) {
     //Talk to the blockchain here
 
+    console.log(req.body.spot);
     db.query(
       "SELECT availability FROM parking_times WHERE spot_ID = $1 AND zone_ID = $2 AND time_code BETWEEN $3 AND $4",
       [
@@ -128,7 +130,6 @@ router.post("/", (req, res) => {
         res.status(403).json({ message: "Bad spot code" });
       }
     });
-  }
 });
 
 module.exports = router;
