@@ -172,7 +172,9 @@ const ReportField = props => {
       const [zone_id, spot_id] = code.data.split('-');
     }
 
-    const response = await makePlateRecogAPICall(imageURI);
+    const url = `${apiprefix}/bounty-system/?image=${imageURI}`;
+    const response = await makeAPICall('GET', url);
+
     const respbody = await response.json();
 
     console.log(respbody);
@@ -355,7 +357,7 @@ const BountySystem = ({ classes, ...props }) => {
   };*/
 
   const handleReport = async info => {
-    const url = `${apiprefix}/bounty/report`;
+    const url = `${apiprefix}/bounty-system/report`;
     const json = {
       zone_id: info.zone_id,
       spot_id: info.spot_id,
