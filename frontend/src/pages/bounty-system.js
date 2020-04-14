@@ -173,11 +173,15 @@ const ReportField = props => {
     }
 
     const url = `${apiprefix}/bounty-system/?image=${imageURI}`;
-    const response = await makeAPICall('GET', url);
+    console.log(url);
+    try {
+      const response = await makeAPICall('GET', url);
+      const respbody = await response.json();
 
-    const respbody = await response.json();
-
-    console.log(respbody);
+      console.log(respbody);
+    } catch (err) {
+      console.log(err.stack);
+    }
 
     // make a dialog for confirmation of the info.
     // updateInfo({
