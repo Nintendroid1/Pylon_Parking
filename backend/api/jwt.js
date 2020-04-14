@@ -8,7 +8,7 @@ const expiration_offset = conf.expire;
 function createJWT(userName, admin_status) {
   return jwt.sign(
     {
-      exp: Math.floor(Date.now() / 1000) + ,
+      exp: Math.floor(Date.now() / 1000) + expiration_offset,
       pid: userName,
       admin: admin_status
     },
