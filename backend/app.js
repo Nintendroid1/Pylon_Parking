@@ -9,7 +9,7 @@ const zonesRouter = require("./api/zones");
 const purchaseRouter = require("./api/purchase");
 const sellRouter = require("./api/sell");
 const historyRouter = require("./api/history")
-const bountyRouter = require("./api/history")
+const bountyRouter = require("./api/bounty-system")
 
 // Initializing socket and passing it to each app.
 const server = require("http").Server(app);
