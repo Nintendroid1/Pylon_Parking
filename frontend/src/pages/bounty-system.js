@@ -165,15 +165,18 @@ const ReportField = props => {
     const code = jsQR(Uint8ClampedArray.from(png.data), png.width, png.height);
 
     // Do error checking of code where only make api call if qr code is valid.
-    if (code.data === null) {
+    if (code === null) {
       console.log('no qr code found');
     }
 
     // the data in the qr code will be of the form zone_id-spot_id.
-    const [zone_id, spot_id] = code.data.split('-');
+    // const [zone_id, spot_id] = code.data.split('-');
 
-    const url = `${apiprefix}/bounty-system/?image=${imageURI}`;
-    const response = await makeAPICall('GET', url);
+    const json = {
+      image: imageURI
+    }
+    const url = `${apiprefix}/bounty-system`;
+    const response = await makeAPICall('POST', url, json);
     const respbody = await response.json();
 
     console.log(respbody);
