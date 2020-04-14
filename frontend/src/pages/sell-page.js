@@ -249,16 +249,6 @@ const SellingParkingSpotTableBody = props => {
           return (
             <>
               <TableRow>
-                <TableCell>{parkingSpot.uniqueId}</TableCell>
-                <TableCell>{parkingSpot.zone_name}</TableCell>
-                <TableCell>{parkingSpot.dateString}</TableCell>
-                <TableCell>
-                  {convertMilitaryTimeToNormal(parkingSpot.start_time)}
-                </TableCell>
-                <TableCell>
-                  {convertMilitaryTimeToNormal(parkingSpot.end_time)}
-                </TableCell>
-                <TableCell>{parkingSpot.price}</TableCell>
                 <TableCell>
                   <ConfirmationDialogFieldButton
                     buttonMessage="Sell"
@@ -274,6 +264,16 @@ const SellingParkingSpotTableBody = props => {
                     buttonColor="secondary"
                   />
                 </TableCell>
+                <TableCell>{parkingSpot.uniqueId}</TableCell>
+                <TableCell>{parkingSpot.zone_name}</TableCell>
+                <TableCell>{parkingSpot.dateString}</TableCell>
+                <TableCell>
+                  {convertMilitaryTimeToNormal(parkingSpot.start_time)}
+                </TableCell>
+                <TableCell>
+                  {convertMilitaryTimeToNormal(parkingSpot.end_time)}
+                </TableCell>
+                <TableCell>{parkingSpot.price}</TableCell>
               </TableRow>
             </>
           );
@@ -288,15 +288,15 @@ const SellingParkingSpotTableHeader = () => {
     <>
       <TableHead>
         <TableRow>
+          <TableCell>
+            <span />
+          </TableCell>
           <TableCell>Parking Spot ID</TableCell>
           <TableCell>Zone Name</TableCell>
           <TableCell>Date</TableCell>
           <TableCell>Start Time</TableCell>
           <TableCell>End Time</TableCell>
           <TableCell>Average Price Per 15 minutes</TableCell>
-          <TableCell>
-            <span />
-          </TableCell>
         </TableRow>
       </TableHead>
     </>
@@ -357,7 +357,7 @@ const SellPage = ({ socket, isLoggedIn, classes, ...props }) => {
         console.log(e);
         e.uniqueId = `${e.zone_id}-${e.spot_id}`;
         e.date = new Date(Number(e.start_time) * 1000);
-        e.dateString = new Date(Number(e.start_time) * 1000).toLocaleDateString('en-US');
+        e.dateString = new Date(Number(e.start_time) * 1000).toLocaleDateString('en-US', { timeZone = 'UTC' });
         e.start_time = convertEpochToMilitary(e.start_time);
         e.end_time = convertEpochToMilitary(e.end_time);
         console.log(e.date);
