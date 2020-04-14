@@ -4,11 +4,10 @@ const { withJWTAuthMiddleware } = require("express-kun");
 const jwt = require("./jwt");
 const db = require("../db");
 // const { createSecureRouter, getTokenFromBearer } = require("./auth.js");
+// const secureRouter = createSecureRouter(router);
 const { requireLogin } = require("./auth.js");
 
 router.use(express.json());
-
-// const secureRouter = createSecureRouter(router);
 
 router.get("/", (req, res) => {
   res.send("This should be login api");

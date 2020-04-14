@@ -8,7 +8,6 @@ const { requireLogin } = require("./auth.js");
 router.use(express.json());
 
 router.post("/", requireLogin, (req, res) => {
-  // if (jwt.verifyJWT(req.body.token, req.body.pid)) {
     //Talk to the blockchain here
 
     console.log(req.body.spot);

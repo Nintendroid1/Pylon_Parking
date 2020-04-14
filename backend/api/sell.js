@@ -2,12 +2,13 @@ const express = require('express');
 const router = express.Router();
 const jwt = require('./jwt');
 const db = require('../db');
+const { requireLogin } = require("./auth.js");
 //const socketAPI = require("../realtime/socket-broadcaster");
 
 router.use(express.json());
 
-router.post('/',(req,res) => {
-    if(jwt.verifyJWT(req.body.token, req.body.pid)) {
+router.post('/', requireLogin, (req,res) => {
+    // if(jwt.verifyJWT(req.body.token, req.body.pid)) {
         if(req.body.pid && req.body.token && req.body.spot.spot_id && req.body.spot.zone_id && req.body.spot.start_time && req.body.spot.end_time && req.body.spot.price) {
 
             let isValidReq = true;
@@ -41,9 +42,9 @@ router.post('/',(req,res) => {
         else {
             res.status(400).json({message: "Bad json format"});
         }
-    } else {
-        res.status(401).json({message: "Bad login"});
-    }
+    // } else {
+    //     res.status(401).json({message: "Bad login"});
+    // }
 });
 
 module.exports = router;
