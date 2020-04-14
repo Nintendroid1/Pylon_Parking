@@ -139,6 +139,14 @@ const styles = theme => ({
     width: '25px',
     height: 'auto',
     marginRight: '15px'
+  },
+  circular: {
+    width: '35px',
+    marginRight: '10px',
+    borderTopLeftRadius: '50% 50%',
+    borderTopRightRadius: '50% 50%',
+    borderBottomRightRadius: '50% 50%',
+    borderBottomLeftRadius: '50% 50%'
   }
 });
 
@@ -254,6 +262,7 @@ function TabChooser({
   function handleLogout() {
     localStorage.olivia_pid = '';
     localStorage.removeItem('olivia_token');
+    localStorage.removeItem('avatar');
     updateLogin(false);
     window.location.href = `${process.env.PUBLIC_URL}/`;
   } // apply HOC*/
@@ -329,6 +338,26 @@ function TabChooser({
       history.push(link);
     };
 
+    function drawAccountIcon() {
+      if (localStorage.getItem('avatar') === null) {
+        return (
+          <>
+            <AccountCircle className={classes.avatar} />
+          </>
+        );
+      } else {
+        return (
+          <>
+            <img
+              className={classes.circular}
+              alt="userIcon"
+              src={`${localStorage.avatar}`}
+            />
+          </>
+        );
+      }
+    }
+
     return (
       <>
         <Typography
@@ -343,7 +372,7 @@ function TabChooser({
             aria-haspopup="true"
             onClick={handleClick}
           >
-            <AccountCircle className={classes.avatar} />
+            {drawAccountIcon()}
             <Typography
               variant="button"
               style={{ color: '#FFFFFF', fontSize: 14 }}
