@@ -205,6 +205,7 @@ const SellingParkingSpotTableBody = props => {
   };
 
   const handleSellInfo = () => {
+    console.log(sellInfo);
     const index = parkingSpotsInfo.findIndex(
       e => e.spot_id === sellInfo.spot_id && e.zone_id === sellInfo.zone_id
     );
@@ -333,12 +334,11 @@ const SellPage = ({ socket, isLoggedIn, classes, ...props }) => {
     let url = `${apiprefix}/users/${localStorage.olivia_pid}/spots`;
     let response = await makeAPICall('GET', url);
     let respbody = await response.json();
-    console.log(respbody);
+    // console.log(respbody);
 
     if (response.status === 200) {
       // Extracting the date and leaving in UTC so no need for further conversion.
       // Converting epoch to military time.
-      console.log(respbody);
       /*
         respbody = {
           parkingSpotsInfo: [
@@ -354,13 +354,11 @@ const SellPage = ({ socket, isLoggedIn, classes, ...props }) => {
         }
       */
       respbody.parkingSpotsInfo.forEach(e => {
-        console.log(e);
         e.uniqueId = `${e.zone_id}-${e.spot_id}`;
         e.date = new Date(Number(e.start_time) * 1000);
         e.dateString = new Date(Number(e.start_time) * 1000).toLocaleDateString('en-US', { timeZone: 'UTC' });
         e.start_time = convertEpochToMilitary(e.start_time);
         e.end_time = convertEpochToMilitary(e.end_time);
-        console.log(e.date);
       });
 
       updateSpotsOwned(respbody.parkingSpotsInfo);
