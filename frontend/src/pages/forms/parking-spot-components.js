@@ -212,10 +212,12 @@ const ConfirmationDialogFieldButton = ({
           <form onSubmit={handleSubmit}>
             <Grid>{messageContent}</Grid>
             <Grid>
-              <PrivateKeyField
-                privateKey={privateKey}
-                updatePrivateKey={updatePrivateKey}
-              />
+              {requireKey ? (
+                <PrivateKeyField
+                  privateKey={privateKey}
+                  updatePrivateKey={updatePrivateKey}
+                />
+              ) : null}
             </Grid>
             <Button onClick={handleClose} color="primary">
               Cancel
