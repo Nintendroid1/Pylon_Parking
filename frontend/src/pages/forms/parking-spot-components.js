@@ -5,6 +5,7 @@ import Grid from '@material-ui/core/Grid';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import OutlinedInput from '@material-ui/core/OutlinedInput';
 import InputLabel from '@material-ui/core/InputLabel';
@@ -130,21 +131,19 @@ const TimePicker = ({
   );
 };
 
-const ErrorDialog = (props) => {
+const ErrorDialog = props => {
   const { message, open, setOpen } = props;
-  
+
   const handleClose = () => {
     setOpen(false);
-  }
+  };
 
   return (
     <>
       <Dialog open={open} onClose={handleClose}>
         <DialogTitle>Error</DialogTitle>
         <DialogContent>
-          <DialogContentText>
-            {message}
-          </DialogContentText>
+          <DialogContentText>{message}</DialogContentText>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose} color="primary">
@@ -154,7 +153,7 @@ const ErrorDialog = (props) => {
       </Dialog>
     </>
   );
-}
+};
 
 const ConfirmationDialogFieldButton = ({
   buttonMessage,
