@@ -11,7 +11,14 @@ import {
   DialogContent,
   DialogActions
 } from '@material-ui/core';
+import { MuiThemeProvider } from '@material-ui/core/styles';
 
+const styles = theme => ({
+  root: {
+    display: 'flex',
+    flexGrow: 1
+  }
+});
 /*
  * Create a confirmation dialog, to be used with dialog below.
  */
@@ -21,6 +28,7 @@ export function Confirm({
   title,
   children,
   onHide,
+  theme,
   ...other
 }) {
   okLabel = okLabel || 'Ok';
@@ -30,24 +38,26 @@ export function Confirm({
   // as an alternative to the onClose, you could use disableEscapeKeyDown
   // see https://material-ui.com/api/dialog/
   return (
-    <Dialog
-      disableBackdropClick
-      onClose={() => onHide(false)}
-      maxWidth="xs"
-      aria-labelledby="confirmation-dialog-title"
-      {...other}
-    >
-      <DialogTitle id="confirmation-dialog-title">{title}</DialogTitle>
-      <DialogContent>{children}</DialogContent>
-      <DialogActions>
-        <Button onClick={() => onHide(false)} color="primary">
-          {cancelLabel}
-        </Button>
-        <Button onClick={() => onHide(true)} color="primary">
-          {okLabel}
-        </Button>
-      </DialogActions>
-    </Dialog>
+    <MuiThemeProvider theme={theme}>
+      <Dialog
+        disableBackdropClick
+        onClose={() => onHide(false)}
+        maxWidth="xs"
+        aria-labelledby="confirmation-dialog-title"
+        {...other}
+      >
+        <DialogTitle id="confirmation-dialog-title">{title}</DialogTitle>
+        <DialogContent>{children}</DialogContent>
+        <DialogActions>
+          <Button onClick={() => onHide(false)} color="secondary">
+            {cancelLabel}
+          </Button>
+          <Button onClick={() => onHide(true)} color="secondary">
+            {okLabel}
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </MuiThemeProvider>
   );
 }
 

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { makeAPICall } from '../api';
+import { UpdatePasswordForm } from './forms/update-user-form';
 import PropTypes from 'prop-types';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
@@ -37,65 +38,42 @@ import {
   MuiThemeProvider,
   createMuiTheme
 } from '@material-ui/core/styles';
+const styles = theme => ({
+  root: {
+    display: 'flex',
+    flexGrow: 1
+  }
+});
 
-const UserInfo = ({ socket, isLoggedIn, ...props }) => {
-  const [message, updateMessage] = useState('Loading');
-  const [userInfo, updateUserInfo] = useState(null);
+const UpdateUserInfo = () => {
+  const [message, updateMessage] = useState(null);
 
-  let getUserInfo = async () => {
+  const handleUpdate = async password => {
     let url = `${apiprefix}/users/${localStorage.olivia_pid}`;
-    let response = await makeAPICall('GET', url);
+
+    /*
+      password = {
+        password: current password,
+        newPassword: new password
+      }
+    */
+    let response = await makeAPICall('POST', url, password);
     let respbody = await response.json();
 
     if (response.status === 200) {
-      // Extracting the date and leaving in UTC so no need for further conversion.
-      // Converting epoch to military time.
-      console.log(respbody);
-
-      updateUserInfo(respbody);
-      /*
-        respbody.body = {
-          pid: tempUser.pid,
-          email: tempUser.email,
-          first_name: tempUser.first_name,
-          last_name: tempUser.last_name
-          balance
-        }
-      */
-      // updateUserInfo(respbody.body);
-      updateMessage(null);
+      // do a redirection to the home page.
     } else {
-      updateMessage(<div>Failed to get user.</div>);
-      console.log(respbody);
+      updateMessage(respbody.message);
     }
   };
 
-  useEffect(() => {
-    getUserInfo();
-  }, []);
-
-  useEffect(() => {
-    // data = balance # hokie tokens in wallet now.
-    socket.on(`userInfo-${localStorage.olivia_pid}`, data => {
-      updateUserInfo({ ...userInfo, balance: data });
-    });
-  }, []);
-
   return (
     <>
-      {message ? (
-        <Typography>{message}</Typography>
-      ) : (
-        <Typography>
-          <Box>{`PID: ${userInfo.pid}`}</Box>
-          <Box>{`First Name: ${userInfo.first_name}`}</Box>
-          <Box>{`Last Name: ${userInfo.last_name}`}</Box>
-          <Box>{`Email: ${userInfo.email}`}</Box>
-          <Box>{`Hokie Coins: ${userInfo.balance}`}</Box>
-        </Typography>
-      )}
+      <Typography>{message}</Typography>
+      <Typography>
+        <UpdatePasswordForm onSubmit={handleUpdate} />
+      </Typography>
     </>
   );
 };
-
-export default UserInfo;
+export default withStyles(styles)(RequireAuthentication(UpdateUserInfo));

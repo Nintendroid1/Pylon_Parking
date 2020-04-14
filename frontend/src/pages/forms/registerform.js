@@ -60,11 +60,11 @@ const UserForm = ({ onSubmit, message, classes, isLoading, messageColor }) => {
   // we are using the Hooks API
   // internal state that represents current state of the form
   const [values, setValues] = useState({
-    username: '',
+    pid: '',
     password: '',
     confpassword: '',
-    firstname: '',
-    lastname: '',
+    first_name: '',
+    last_name: '',
     email: ''
   });
   // a universal onChange handler that propagates user input to component state
@@ -78,11 +78,13 @@ const UserForm = ({ onSubmit, message, classes, isLoading, messageColor }) => {
       alert('Passwords do not match!');
     } else {
       let tempUser = {
-        username: values.username,
-        password: values.password,
-        firstname: values.firstname,
-        lastname: values.lastname,
-        email: values.email
+        user: {
+          pid: values.pid,
+          password: values.password,
+          first_name: values.first_name,
+          last_name: values.last_name,
+          email: values.email
+        }
       };
       onSubmit(tempUser);
     }
@@ -95,13 +97,13 @@ const UserForm = ({ onSubmit, message, classes, isLoading, messageColor }) => {
         <Paper className={classes.paper}>
           <form id="regform" onSubmit={handleSubmit} className={classes.form}>
             <FormControl margin="normal" required fullWidth>
-              <InputLabel htmlFor="username">Username</InputLabel>
+              <InputLabel htmlFor="username">PID</InputLabel>
               <Input
                 onChange={handleChange}
-                id="username"
-                name="username"
+                id="pid"
+                name="pid"
                 autoComplete="current-username"
-                placeholder="username"
+                placeholder="pid"
                 autoFocus
               />
             </FormControl>
@@ -130,9 +132,9 @@ const UserForm = ({ onSubmit, message, classes, isLoading, messageColor }) => {
               <InputLabel htmlFor="firstname">First Name</InputLabel>
               <Input
                 onChange={handleChange}
-                name="firstname"
-                type="firstname"
-                id="firstname"
+                name="first_name"
+                type="first_name"
+                id="first_name"
                 autoComplete="current-firstname"
                 placeholder="first name"
               />
@@ -141,9 +143,9 @@ const UserForm = ({ onSubmit, message, classes, isLoading, messageColor }) => {
               <InputLabel htmlFor="lastname">Last Name</InputLabel>
               <Input
                 onChange={handleChange}
-                name="lastname"
-                type="lastname"
-                id="lastname"
+                name="last_name"
+                type="last_name"
+                id="last_name"
                 autoComplete="current-lastname"
                 placeholder="last name"
               />
