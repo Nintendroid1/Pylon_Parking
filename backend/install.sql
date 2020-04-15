@@ -37,6 +37,7 @@ CREATE TABLE parking_times
 	user_PID VARCHAR(100),
 	availability boolean,
 	price DECIMAL(16, 10) DEFAULT 4.20,
+	seller_key VARCHAR(256),
 	PRIMARY KEY (spot_ID, zone_ID, time_code),
 	FOREIGN KEY (spot_ID, zone_ID) REFERENCES parking_spots(spot_ID, zone_ID),
 	FOREIGN KEY (user_PID) REFERENCES users(PID)

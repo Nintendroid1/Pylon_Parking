@@ -8,8 +8,6 @@ router.use(express.json());
 
 router.post("/", (req, res) => {
   if (jwt.verifyJWT(req.body.token, req.body.pid)) {
-    //Talk to the blockchain here
-
     db.query(
       "SELECT availability FROM parking_times WHERE spot_ID = $1 AND zone_ID = $2 AND time_code BETWEEN $3 AND $4",
       [
@@ -27,8 +25,9 @@ router.post("/", (req, res) => {
           }
         }
         if (isValidReq) {
+          //talk to the blockchain here
           db.query(
-            "UPDATE parking_times SET user_PID = $1, availability = false WHERE spot_ID = $2 AND zone_ID = $3 AND time_code BETWEEN $4 AND $5 RETURNING *",
+            "UPDATE parking_times SET user_PID = $1, availability = false, seller_key = NULL WHERE spot_ID = $2 AND zone_ID = $3 AND time_code BETWEEN $4 AND $5 RETURNING *",
             [
               req.body.pid,
               req.body.spot.spot_id,

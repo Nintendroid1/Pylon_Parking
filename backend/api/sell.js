@@ -8,7 +8,7 @@ router.use(express.json());
 
 router.post('/',(req,res) => {
     if(jwt.verifyJWT(req.body.token, req.body.pid)) {
-        if(req.body.pid && req.body.token && req.body.spot.spot_id && req.body.spot.zone_id && req.body.spot.start_time && req.body.spot.end_time && req.body.spot.price) {
+        if(req.body.pid && req.body.token && req.body.key && req.body.spot.spot_id && req.body.spot.zone_id && req.body.spot.start_time && req.body.spot.end_time && req.body.spot.price) {
 
             let isValidReq = true;
             db.query("SELECT * FROM parking_times WHERE spot_id = $1 AND zone_id = $2 AND time_code BETWEEN $3 AND $4",
@@ -20,8 +20,8 @@ router.post('/',(req,res) => {
                     }
                 }
                 if(isValidReq) {
-                    db.query("UPDATE parking_times SET price = $5, availability = true WHERE spot_id = $1 AND zone_id = $2 AND time_code BETWEEN $3 AND $4 RETURNING *",
-                    [req.body.spot.spot_id, req.body.spot.zone_id, req.body.spot.start_time, req.body.spot.end_time-1, req.body.spot.price], (err, response) => {
+                    db.query("UPDATE parking_times SET price = $5, availability = true WHERE spot_id = $1 AND zone_id = $2 AND seller_key = $6 time_code BETWEEN $3 AND $4 RETURNING *",
+                    [req.body.spot.spot_id, req.body.spot.zone_id, req.body.spot.start_time, req.body.spot.end_time-1, req.body.spot.price, req.body.key], (err, response) => {
                         if(err) {
                             console.log(err);
                             res.status(500).json({message: "Internal Server Error"});
