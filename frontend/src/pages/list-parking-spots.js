@@ -234,15 +234,15 @@ function MakeTable({
 
 /**
  * Called by socket when spot is made available.
- * 
+ *
  * @param {*} parkingSpotsInfo current list of parking spots.
- * @param {*} updateparkingSpotsInfo update current list of spots.
+ * @param {*} updateParkingSpotsInfo update current list of spots.
  * @param {*} parkingInfo new parking spot sent by socket.
  * @param {*} currentTimeFilter the current filtering client uses.
  */
 const handleParkingSpotAvailable = (
   parkingSpotsInfo,
-  updateparkingSpotsInfo,
+  updateParkingSpotsInfo,
   parkingInfo,
   currentTimeFilter
 ) => {
@@ -264,16 +264,21 @@ const handleParkingSpotAvailable = (
     !(parkingInfo.end_time <= timeFilterStartTimeEpoch) &&
     !(timeFilterEndTimeEpoch <= parkingInfo.start_time)
   ) {
-
     // Get snippet of valid data.
 
     // For start time, if new data start time is after filter start time,
     // then keep it, otherwise, use filter time.
-    parkingInfo.start_time = timeFilterStartTimeEpoch < parkingInfo.start_time ? parkingInfo.start_time : timeFilterStartTimeEpoch;
+    parkingInfo.start_time =
+      timeFilterStartTimeEpoch < parkingInfo.start_time
+        ? parkingInfo.start_time
+        : timeFilterStartTimeEpoch;
 
     // For end time, if new data end time is before filter end time, then
     // keep it, otherwise, use filter time.
-    parkingInfo.end_time = parkingInfo.end_time < timeFilterEndTimeEpoch ? parkingInfo.end_time : timeFilterEndTimeEpoch;
+    parkingInfo.end_time =
+      parkingInfo.end_time < timeFilterEndTimeEpoch
+        ? parkingInfo.end_time
+        : timeFilterEndTimeEpoch;
 
     // check if spot is in the list.
     let i = parkingSpotsInfo.length;
@@ -309,21 +314,21 @@ const handleParkingSpotAvailable = (
 
     listedSpots.forEach(e => parkingSpotsInfo.push(e));
     
-    updateparkingSpotsInfo(parkingSpotsInfo);
+    updateParkingSpotsInfo(parkingSpotsInfo);
   }
 };
 
 /**
  * Called when a parking spot is made unavailable.
- * 
+ *
  * @param {*} parkingSpotsInfo current list of parking spots.
- * @param {*} updateparkingSpotsInfo update current list of spots.
+ * @param {*} updateParkingSpotsInfo update current list of spots.
  * @param {*} parkingInfo parking spot that was made unavailable.
  * @param {*} currentTimeFilter the current filtering client uses.
  */
 const handleParkingSpotUnavailable = (
   parkingSpotsInfo,
-  updateparkingSpotsInfo,
+  updateParkingSpotsInfo,
   parkingInfo,
   currentTimeFilter
 ) => {
@@ -400,7 +405,7 @@ const handleParkingSpotUnavailable = (
 
     listedSpots.forEach(e => parkingSpotsInfo.push(e));
     
-    updateparkingSpotsInfo(parkingSpotsInfo);
+    updateParkingSpotsInfo(parkingSpotsInfo);
   }  
 };
 
@@ -426,7 +431,7 @@ const Zone = ({
 
   setOpenSnackbar(false);
   const [message, updateMessage] = useState(null);
-  const [parkingSpotsInfo, updateparkingSpotsInfo] = useState(null);
+  const [parkingSpotsInfo, updateParkingSpotsInfo] = useState(null);
   const [order, updateOrder] = useState('asc');
   const [columnToSort, updatecolumnToSort] = useState('spot_id');
 
@@ -479,7 +484,7 @@ const Zone = ({
         e.end_time = convertEpochToMilitary(e.end_time);
         e.price = Number(e.price).toFixed(3);
       });
-      updateparkingSpotsInfo(resbody.parkingInfo);
+      updateParkingSpotsInfo(resbody.parkingInfo);
       updateMessage(null);
     } else {
       updateMessage(<div>Fail</div>);
@@ -537,7 +542,7 @@ const Zone = ({
         e.end_time = convertEpochToMilitary(e.end_time);
         e.price = Number(e.price).toFixed(3);
       });
-      updateparkingSpotsInfo(resbody.parkingInfo);
+      updateParkingSpotsInfo(resbody.parkingInfo);
       updateMessage(null);
     } else {
       updateMessage(<div>Fail</div>);
@@ -622,12 +627,18 @@ const Zone = ({
       //console.log("Big Test ASDFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF");
       //console.log(data);
       // data should also include info on whether it is a spot being made available or unavailable.
-      handleParkingSpotTimeChange(
-        parkingSpotsInfo,
-        updateparkingSpotsInfo,
-        data,
-        currentTimeFilter
-      );
+      // TODO
+      // handleParkingSpotTimeChange(
+      //   parkingSpotsInfo,
+      //   updateParkingSpotsInfo,
+      //   data,
+      //   currentTimeFilter
+      // );
+      if (data.isAvail) {
+        handleParkingSpotAvailable(parkingSpotsInfo, updateParkingSpotsInfo, data.parkingInfo, currentTimeFilter);
+      } else {
+        handleParkingSpotUnavailable(parkingSpotsInfo, updateParkingSpotsInfo, data.parkingInfo, currentTimeFilter)
+      }
     });
   }, []);
 

@@ -32,8 +32,16 @@ const LoginTab = ({
       ? history.location.state.from
       : { pathname: '/' };
 
-  console.log(history);
-  console.log(props);
+  // console.log(history);
+  // console.log(props);
+  let loadUserImage = async () => {
+    const url = `${apiprefix}/users/${localStorage.olivia_pid}/avatar`;
+    let response = await makeAPICall('GET', url);
+    if (response.status === 200) {
+      let rbody = await response.json();
+      localStorage.avatar = `data:image/png;base64,${rbody.image}`;
+    }
+  };
   // handle user login
   const userLogin = async values => {
     setLoading(true);
@@ -47,13 +55,12 @@ const LoginTab = ({
     if (res.status === 200) {
       localStorage.olivia_token = body.token;
       localStorage.olivia_pid = body.pid;
-      console.log("LOGIN");
-      console.log(body);
       updateUser({
         pid: values.pid,
         admin: res.body.admin,
         authenticated: true
       });
+      await loadUserImage();
       console.log(res.body);
       updateAdmin(res.body.admin === 1);
       updateLogin(true);

@@ -105,7 +105,11 @@ const SellingMessageContent = (
     let currTime = timeSplit[0].concat(':', timeSplit[1]);
 
     // chosen start time is before parking spot start time.
-    if (name === 'start_time' && compareMilitaryTime(value, currTime) < 0 && compareMilitaryTime(value, parkingSpotStartTime) < 0) {
+    if (
+      name === 'start_time' &&
+      compareMilitaryTime(value, currTime) < 0 &&
+      compareMilitaryTime(value, parkingSpotStartTime) < 0
+    ) {
       updateValidTime({
         ...validTime,
         start_timeHasError: true,
@@ -142,9 +146,16 @@ const SellingMessageContent = (
     } else {
       updateSellInfo({ ...sellInfo, price: Number(cost) });
       // update the total cost.
-      if (!validCost.hasError && !validTime.start_timeHasError && !validTime.end_timeHasError) {
-        const timeDiff = militaryTimeDifference(sellInfo.start_time, sellInfo.end_time);
-        const totalCost = Number(cost) * timeDiff / 15;
+      if (
+        !validCost.hasError &&
+        !validTime.start_timeHasError &&
+        !validTime.end_timeHasError
+      ) {
+        const timeDiff = militaryTimeDifference(
+          sellInfo.start_time,
+          sellInfo.end_time
+        );
+        const totalCost = (Number(cost) * timeDiff) / 15;
         UpdateTotalCost(totalCost);
       }
     }
@@ -194,11 +205,7 @@ const SellingMessageContent = (
           <TableRow>
             <TableCell>Total Price For Entire Time Period:</TableCell>
             <TableCell>
-              <TextField
-                disabled
-                label={'Total Cost'}
-                value={totalCost}
-              />
+              <TextField disabled label={'Total Cost'} value={totalCost} />
             </TableCell>
           </TableRow>
         </TableBody>
@@ -243,14 +250,14 @@ const SellingParkingSpotTableBody = props => {
     handleSellRequest(sellInfo, privateKey);
   };
 
-  const handleSellInfo = (spotInfo) => () => {
-    console.log(sellInfo);
+  const handleSellInfo = spotInfo => () => {
+    // console.log(sellInfo);
     const index = parkingSpotsInfo.findIndex(
       e => e.spot_id === spotInfo.spot_id && e.zone_id === spotInfo.zone_id
     );
 
-    updateSellInfo({ 
-      ...sellInfo, 
+    updateSellInfo({
+      ...sellInfo,
       date: parkingSpotsInfo[index].date,
       spot_id: spotInfo.spot_id,
       zone_id: spotInfo.zone_id
@@ -276,7 +283,7 @@ const SellingParkingSpotTableBody = props => {
       <>
         <ConfirmationDialogFieldButton
           buttonMessage="Sell"
-          messageTitle={`Sell Parking Spot ${parkingSpot.uniqueId}`}
+          messageTitle={`Sell Parking Spot ${sellInfo.zone_id}-${sellInfo.spot_id}`}
           requireKey={true}
           messageContent={popUpContent(sellInfoList)}
           handleOnConfirm={handleOnConfirm}
@@ -411,7 +418,9 @@ const SellPage = ({
       respbody.parkingSpotsInfo.forEach(e => {
         e.uniqueId = `${e.zone_id}-${e.spot_id}`;
         e.date = new Date(Number(e.start_time) * 1000);
-        e.dateString = new Date(Number(e.start_time) * 1000).toLocaleDateString('en-US', { timeZone: 'UTC' });
+        e.dateString = new Date(
+          Number(e.start_time) * 1000
+        ).toLocaleDateString('en-US', { timeZone: 'UTC' });
         e.start_time = convertEpochToMilitary(e.start_time);
         e.end_time = convertEpochToMilitary(e.end_time);
       });
@@ -461,9 +470,9 @@ const SellPage = ({
         zone_id: sellInfo.zone_id,
         start_time: startUTCEpoch,
         end_time: endUTCEpoch,
-        price: cost // price is per 15.
+        price: sellInfo.cost // price is per 15.
       }
-    }
+    };
 
     const response = await makeAPICall('POST', url, json);
     const respbody = await response.json();

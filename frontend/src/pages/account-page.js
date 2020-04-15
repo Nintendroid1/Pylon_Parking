@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { makeAPICall } from '../api';
+import { makeAPICall, makeImageAPICall } from '../api';
 import { withStyles } from '@material-ui/core/styles';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
@@ -14,6 +14,8 @@ import EditIcon from '@material-ui/icons/Edit';
 import apiprefix from './apiprefix';
 import Paper from '@material-ui/core/Paper';
 import Container from '@material-ui/core/Container';
+import ImageForm from './forms/image-form';
+import { PNG } from 'pngjs';
 
 const styles = theme => ({
   table: {
@@ -44,7 +46,7 @@ const styles = theme => ({
   }
 });
 
-let ProfilePage = ({ classes, socket, ...props }) => {
+let AccountPage = ({ classes, socket, ...props }) => {
   const [user, updateUser] = useState({
     pid: '',
     first_name: '',
@@ -72,6 +74,18 @@ let ProfilePage = ({ classes, socket, ...props }) => {
       setLoading(false);
     } else {
       setLoading(false);
+    }
+  };
+
+  let changeUserAvatar = async imageURI => {
+    try {
+      const url = `${apiprefix}/users/${localStorage.olivia_pid}/avatar`;
+      const response = await makeImageAPICall('POST', url, imageURI.imageData);
+      if (response.status === 200) {
+        localStorage.avatar = imageURI.imageData;
+      }
+    } catch (err) {
+      console.log(err.stack);
     }
   };
 
@@ -180,6 +194,18 @@ let ProfilePage = ({ classes, socket, ...props }) => {
                 </Table>
               </Paper>
             </Grid>
+            <Grid item xs={12} md={8} lg={9}>
+              <Paper className={classes.paper}>
+                <ImageForm
+                  onSubmit={values => {
+                    changeUserAvatar(values);
+                  }}
+                  isLoading={isLoading}
+                  setLoading={setLoading}
+                  message={'TEST'}
+                />
+              </Paper>
+            </Grid>
           </Grid>
         </Container>
       </div>
@@ -187,4 +213,4 @@ let ProfilePage = ({ classes, socket, ...props }) => {
   );
 };
 
-export default withStyles(styles)(RequireAuthentication(ProfilePage));
+export default withStyles(styles)(RequireAuthentication(AccountPage));

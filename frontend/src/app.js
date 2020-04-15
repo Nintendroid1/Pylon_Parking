@@ -27,6 +27,8 @@ import UserInfo from './pages/user-info';
 import UpdateUserInfo from './pages/update-user-info';
 import BountySystem from './pages/bounty-system';
 import CustomSnackbar from './ui/snackbars';
+import AccountPage from './pages/account-page';
+
 import Typography from '@material-ui/core/Typography';
 import history from './history';
 import Dashboard from './ui/Dashboard';
@@ -41,6 +43,7 @@ import ReportIcon from '@material-ui/icons/Report';
 import PersonOutlineIcon from '@material-ui/icons/PersonOutline';
 import LocalParkingIcon from '@material-ui/icons/LocalParking';
 import DirectionsCarIcon from '@material-ui/icons/DirectionsCar';
+import AccountBoxIcon from '@material-ui/icons/AccountBox';
 
 const styles = theme => ({
   root: {
@@ -251,6 +254,19 @@ const App = ({ classes, ...props }) => {
                       updateSnackbarOptions={updateSnackbarOptions}
                       snackbarOptions={snackbarOptions}
                     />
+                  )}
+                />
+                <Route
+                  exact
+                  path="/account"
+                  label="Account Info"
+                  key="/account"
+                  icon={<AccountBoxIcon />}
+                  hidden={false}
+                  reqAdmin={false}
+                  reqLogin={true}
+                  render={() => (
+                    <AccountPage socket={userSocket} isLoggedIn={isLoggedIn} />
                   )}
                 />
                 <Route
