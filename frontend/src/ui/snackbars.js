@@ -7,6 +7,9 @@ const Alert = props => {
   return <MuiAlert elevation={6} variant="filled" {...props} />;
 };
 
+/*
+  severity: info, error, warning, success
+*/
 const CustomSnackbar = ({
   isOpen,
   updateIsOpen,

@@ -130,8 +130,8 @@ const TimePicker = ({
   );
 };
 
-const ErrorDialog = (props) => {
-  const { message, open, setOpen } = props;
+const MessageDialog = (props) => {
+  const { message, dialogTitle, open, setOpen } = props;
   
   const handleClose = () => {
     setOpen(false);
@@ -140,7 +140,7 @@ const ErrorDialog = (props) => {
   return (
     <>
       <Dialog open={open} onClose={handleClose}>
-        <DialogTitle>Error</DialogTitle>
+        <DialogTitle>{dialogTitle}</DialogTitle>
         <DialogContent>
           <DialogContentText>
             {message}
@@ -322,5 +322,5 @@ export {
   PrivateKeyField,
   CostField,
   TimePicker,
-  ErrorDialog
+  MessageDialog
 };

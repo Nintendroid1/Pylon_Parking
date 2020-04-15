@@ -33,6 +33,7 @@ import {
   MuiThemeProvider,
   createMuiTheme
 } from '@material-ui/core/styles';
+import CustomSnackbar from '../ui/snackbars';
 import HokieKoinIcon from '../images/hokie_coin.js';
 
 const styles = theme => ({
@@ -260,8 +261,8 @@ const handleParkingSpotAvailable = (
 
   // Ensures that updated parking spot info is within the filtering options the client wants.
   if (
-    !(parkingInfo.end_time < timeFilterStartTimeEpoch) &&
-    !(timeFilterEndTimeEpoch < parkingInfo.start_time)
+    !(parkingInfo.end_time <= timeFilterStartTimeEpoch) &&
+    !(timeFilterEndTimeEpoch <= parkingInfo.start_time)
   ) {
 
     // Get snippet of valid data.
@@ -275,34 +276,38 @@ const handleParkingSpotAvailable = (
     parkingInfo.end_time = parkingInfo.end_time < timeFilterEndTimeEpoch ? parkingInfo.end_time : timeFilterEndTimeEpoch;
 
     // check if spot is in the list.
-    const index = parkingSpotsInfo.findIndex(
-      e => Number(e.spot_id) === Number(parkingInfo.spot_id)
-    );
+    let i = parkingSpotsInfo.length;
+    let listedSpots = [];
+    while (i--) {
+      if (Number(parkingInfo.spot_id) === Number(parkingSpotsInfo[i].spot_id)) {
+        listedSpots.push(parkingSpotsInfo.splice(i, 1));
+      }
+    }
 
     parkingInfo.start_time = convertEpochToMilitary(parkingInfo.start_time);
-    parkingInfo.endTime = convertEpochToMilitary(parkingInfo.end_time);
+    parkingInfo.end_time = convertEpochToMilitary(parkingInfo.end_time);
 
     // the parking spot is in the list, concatentate if possible.
-    if (index !== -1) {
+    listedSpots.forEach((e, i) => {
       // For start time, if new data start time equals end time, then 
       // new start time is old start time and new end time is new end time.
-      if (compareMilitaryTime(parkingInfo.start_time, parkingSpotsInfo[index].end_time) === 0) {
-        parkingInfo.start_time = parkingSpotsInfo[index].start_time;
+      if (compareMilitaryTime(parkingInfo.start_time, e.end_time) === 0) {
+        parkingInfo.start_time = e.start_time;
+        listedSpots.splice(i, 1);
       }
 
       // For end time, if new data end time equals old start time, then
       // new start time is new start time and new end time is old end time.
-      if (compareMilitaryTime(parkingInfo.end_time, parkingSpotsInfo[index].start_time) === 0) {
-        parkingInfo.end_time = parkingSpotsInfo[index].end_time;
+      if (compareMilitaryTime(parkingInfo.end_time, e.start_time) === 0) {
+        parkingInfo.end_time = e.end_time;
+        listedSpots.splice(i, 1);
       }
-    }
-    parkingInfo.price = Number(parkingInfo.price).toFixed(3);
+    });
 
-    if (index === -1) {
-      parkingSpotsInfo.push(parkingInfo);
-    } else {
-      parkingSpotsInfo[index] = parkingInfo;
-    }
+    parkingInfo.price = Number(parkingInfo.price).toFixed(3);
+    parkingSpotsInfo.push(parkingInfo);
+
+    listedSpots.forEach(e => parkingSpotsInfo.push(e));
     
     updateparkingSpotsInfo(parkingSpotsInfo);
   }
@@ -313,7 +318,7 @@ const handleParkingSpotAvailable = (
  * 
  * @param {*} parkingSpotsInfo current list of parking spots.
  * @param {*} updateparkingSpotsInfo update current list of spots.
- * @param {*} parkingInfo list of new parking spots for change spot only.
+ * @param {*} parkingInfo parking spot that was made unavailable.
  * @param {*} currentTimeFilter the current filtering client uses.
  */
 const handleParkingSpotUnavailable = (
@@ -336,30 +341,67 @@ const handleParkingSpotUnavailable = (
   );
 
   // Ensures that updated parking spot info is within the filtering options the client wants.
-  /*
   if (
-    !(parkingInfo.end_time < timeFilterStartTimeEpoch) &&
-    !(timeFilterEndTimeEpoch < parkingInfo.start_time)
+    !(parkingInfo.end_time <= timeFilterStartTimeEpoch) &&
+    !(timeFilterEndTimeEpoch <= parkingInfo.start_time)
   ) {
-    const index = parkingSpotsInfo.findIndex(
-      e => Number(e.spot_id) === Number(parkingInfo.spot_id)
-    );
+    // Get snippet of valid data.
+
+    // For start time, if new data start time is after filter start time,
+    // then keep it, otherwise, use filter time.
+    // parkingInfo.start_time = timeFilterStartTimeEpoch < parkingInfo.start_time ? parkingInfo.start_time : timeFilterStartTimeEpoch;
+
+    // For end time, if new data end time is before filter end time, then
+    // keep it, otherwise, use filter time.
+    // parkingInfo.end_time = parkingInfo.end_time < timeFilterEndTimeEpoch ? parkingInfo.end_time : timeFilterEndTimeEpoch;
 
     parkingInfo.start_time = convertEpochToMilitary(parkingInfo.start_time);
-    parkingInfo.endTime = convertEpochToMilitary(parkingInfo.end_time);
-    if (index !== -1) {
-      
-      if (compareMilitaryTime(parkingSpotsInfo[index].start_time, parkingInfo.start_time))
+    parkingInfo.end_time = convertEpochToMilitary(parkingInfo.end_time);
 
-      parkingInfo.price = Number(parkingInfo.price).toFixed(3);
-      parkingSpotsInfo[index] = parkingInfo;
-      updateparkingSpotsInfo(parkingSpotsInfo);
-
-
+    // check if spot is in the list.
+    let i = parkingSpotsInfo.length;
+    let listedSpots = [];
+    while (i--) {
+      if ((Number(parkingInfo.spot_id) === Number(parkingSpotsInfo[i].spot_id)) &&
+          (compareMilitaryTime(parkingInfo.end_time, parkingSpotsInfo[i].start_time) > 0) &&
+          (compareMilitaryTime(parkingSpotsInfo[i].end_time, parkingInfo.start_time) > 0)
+      ) {
+        listedSpots.push(parkingSpotsInfo.splice(i, 1));
+      }
     }
-  }*/
 
-  
+    // the parking spot is in the list, remove times in common and delete if times match.
+    listedSpots.forEach((e, i) => {
+      // For a given spot, if the new spot's start time is at or before the given spot's start time,
+      // then, if the new spot has an end time before the given spot's
+      // end time, set the given spot's start time to be at the new spot's end time, otherwise,
+      // set the given spot's start time to be at given spot's end time.
+      if (compareMilitaryTime(parkingInfo.start_time, listedSpots[i].start_time) <= 0) {
+        if (compareMilitaryTime(parkingSpot.end_time, listedSpots[i].end_time) < 0) {
+          listedSpots[i].start_time = parkingSpot.end_time;
+        } else {
+          listedSpots[i].start_time = listedSpots[i].end_time;
+        }
+      }
+
+      // For a given spot, if the new spot's end time is at or after the given spot's
+      // end time, then because the new spot's start time is after the given spot's start time,
+      // move given spot's end time to new spot's start time, 
+      // otherwise, it should have been handled by the first if-statement.
+      else if (compareMilitaryTime(parkingInfo.end_time, listedSpots[i].end_time) >= 0) {
+        listedSpots[i].end_time = parkingSpot.start_time;
+      }
+
+      // Check if given spot's end time equals start time for it to be removed from the list.
+      if (compareMilitaryTime(listedSpots[i].start_time, listedSpots[i].end_time) === 0) {
+        listedSpots.splice(i, 1);
+      }
+    });
+
+    listedSpots.forEach(e => parkingSpotsInfo.push(e));
+    
+    updateparkingSpotsInfo(parkingSpotsInfo);
+  }  
 };
 
 const Zone = ({
@@ -370,6 +412,9 @@ const Zone = ({
   updateUser,
   updateAdmin,
   socket,
+  setOpenSnackbar,
+  snackbarOptions,
+  updateSnackbarOptions,
   ...props
 }) => {
   // To be used if paging
@@ -379,6 +424,7 @@ const Zone = ({
     return isNaN(Number(tempQuery.page)) ? 0 : Number(tempQuery.page);
   }*/
 
+  setOpenSnackbar(false);
   const [message, updateMessage] = useState(null);
   const [parkingSpotsInfo, updateparkingSpotsInfo] = useState(null);
   const [order, updateOrder] = useState('asc');
@@ -499,6 +545,13 @@ const Zone = ({
   };
 
   const handleBuyRequest = async (parkingInfo, privateKey) => {
+    updateSnackbarOptions({
+      ...snackbarOptions,
+      message: 'Your Request Is Currently Being Processed By Our Elite Team Of Trained Monkeys',
+      severity: 'info'
+    });
+    setOpenSnackbar(true);
+
     const startUTCEpoch = convertMilitaryToEpoch(
       parkingInfo.date,
       parkingInfo.start_time
@@ -511,6 +564,7 @@ const Zone = ({
     // Make api call to carry out transaction.
     const url = `${apiprefix}/purchase`;
     const json = {
+      key: privateKey,
       pid: localStorage.olivia_pid,
       spot: {
         spot_id: parkingInfo.spot_id,
@@ -525,14 +579,28 @@ const Zone = ({
     console.log('WAIT2');
     const respbody = await response.json();
     console.log(respbody);
+    setOpenSnackbar(false);
+    
 
     if (response.status === 200) {
       // Redirect them to invoice page.
       console.log('Successfully purchased spot!');
+      updateSnackbarOptions({
+        ...snackbarOptions,
+        message: 'You Used Bribery. It Was Super Effective! You Got The Parking Spot!',
+        severity: 'success'
+      });
       // Can have it as a snackbar that appears at the top of the page instead of redirection.
     } else {
+      updateSnackbarOptions({
+        ...snackbarOptions,
+        message: 'Our Team Of Monkeys Was So Traumatized By Your Request That We Were Forced To Reject Your Request',
+        severity: 'error'
+      })
       updateMessage(<div>{respbody.message}</div>);
     }
+
+    setOpenSnackbar(true);
 
     // For testing purposes.
     // console.log(`

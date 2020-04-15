@@ -26,7 +26,7 @@ import ProfilePage from './pages/profile';
 import UserInfo from './pages/user-info';
 import UpdateUserInfo from './pages/update-user-info';
 import BountySystem from './pages/bounty-system';
-
+import CustomSnackbar from './ui/snackbars';
 import Typography from '@material-ui/core/Typography';
 import history from './history';
 import Dashboard from './ui/Dashboard';
@@ -104,6 +104,13 @@ let darkTheme = createMuiTheme({
 });
 
 const App = ({ classes, ...props }) => {
+  const [openSnackbar, setOpenSnackbar] = useState(false);
+  const [snackbarOptions, updateSnackbarOptions] = useState({
+    verticalPos: 'top',
+    horizontalPos: 'center',
+    message: '',
+    severity: 'info'
+  });
   let [isDark, switchThemeFunc] = useState(localStorage.isDark === false);
   let [isLoggedIn, updateLogin] = useState(localStorage.olivia_pid !== '');
   let [currentUser, updateUser] = useState(() => {
@@ -142,6 +149,14 @@ const App = ({ classes, ...props }) => {
 
   return (
     <React.Fragment>
+      <CustomSnackbar 
+        isOpen={openSnackbar}
+        updateIsOpen={setOpenSnackbar}
+        verticalPos={snackbarOptions.verticalPos}
+        horizontalPos={snackbarOptions.horizontalPos}
+        message={snackbarOptions.message}
+        severity={snackbarOptions.severity}
+      />
       <MuiThemeProvider theme={isDark ? darkTheme : lightTheme}>
         <div className={classes.root}>
           <CssBaseline />
@@ -213,6 +228,9 @@ const App = ({ classes, ...props }) => {
                     <TransactionHistory
                       classes={classes}
                       socket={transactionHistorySocket}
+                      setOpenSnackbar={setOpenSnackbar}
+                      updateSnackbarOptions={updateSnackbarOptions}
+                      snackbarOptions={snackbarOptions}
                     />
                   )}
                 />
@@ -226,7 +244,13 @@ const App = ({ classes, ...props }) => {
                   reqLogin={true}
                   hidden={false}
                   render={() => (
-                    <SellPage isLoggedIn={isLoggedIn} socket={userSocket} />
+                    <SellPage 
+                      isLoggedIn={isLoggedIn} 
+                      socket={userSocket} 
+                      setOpenSnackbar={setOpenSnackbar}
+                      updateSnackbarOptions={updateSnackbarOptions}
+                      snackbarOptions={snackbarOptions}
+                    />
                   )}
                 />
                 <Route
@@ -239,7 +263,13 @@ const App = ({ classes, ...props }) => {
                   reqAdmin={false}
                   reqLogin={true}
                   render={() => (
-                    <ProfilePage socket={userSocket} isLoggedIn={isLoggedIn} />
+                    <ProfilePage 
+                      socket={userSocket} 
+                      isLoggedIn={isLoggedIn}
+                      setOpenSnackbar={setOpenSnackbar}
+                      updateSnackbarOptions={updateSnackbarOptions}
+                      snackbarOptions={snackbarOptions}
+                    />
                   )}
                 />
               </div>
@@ -252,7 +282,13 @@ const App = ({ classes, ...props }) => {
                 hidden={false}
                 reqAdmin={false}
                 reqLogin={false}
-                component={BountySystem}
+                render={() => (
+                  <BountySystem 
+                    setOpenSnackbar={setOpenSnackbar}
+                    updateSnackbarOptions={updateSnackbarOptions}
+                    snackbarOptions={snackbarOptions}
+                  />
+                )}
               />
               {/*render={() => <UserInfo isLoggedIn={isLoggedIn} socket={userSocket} />}*/}
               <Route
@@ -263,7 +299,14 @@ const App = ({ classes, ...props }) => {
                 hidden={true}
                 reqAdmin={false}
                 reqLogin={true}
-                render={() => <UpdateUserInfo isLoggedIn={isLoggedIn} />}
+                render={() => 
+                  <UpdateUserInfo 
+                    isLoggedIn={isLoggedIn} 
+                    setOpenSnackbar={setOpenSnackbar}
+                    updateSnackbarOptions={updateSnackbarOptions}
+                    snackbarOptions={snackbarOptions}
+                  />
+                }
               />
               <Route
                 path="/zones/:zone_id/spot/:spot_id"
@@ -272,7 +315,14 @@ const App = ({ classes, ...props }) => {
                 label="Spot Page"
                 reqAdmin={false}
                 reqLogin={false}
-                render={() => <ParkingSpot socket={parkingSpotSocket} />}
+                render={() => 
+                  <ParkingSpot 
+                    socket={parkingSpotSocket} 
+                    setOpenSnackbar={setOpenSnackbar}
+                    updateSnackbarOptions={updateSnackbarOptions}
+                    snackbarOptions={snackbarOptions}
+                  />
+                }
               />
               <Route
                 path="/zones/:zone_id"
@@ -281,7 +331,14 @@ const App = ({ classes, ...props }) => {
                 hidden={true}
                 reqAdmin={false}
                 reqLogin={false}
-                render={() => <Zone socket={parkingLotSocket} />}
+                render={() => 
+                  <Zone 
+                    socket={parkingLotSocket} 
+                    setOpenSnackbar={setOpenSnackbar}
+                    updateSnackbarOptions={updateSnackbarOptions}
+                    snackbarOptions={snackbarOptions}
+                  />
+                }
               />
             </TabChooser>
           </Router>

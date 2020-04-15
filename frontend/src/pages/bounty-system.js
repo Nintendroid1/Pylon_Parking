@@ -26,6 +26,7 @@ import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import Paper from '@material-ui/core/Paper';
+import CustomSnackbar from '../ui/snackbars';
 import { TimePicker } from './forms/parking-spot-components';
 import CustomSnackbar from '../ui/snackbars';
 // import QrReader from 'react-qr-reader';
@@ -42,7 +43,7 @@ import {
   roundUpToNearest15
 } from './forms/time-filter';
 import Box from '@material-ui/core/Box';
-import { ErrorDialog } from './forms/parking-spot-components';
+import { MessageDialog } from './forms/parking-spot-components';
 import {
   withStyles,
   withTheme,
@@ -139,10 +140,12 @@ const popUpContent = info => {
 };
 
 const ReportField = props => {
-  const { handleReport } = props;
+  const { handleReport, setOpenSnackbar, snackbarOptions, updateSnackbarOptions } = props;
 
   const [open, setOpen] = useState(false);
   const [openErrorDialog, setOpenErrorDialog] = useState(false);
+  
+  const [openInstrDialog, setOpenInstrDialog] = useState(true);
   const [errorMessage, updateErrorMessage] = useState('');
   const [info, updateInfo] = useState({
     zone_id: -1,
@@ -156,11 +159,22 @@ const ReportField = props => {
 
   const handleSubmit = event => {
     event.preventDefault();
+    updateSnackbarOptions({
+      ...snackbarOptions,
+      message: 'Sending Info To Headquarters For Confirmation',
+      severity: 'info'
+    })
+    setOpenSnackbar(true);
     setOpen(false);
     handleReport(info);
   };
 
   const handleOnCameraClick = async imageURI => {
+    updateSnackbarOptions({
+      ...snackbarOptions,
+      message: 'Using Alien Technology To Analyze Image',
+      severity: 'info'
+    })
     const dataUri = imageURI;
     const png = PNG.sync.read(
       Buffer.from(dataUri.slice('data:image/png;base64,'.length), 'base64')
@@ -171,6 +185,7 @@ const ReportField = props => {
     if (code === null) {
       // error message.
       console.log('no qr code found');
+      setOpenSnackbar(false);
       updateErrorMessage('The QR Code was invalid. Please take a better picture you pleb.');
       setOpenErrorDialog(true);
     } else {
@@ -182,6 +197,8 @@ const ReportField = props => {
         const url = `${apiprefix}/bounty-system`;
         const response = await makeImageAPICall('POST', url, imageURI);
         const respbody = await response.json();
+        
+        setOpenSnackbar(false);
 
         if (response.status === 200) {
           // make a dialog for confirmation of the info.
@@ -190,6 +207,8 @@ const ReportField = props => {
             spot_id: 1,
             license_info: respbody.results[0].plate
           });
+
+          setOpen(true);
         } else {
           setOpenErrorDialog(true);
           updateErrorMessage('The license plate was unable to be read. I dare u take another picture, I double dog dare you.')
@@ -198,22 +217,30 @@ const ReportField = props => {
       } catch (err) {
         console.log(err.stack);
       }
-
-      setOpen(true);
     }
   };
 
   return (
     <>
       <CaptureImage handleCameraClick={handleOnCameraClick} />
-      <ErrorDialog 
+      <MessageDialog 
+        message='Please take a picture that includes the a single license plate and a single qr code.'
+        dialogTitle='Instructions'
+        open={openInstrDialog}
+        setOpen={setOpenInstrDialog}
+      />
+      <MessageDialog 
         message={errorMessage}
+        dialogTitle='Error'
         open={openErrorDialog}
         setOpen={setOpenErrorDialog}
       />
       <Dialog open={open} onClose={handleClose}>
         <DialogTitle>Confirm Report Info</DialogTitle>
         <DialogContent>
+          <DialogContentText>
+            Is the following information correct?
+          </DialogContentText>
           <DialogContentText>
             <Table>{popUpContent(info)}</Table>
           </DialogContentText>
@@ -231,150 +258,8 @@ const ReportField = props => {
   );
 };
 
-// TODO
-// Delete this after we are sure it is useless
-// const QrReaderField = ({ handleCameraClick, className }) => {
-//   const handleOnScan = data => {
-//     handleCameraClick(data);
-//   };
-
-//   const handleOnError = err => {
-//     console.log(err);
-//   };
-
-//   /**
-//    * delay: the delay between scans in milliseconds, pass in false to disable.
-//    * legacyMode: default is false. Can allow user to upload photo.
-//    */
-//   return (
-//     <>
-//       <QrReader
-//         className={className}
-//         delay={300}
-//         onError={handleOnError}
-//         onScan={handleOnScan}
-//       />
-//     </>
-//   );
-// };
-
-/*
-const ReportField = ({
-  info,
-  updateInfo,
-  makeReport,
-  getInfo
-}) => {
-
-const ReportField = ({ classes, info, updateInfo, makeReport, getInfo }) => {
-  const hasInfo = info.license_info === '' ? false : true;
-
-  const [isOpen, updateIsOpen] = useState(false);
-  const [snackbarMessage, updateSnackbarMessage] = useState({
-    message: '',
-    verticalPos: 'top',
-    horizontalPos: 'center'
-  });
-
-  const handleOnChange = prop => event => {
-    updateInfo({ ...info, [prop]: event.target.value });
-  };
-
-  const handleOnClickGetInfo = () => {
-    updateSnackbarMessage({
-      ...snackbarMessage,
-      message: 'Getting License Number'
-    });
-    updateIsOpen(true);
-    makeReport();
-  };
-
-  const handleOnClickReport = () => {
-    updateSnackbarMessage({
-      ...snackbarMessage,
-      message: 'Report Sent'
-    });
-    updateIsOpen(true);
-    getInfo();
-  };
-
-  // Default is qr reader.
-  return (
-    <>
-      <CustomSnackbar
-        isOpen={isOpen}
-        updateIsOpen={updateIsOpen}
-        verticalPos={snackbarMessage.verticalPos}
-        horizontalPos={snackbarMessage.horizontalPos}
-        message={snackbarMessage.message}
-      />
-      <QrReaderField updateData={updateInfo} className={classes.reader} />
-      <TextField
-        label="Zone ID"
-        type="number"
-        value={info.zone_id}
-        onChange={handleOnChange('zone_id')}
-        InputLabelProps={{
-          shrink: true
-        }}
-        variant="outlined"
-      />
-      <TextField
-        label="Spot ID"
-        type="number"
-        value={info.spot_id}
-        onChange={handleOnChange('spot_id')}
-        InputLabelProps={{
-          shrink: true
-        }}
-        variant="outlined"
-      />
-      <TextField
-        disabled
-        label="License Number"
-        type="text"
-        value={info.license_info}
-        variant="filled"
-      />
-      <Button
-        variant="contained"
-        color="primary"
-        onClick={handleOnClickGetInfo}
-      >
-        Get Info!
-      </Button>
-      <Button
-        disabled={!hasInfo}
-        variant="contained"
-        color="secondary"
-        onClick={handleOnClickReport}
-      >
-        Report!
-      </Button>
-    </>
-  );
-}
-*/
-const BountySystem = ({ classes, ...props }) => {
+const BountySystem = ({ classes, setOpenSnackbar, snackbarOptions, updateSnackbarOptions, ...props }) => {
   const [message, updateMessage] = useState(null);
-
-  /*
-  const handleRequestLicenseInfo = async () => {
-    const url = `${apiprefix}/bounty/info`;
-    const json = {
-      zone_id: info.zone_id,
-      spot_id: info.spot_id
-    };
-
-    const response = await makeAPICall('GET', url, json);
-    const respbody = await response.json();
-
-    if (response.status === 200) {
-      updateInfo({ ...info, license_info: respbody });
-    } else {
-      // Make some kind of error message.
-    }
-  };*/
 
   const handleReport = async info => {
     const url = `${apiprefix}/bounty-system/report`;
@@ -386,11 +271,21 @@ const BountySystem = ({ classes, ...props }) => {
 
     const response = await makeAPICall('POST', url, json);
     const respbody = await response.json();
+    setOpenSnackbar(false);
 
     if (response.status === 200) {
-      // make a toaster stating that the report has been received?
+      updateSnackbarOptions({
+        ...snackbarOptions,
+        message: 'Headquarters Successfully Received Your Report.',
+        severity: 'success'
+      })
+      setOpenSnackbar(true);
     } else {
-      // there was an error in the report.
+      updateSnackbarOptions({
+        ...snackbarOptions,
+        message: 'Oh no, the dog intercepted the message. Please take another picture',
+        severity: 'error'
+      })
     }
   };
 
@@ -398,7 +293,12 @@ const BountySystem = ({ classes, ...props }) => {
     <>
       <Typography>
         <Paper>
-          <ReportField handleReport={handleReport} />
+          <ReportField 
+            handleReport={handleReport}
+            setOpenSnackbar={setOpenSnackbar}
+            snackbarOptions={snackbarOptions}
+            updateSnackbarOptions={updateSnackbarOptions}
+          />
         </Paper>
       </Typography>
     </>

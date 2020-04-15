@@ -364,7 +364,18 @@ const SellingParkingSpotTable = props => {
   );
 };
 
-const SellPage = ({ socket, isLoggedIn, classes, ...props }) => {
+const SellPage = ({ 
+  socket, 
+  isLoggedIn, 
+  classes,
+  setOpenSnackbar,
+  snackbarOptions,
+  updateSnackbarOptions,
+  ...props 
+}) => {
+
+  setOpenSnackbar(false);
+
   const [message, updateMessage] = useState(
     <>
       <Typography align="center">
@@ -414,6 +425,13 @@ const SellPage = ({ socket, isLoggedIn, classes, ...props }) => {
   };
 
   const handleSellRequest = async (sellInfo, privatekey) => {
+    updateSnackbarOptions({
+      ...snackbarOptions,
+      message: 'Our Professional Team Of Robbers Is Escorting Your Request To Headquarters',
+      severity: 'success'
+    })
+    setOpenSnackbar(true);
+
     // Make sure that the date field is correct.
     console.log(sellInfo.date);
     const startUTCEpoch = convertMilitaryToEpoch(
@@ -436,6 +454,7 @@ const SellPage = ({ socket, isLoggedIn, classes, ...props }) => {
     */
     const url = `${apiprefix}/sell`;
     const json = {
+      key: privatekey,
       pid: localStorage.olivia_pid,
       spot: {
         spot_id: sellInfo.spot_id,
@@ -448,12 +467,24 @@ const SellPage = ({ socket, isLoggedIn, classes, ...props }) => {
 
     const response = await makeAPICall('POST', url, json);
     const respbody = await response.json();
+    setOpenSnackbar(false);
 
     if (response.status === 200) {
-      // Do something.
+      updateSnackbarOptions({
+        ...snackbarOptions,
+        message: 'Congrats, Your Request Has Been Granted! Mind Sharing Some Of That Wealth With Us? Please?',
+        severity: 'success'
+      });
     } else {
       // Do something.
+      updateSnackbarOptions({
+        ...snackbarOptions,
+        message: 'Oh no, the robbers found out you lied to them. Quick, fix the error before they find your credit card info.',
+        severity: 'error'
+      })
     }
+
+    setOpenSnackbar(true);
   };
 
   // Need another socket event for when parking spot is sold.
