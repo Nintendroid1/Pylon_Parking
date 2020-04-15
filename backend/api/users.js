@@ -1,20 +1,62 @@
 const express = require("express");
 const router = express.Router();
-const { withJWTAuthMiddleware } = require("express-kun");
 const jwt = require("./jwt");
 const db = require("../db");
-const { createSecureRouter, getTokenFromBearer } = require("./auth.js");
-// const { requireLogin } = require("./auth.js");
+const fs = require("fs");
+// const { withJWTAuthMiddleware } = require("express-kun");
+// const { createSecureRouter, getTokenFromBearer } = require("./auth.js");
+// const secureRouter = createSecureRouter(router);
+const FormData = require('form-data');
+var multer = require("multer");
+var upload = multer({ dest: "../public/data/uploads/" });
+const { requireLogin } = require("./auth.js");
+
+router.post("/:pid/avatar", upload.single("image"), function(req, res) {
+  if (req.body.image) {
+    // Grab the extension to resolve any image error
+    var ext = req.body.image.split(';')[0].match(/jpeg|png|gif/)[0];
+    // strip off the data: url prefix to get just the base64-encoded bytes
+    let base64Image = req.body.image.split(";base64,").pop();
+    fs.writeFile(`public/images/avatars/${req.params.pid}_avatar.png`, base64Image, { encoding: "base64" }, function(
+      err
+    ) {
+      if (err) {
+        console.log(err.stack);
+        res.status(500).json({message: "Internal Server Error"});
+      } else {
+        res.json({message: "Updated user avatar!"});
+      }
+    });
+  }
+});
 
 router.use(express.json());
 
-const secureRouter = createSecureRouter(router);
+router.get("/:pid/avatar", requireLogin, function(req, res) {
+  if (req.user) {
+    fs.readFile(`public/images/avatars/${req.user.pid}_avatar.png`, "base64", function(
+      err, data
+    ) {
+      if (err) {
+        console.log(err.stack);
+        res.status(404).json({message: "User has no avatar"});
+      } else {
+        let body = new FormData();
+        body.append('image', data);
+        // Or body.append('upload', base64Image);
+        body.append('regions', 'us'); // Change to your country
+        res.send({image: data});
+      }
+    });
+  }
+});
+
 
 router.get("/", (req, res) => {
   res.send("This should be login api");
 });
 
-secureRouter.get("/:pid/spots", function(req, res) {
+router.get("/:pid/spots", requireLogin, function(req, res) {
   // let req_token = getTokenFromBearer(req);
   // if (jwt.verifyJWT(req_token, req.params.pid)) {
   let sellInfo = {};
@@ -32,11 +74,80 @@ secureRouter.get("/:pid/spots", function(req, res) {
       }
     })
     .then(() => {
-      db.query("SELECT Z.zone_name, P.* FROM parking_times P INNER JOIN zones Z ON P.zone_id = Z.zone_id WHERE P.user_pid = $1", [
-        req.params.pid
-      ]).then(dbres => {
+      db.query(
+        "WITH spot_range AS\
+  (SELECT p1.zone_id,\
+          p1.spot_id,\
+          p1.time_code start_time,\
+          p2.time_code end_time,\
+          p1.user_pid,\
+          p1.availability,\
+          p1.price\
+   FROM parking_times p1,\
+        parking_times p2\
+   WHERE p1.user_pid = $1\
+     AND p1.time_code + 900 = p2.time_code\
+     AND p1.zone_id = p2.zone_id\
+     AND p1.spot_id = p2.spot_id\
+     AND p1.availability = p2.availability)\
+        SELECT Z.zone_name, P.*\
+        FROM spot_range P\
+        INNER JOIN zones Z\
+        ON P.zone_id = Z.zone_id\
+        WHERE P.user_pid = $1 \
+        ORDER BY spot_id, start_time",
+        [req.params.pid]
+      ).then(dbres => {
+        // P.start_time >= (SELECT EXTRACT(epoch FROM date_trunc('day', NOW()))) AND P.end_time <= (SELECT EXTRACT(epoch FROM date_trunc('day', NOW() + INTERVAL '1 day')))\
         if (dbres.rows[0]) {
-          sellInfo.parkingSpotsInfo = dbres.rows;
+          let info = dbres.rows;
+          let areOnSameDay = (date1, date2) => {
+            return (
+              date1.getDate() == date2.getDate() &&
+              date1.getMonth() == date2.getMonth() &&
+              date1.getFullYear() == date2.getFullYear()
+            );
+          };
+          let mergeTimes = (index, arr) => {
+            if (index < arr.length) {
+              let temp_res = [arr[index]];
+              let totalCost = Number(temp_res[0].price);
+              let temp_ind = 1;
+              let arr_ind = index + 1;
+              let startDate = new Date(Number(temp_res[0].start_time) * 1000);
+              let curDate = new Date(
+                Number(temp_res[temp_ind - 1].end_time) * 1000
+              );
+              while (
+                arr_ind < arr.length &&
+                temp_res[temp_ind - 1].end_time == arr[arr_ind].start_time &&
+                areOnSameDay(startDate, curDate) &&
+                temp_res[temp_ind - 1].availability ==
+                  arr[arr_ind].availability &&
+                temp_res[temp_ind - 1].zone_id == arr[arr_ind].zone_id &&
+                temp_res[temp_ind - 1].spot_id == arr[arr_ind].spot_id
+              ) {
+                temp_res.push(arr[arr_ind]);
+                totalCost += Number(arr[arr_ind].price);
+                arr_ind++;
+                temp_ind++;
+                curDate = new Date(
+                  Number(temp_res[temp_ind - 1].end_time) * 1000
+                );
+              }
+              return [
+                {
+                  ...temp_res[0],
+                  end_time: Number(temp_res[temp_res.length - 1].end_time) - 1,
+                  price: totalCost
+                }
+              ].concat(mergeTimes(arr_ind, arr));
+            } else {
+              return [];
+            }
+          };
+
+          sellInfo.parkingSpotsInfo = mergeTimes(0, dbres.rows);
         } else {
           sellInfo.parkingSpotsInfo = [];
         }
@@ -45,7 +156,7 @@ secureRouter.get("/:pid/spots", function(req, res) {
     });
 });
 
-secureRouter.get("/:pid", function(req, res) {
+router.get("/:pid", requireLogin, function(req, res) {
   // let req_token = getTokenFromBearer(req);
   // if (jwt.verifyJWT(req_token, req.params.pid)) {
   let userInfo = {};
