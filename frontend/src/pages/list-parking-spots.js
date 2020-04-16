@@ -24,7 +24,8 @@ import {
   convertMilitaryTimeToNormal,
   sortByMilitaryTime,
   getCurrentTimeInUTC,
-  compareMilitaryTime
+  compareMilitaryTime,
+  timeDiffInEpoch15
 } from './forms/time-filter';
 import queryString from 'query-string';
 import {
@@ -266,19 +267,21 @@ const handleParkingSpotAvailable = (
   ) {
     // Get snippet of valid data.
 
+    const spotPricePer15 = parkingInfo.price / timeDiffInEpoch15(parkingInfo.start_time, parkingInfo.end_time);
+
     // For start time, if new data start time is after filter start time,
     // then keep it, otherwise, use filter time.
-    parkingInfo.start_time =
-      timeFilterStartTimeEpoch < parkingInfo.start_time
-        ? parkingInfo.start_time
-        : timeFilterStartTimeEpoch;
+    if (timeFilterStartTimeEpoch >= parkingInfo.start_time) {
+      parkingInfo.start_time = timeFilterStartTimeEpoch;
+      parkingInfo.price -= timeDiffInEpoch15(parkingInfo.start_time, timeFilterStartTimeEpoch) * spotPricePer15;
+    }
 
     // For end time, if new data end time is before filter end time, then
     // keep it, otherwise, use filter time.
-    parkingInfo.end_time =
-      parkingInfo.end_time < timeFilterEndTimeEpoch
-        ? parkingInfo.end_time
-        : timeFilterEndTimeEpoch;
+    if (parkingInfo.end_time >= timeFilterEndTimeEpoch) {
+      parkingInfo.end_time = timeFilterEndTimeEpoch;
+      parkingInfo.price -= timeDiffInEpoch15(timeFilterEndTimeEpoch, parkingInfo.end_time) * spotPricePer15;
+    }
 
     // check if spot is in the list.
     let i = parkingSpotsInfo.length;
@@ -298,6 +301,7 @@ const handleParkingSpotAvailable = (
       // new start time is old start time and new end time is new end time.
       if (compareMilitaryTime(parkingInfo.start_time, e.end_time) === 0) {
         parkingInfo.start_time = e.start_time;
+        parkingInfo.price += listedSpots.price;
         listedSpots.splice(i, 1);
       }
 
@@ -305,6 +309,7 @@ const handleParkingSpotAvailable = (
       // new start time is new start time and new end time is old end time.
       if (compareMilitaryTime(parkingInfo.end_time, e.start_time) === 0) {
         parkingInfo.end_time = e.end_time;
+        parkingInfo.price += listedSpots.price;
         listedSpots.splice(i, 1);
       }
     });
@@ -383,8 +388,11 @@ const handleParkingSpotUnavailable = (
       // set the given spot's start time to be at given spot's end time.
       if (compareMilitaryTime(parkingInfo.start_time, listedSpots[i].start_time) <= 0) {
         if (compareMilitaryTime(parkingSpot.end_time, listedSpots[i].end_time) < 0) {
+          const spotPricePer15 = listedSpots[i].price / timeDiffInEpoch15(listedSpots[i].start_time, listedSpots[i].end_time);
+          listedSpots[i].price -= spotPricePer15 * timeDiffInEpoch15(listedSpots[i].start_time, parkingSpot.end_time);
           listedSpots[i].start_time = parkingSpot.end_time;
         } else {
+          listedSpots[i].price = 0;
           listedSpots[i].start_time = listedSpots[i].end_time;
         }
       }
@@ -394,6 +402,8 @@ const handleParkingSpotUnavailable = (
       // move given spot's end time to new spot's start time, 
       // otherwise, it should have been handled by the first if-statement.
       else if (compareMilitaryTime(parkingInfo.end_time, listedSpots[i].end_time) >= 0) {
+        const spotPricePer15 = listedSpots[i].price / timeDiffInEpoch15(listedSpots[i].start_time, listedSpots[i].end_time);
+        listedSpots[i].price -= spotPricePer15 * timeDiffInEpoch15(parkingSpot.start_time, listedSpots[i].end_time);
         listedSpots[i].end_time = parkingSpot.start_time;
       }
 
