@@ -268,20 +268,26 @@ const handleParkingSpotAvailable = (
   ) {
     // Get snippet of valid data.
 
-    const spotPricePer15 = parkingInfo.price / timeDiffInEpoch15(parkingInfo.start_time, parkingInfo.end_time);
+    const spotPricePer15 =
+      parkingInfo.price /
+      timeDiffInEpoch15(parkingInfo.start_time, parkingInfo.end_time);
 
     // For start time, if new data start time is after filter start time,
     // then keep it, otherwise, use filter time.
     if (timeFilterStartTimeEpoch >= parkingInfo.start_time) {
       parkingInfo.start_time = timeFilterStartTimeEpoch;
-      parkingInfo.price -= timeDiffInEpoch15(parkingInfo.start_time, timeFilterStartTimeEpoch) * spotPricePer15;
+      parkingInfo.price -=
+        timeDiffInEpoch15(parkingInfo.start_time, timeFilterStartTimeEpoch) *
+        spotPricePer15;
     }
 
     // For end time, if new data end time is before filter end time, then
     // keep it, otherwise, use filter time.
     if (parkingInfo.end_time >= timeFilterEndTimeEpoch) {
       parkingInfo.end_time = timeFilterEndTimeEpoch;
-      parkingInfo.price -= timeDiffInEpoch15(timeFilterEndTimeEpoch, parkingInfo.end_time) * spotPricePer15;
+      parkingInfo.price -=
+        timeDiffInEpoch15(timeFilterEndTimeEpoch, parkingInfo.end_time) *
+        spotPricePer15;
     }
 
     // check if spot is in the list.
@@ -298,7 +304,7 @@ const handleParkingSpotAvailable = (
 
     // the parking spot is in the list, concatentate if possible.
     listedSpots.forEach((e, i) => {
-      // For start time, if new data start time equals end time, then 
+      // For start time, if new data start time equals end time, then
       // new start time is old start time and new end time is new end time.
       if (compareMilitaryTime(parkingInfo.start_time, e.end_time) === 0) {
         parkingInfo.start_time = e.start_time;
@@ -319,7 +325,7 @@ const handleParkingSpotAvailable = (
     parkingSpotsInfo.push(parkingInfo);
 
     listedSpots.forEach(e => parkingSpotsInfo.push(e));
-    
+
     updateParkingSpotsInfo(parkingSpotsInfo);
   }
 };
@@ -373,9 +379,16 @@ const handleParkingSpotUnavailable = (
     let i = parkingSpotsInfo.length;
     let listedSpots = [];
     while (i--) {
-      if ((Number(parkingInfo.spot_id) === Number(parkingSpotsInfo[i].spot_id)) &&
-          (compareMilitaryTime(parkingInfo.end_time, parkingSpotsInfo[i].start_time) > 0) &&
-          (compareMilitaryTime(parkingSpotsInfo[i].end_time, parkingInfo.start_time) > 0)
+      if (
+        Number(parkingInfo.spot_id) === Number(parkingSpotsInfo[i].spot_id) &&
+        compareMilitaryTime(
+          parkingInfo.end_time,
+          parkingSpotsInfo[i].start_time
+        ) > 0 &&
+        compareMilitaryTime(
+          parkingSpotsInfo[i].end_time,
+          parkingInfo.start_time
+        ) > 0
       ) {
         listedSpots.push(parkingSpotsInfo.splice(i, 1));
       }
@@ -387,11 +400,25 @@ const handleParkingSpotUnavailable = (
       // then, if the new spot has an end time before the given spot's
       // end time, set the given spot's start time to be at the new spot's end time, otherwise,
       // set the given spot's start time to be at given spot's end time.
-      if (compareMilitaryTime(parkingInfo.start_time, listedSpots[i].start_time) <= 0) {
-        if (compareMilitaryTime(parkingSpot.end_time, listedSpots[i].end_time) < 0) {
-          const spotPricePer15 = listedSpots[i].price / timeDiffInEpoch15(listedSpots[i].start_time, listedSpots[i].end_time);
-          listedSpots[i].price -= spotPricePer15 * timeDiffInEpoch15(listedSpots[i].start_time, parkingSpot.end_time);
-          listedSpots[i].start_time = parkingSpot.end_time;
+      if (
+        compareMilitaryTime(
+          parkingInfo.start_time,
+          listedSpots[i].start_time
+        ) <= 0
+      ) {
+        if (
+          compareMilitaryTime(parkingInfo.end_time, listedSpots[i].end_time) < 0
+        ) {
+          const spotPricePer15 =
+            listedSpots[i].price /
+            timeDiffInEpoch15(
+              listedSpots[i].start_time,
+              listedSpots[i].end_time
+            );
+          listedSpots[i].price -=
+            spotPricePer15 *
+            timeDiffInEpoch15(listedSpots[i].start_time, parkingInfo.end_time);
+          listedSpots[i].start_time = parkingInfo.end_time;
         } else {
           listedSpots[i].price = 0;
           listedSpots[i].start_time = listedSpots[i].end_time;
@@ -400,24 +427,35 @@ const handleParkingSpotUnavailable = (
 
       // For a given spot, if the new spot's end time is at or after the given spot's
       // end time, then because the new spot's start time is after the given spot's start time,
-      // move given spot's end time to new spot's start time, 
+      // move given spot's end time to new spot's start time,
       // otherwise, it should have been handled by the first if-statement.
-      else if (compareMilitaryTime(parkingInfo.end_time, listedSpots[i].end_time) >= 0) {
-        const spotPricePer15 = listedSpots[i].price / timeDiffInEpoch15(listedSpots[i].start_time, listedSpots[i].end_time);
-        listedSpots[i].price -= spotPricePer15 * timeDiffInEpoch15(parkingSpot.start_time, listedSpots[i].end_time);
-        listedSpots[i].end_time = parkingSpot.start_time;
+      else if (
+        compareMilitaryTime(parkingInfo.end_time, listedSpots[i].end_time) >= 0
+      ) {
+        const spotPricePer15 =
+          listedSpots[i].price /
+          timeDiffInEpoch15(listedSpots[i].start_time, listedSpots[i].end_time);
+        listedSpots[i].price -=
+          spotPricePer15 *
+          timeDiffInEpoch15(parkingInfo.start_time, listedSpots[i].end_time);
+        listedSpots[i].end_time = parkingInfo.start_time;
       }
 
       // Check if given spot's end time equals start time for it to be removed from the list.
-      if (compareMilitaryTime(listedSpots[i].start_time, listedSpots[i].end_time) === 0) {
+      if (
+        compareMilitaryTime(
+          listedSpots[i].start_time,
+          listedSpots[i].end_time
+        ) === 0
+      ) {
         listedSpots.splice(i, 1);
       }
     });
 
     listedSpots.forEach(e => parkingSpotsInfo.push(e));
-    
+
     updateParkingSpotsInfo(parkingSpotsInfo);
-  }  
+  }
 };
 
 const Zone = ({
@@ -563,7 +601,8 @@ const Zone = ({
   const handleBuyRequest = async (parkingInfo, privateKey) => {
     updateSnackbarOptions({
       ...snackbarOptions,
-      message: 'Your Request Is Currently Being Processed By Our Elite Team Of Trained Monkeys',
+      message:
+        'Your Request Is Currently Being Processed By Our Elite Team Of Trained Monkeys',
       severity: 'info'
     });
     setOpenSnackbar(true);
@@ -596,14 +635,14 @@ const Zone = ({
     const respbody = await response.json();
     console.log(respbody);
     setOpenSnackbar(false);
-    
 
     if (response.status === 200) {
       // Redirect them to invoice page.
       console.log('Successfully purchased spot!');
       updateSnackbarOptions({
         ...snackbarOptions,
-        message: 'You Used Bribery. It Was Super Effective! You Got The Parking Spot!',
+        message:
+          'You Used Bribery. It Was Super Effective! You Got The Parking Spot!',
         severity: 'success'
       });
       updateMessage(<Invoice spotInfo={resbody.body} />);
@@ -614,9 +653,10 @@ const Zone = ({
     } else {
       updateSnackbarOptions({
         ...snackbarOptions,
-        message: 'Our Team Of Monkeys Was So Traumatized By Your Request That We Were Forced To Reject Your Request',
+        message:
+          'Our Team Of Monkeys Was So Traumatized By Your Request That We Were Forced To Reject Your Request',
         severity: 'error'
-      })
+      });
       updateMessage(<div>{respbody.message}</div>);
     }
 
@@ -650,9 +690,19 @@ const Zone = ({
       //   currentTimeFilter
       // );
       if (data.isAvail) {
-        handleParkingSpotAvailable(parkingSpotsInfo, updateParkingSpotsInfo, data.parkingInfo, currentTimeFilter);
+        handleParkingSpotAvailable(
+          parkingSpotsInfo,
+          updateParkingSpotsInfo,
+          data.parkingInfo,
+          currentTimeFilter
+        );
       } else {
-        handleParkingSpotUnavailable(parkingSpotsInfo, updateParkingSpotsInfo, data.parkingInfo, currentTimeFilter)
+        handleParkingSpotUnavailable(
+          parkingSpotsInfo,
+          updateParkingSpotsInfo,
+          data.parkingInfo,
+          currentTimeFilter
+        );
       }
     });
   }, []);

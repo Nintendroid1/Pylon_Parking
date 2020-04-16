@@ -28,7 +28,6 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import Paper from '@material-ui/core/Paper';
 import CustomSnackbar from '../ui/snackbars';
 import { TimePicker } from './forms/parking-spot-components';
-import CustomSnackbar from '../ui/snackbars';
 // import QrReader from 'react-qr-reader';
 import Camera from 'react-html5-camera-photo';
 import { PNG } from 'pngjs';
