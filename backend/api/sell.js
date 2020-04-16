@@ -9,7 +9,7 @@ router.use(express.json());
 
 router.post('/', requireLogin, (req,res) => {
     // if(jwt.verifyJWT(req.body.token, req.body.pid)) {
-        if(req.body.pid && req.body.token && req.body.key && req.body.spot.spot_id && req.body.spot.zone_id && req.body.spot.start_time && req.body.spot.end_time && req.body.spot.price) {
+        if(req.body.pid && req.body.key && req.body.spot.spot_id && req.body.spot.zone_id && req.body.spot.start_time && req.body.spot.end_time && req.body.spot.price) {
 
             let isValidReq = true;
             db.query("SELECT * FROM parking_times WHERE spot_id = $1 AND zone_id = $2 AND time_code BETWEEN $3 AND $4",
