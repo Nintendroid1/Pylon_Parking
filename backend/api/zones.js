@@ -23,15 +23,28 @@ router.get("/all", (req, res) => {
 
 router.get("/:zone_id/spot/:spot_id", (req, res) => {
   if (req.query.startTime && req.query.endTime) {
-    db.query(
-      "SELECT * FROM parking_times WHERE spot_ID = $1 AND zone_ID = $2 AND time_code >= $3 AND time_code <= $4 AND availability = true",
+      db.query(
+        "SELECT Z.zone_name, P.*\
+        FROM spot_range P\
+        INNER JOIN zones Z\
+        ON P.zone_id = Z.zone_id\
+        WHERE P.user_pid = $1 \
+        AND P.spot_id = $1 \
+        AND P.zone_id = $2 \
+        AND P.start_time >= $3 \
+        AND P.end_time <= $4 \
+        ORDER BY zone_id, spot_id, start_time",
       [
         req.params.spot_id,
         req.params.zone_id,
         req.query.startTime,
         req.query.endTime
       ],
-      (err, dbres) => {
+      ).then((err, dbres) => {
+        // AND P.start_time >= (SELECT EXTRACT(epoch FROM date_trunc('day', NOW()))) AND P.end_time <= (SELECT EXTRACT(epoch FROM date_trunc('day', NOW() + INTERVAL '1 day')))\
+    // db.query(
+    //   "SELECT * FROM parking_times WHERE spot_ID = $1 AND zone_ID = $2 AND time_code >= $3 AND time_code <= $4 AND availability = true",
+      // (err, dbres) => {
         if (err) {
           console.log(err.stack);
           res.status(500).json({ message: "Internal server error" });

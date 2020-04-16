@@ -75,30 +75,15 @@ router.get("/:pid/spots", requireLogin, function(req, res) {
     })
     .then(() => {
       db.query(
-        "WITH spot_range AS\
-  (SELECT p1.zone_id,\
-          p1.spot_id,\
-          p1.time_code start_time,\
-          p2.time_code end_time,\
-          p1.user_pid,\
-          p1.availability,\
-          p1.price\
-   FROM parking_times p1,\
-        parking_times p2\
-   WHERE p1.user_pid = $1\
-     AND p1.time_code + 900 = p2.time_code\
-     AND p1.zone_id = p2.zone_id\
-     AND p1.spot_id = p2.spot_id\
-     AND p1.availability = p2.availability)\
-        SELECT Z.zone_name, P.*\
+        "SELECT Z.zone_name, P.*\
         FROM spot_range P\
         INNER JOIN zones Z\
         ON P.zone_id = Z.zone_id\
         WHERE P.user_pid = $1 \
-        ORDER BY spot_id, start_time",
+        AND P.start_time >= (SELECT EXTRACT(epoch FROM date_trunc('day', NOW()))) AND P.end_time <= (SELECT EXTRACT(epoch FROM date_trunc('day', NOW() + INTERVAL '1 day')))\
+        ORDER BY zone_id, spot_id, start_time",
         [req.params.pid]
       ).then(dbres => {
-        // P.start_time >= (SELECT EXTRACT(epoch FROM date_trunc('day', NOW()))) AND P.end_time <= (SELECT EXTRACT(epoch FROM date_trunc('day', NOW() + INTERVAL '1 day')))\
         if (dbres.rows[0]) {
           let info = dbres.rows;
           let areOnSameDay = (date1, date2) => {
@@ -109,7 +94,8 @@ router.get("/:pid/spots", requireLogin, function(req, res) {
             );
           };
           let mergeTimes = (index, arr) => {
-            if (index < arr.length) {
+              let final_res = [];
+            while (index < arr.length) {
               let temp_res = [arr[index]];
               let totalCost = Number(temp_res[0].price);
               let temp_ind = 1;
@@ -135,16 +121,17 @@ router.get("/:pid/spots", requireLogin, function(req, res) {
                   Number(temp_res[temp_ind - 1].end_time) * 1000
                 );
               }
-              return [
-                {
+              // console.log(final_res);
+              final_res.push({
                   ...temp_res[0],
                   end_time: Number(temp_res[temp_res.length - 1].end_time) - 1,
                   price: totalCost
                 }
-              ].concat(mergeTimes(arr_ind, arr));
-            } else {
-              return [];
+              );
+              index = arr_ind;
+              //.concat(mergeTimes(arr_ind, arr));
             }
+            return final_res;
           };
 
           sellInfo.parkingSpotsInfo = mergeTimes(0, dbres.rows);
