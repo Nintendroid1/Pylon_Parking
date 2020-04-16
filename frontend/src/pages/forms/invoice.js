@@ -8,18 +8,21 @@ import Button from '@material-ui/core/Button';
 import IconButton from '@material-ui/core/IconButton';
 import PrintIcon from '@material-ui/icons/Print';
 
-const InvoiceInfo = (props) => {
-  const { spotInfo } = props;
+// Must use class component in order to use ReactToPrint because uses ref attribute.
+class InvoiceInfo extends React.Component {
+  constructor(props) {
+    super(props);
+    const { spotInfo } = props.spotInfo;
+    this.listToPrint = [
+      { name: 'Buyer ID', value: spotInfo.buyer_id }
+    ];
+  }
 
-  const listToPrint = [
-    { name: 'Buyer ID', value: spotInfo.buyer_id }
-  ];
-
-  return (
-    <>
+  render() {
+    return (
       <Table>
         <TableBody>
-          {listToPrint.map(e => {
+          {this.listToPrint.map(e => {
             return (
               <>
                 <TableRow>
@@ -31,8 +34,8 @@ const InvoiceInfo = (props) => {
           })}
         </TableBody>
       </Table>
-    </>
-  );
+    );
+  }
 };
 
 const Invoice = (props) => {
