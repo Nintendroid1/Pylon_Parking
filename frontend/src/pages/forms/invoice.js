@@ -7,6 +7,7 @@ import ReactToPrint from 'react-to-print';
 import Button from '@material-ui/core/Button';
 import IconButton from '@material-ui/core/IconButton';
 import PrintIcon from '@material-ui/icons/Print';
+import history from '../../history';
 
 // Must use class component in order to use ReactToPrint because uses ref attribute.
 class InvoiceInfo extends React.Component {
@@ -42,8 +43,20 @@ const Invoice = (props) => {
   const { spotInfo } = props;
   const componentRef = useRef();
 
+  const handleOnClick = () => {
+    history.push('/');
+    window.location.href = `${process.env.PUBLIC_URL}/`;
+  }
+
   return (
     <>
+      <Button
+        variant='contained'
+        color='default'
+        onClick={handleOnClick}
+      >
+        Close
+      </Button>
       <ReactToPrint 
         trigger={() => 
           <Button
@@ -55,6 +68,7 @@ const Invoice = (props) => {
           </Button>
         }
         content={() => componentRef.current}
+        onAfterPrint={handleOnClick}
       />
       <InvoiceInfo 
         ref={componentRef}
