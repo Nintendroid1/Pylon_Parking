@@ -28,6 +28,7 @@ import {
   timeDiffInEpoch15
 } from './forms/time-filter';
 import queryString from 'query-string';
+import invoice from './forms/invoice';
 import {
   withStyles,
   withTheme,
@@ -605,7 +606,11 @@ const Zone = ({
         message: 'You Used Bribery. It Was Super Effective! You Got The Parking Spot!',
         severity: 'success'
       });
-      // Can have it as a snackbar that appears at the top of the page instead of redirection.
+      updateMessage(<Invoice spotInfo={resbody.body} />);
+      
+      // Page redirect to the homepage.
+      history.push('/');
+      window.location.href = `${process.env.PUBLIC_URL}/`;
     } else {
       updateSnackbarOptions({
         ...snackbarOptions,
