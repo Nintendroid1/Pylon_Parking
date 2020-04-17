@@ -32,25 +32,6 @@ router.post("/:pid/avatar", upload.single("image"), function(req, res) {
 
 router.use(express.json());
 
-router.get("/:pid/avatar", requireLogin, function(req, res) {
-  if (req.user) {
-    fs.readFile(`public/images/avatars/${req.user.pid}_avatar.png`, "base64", function(
-      err, data
-    ) {
-      if (err) {
-        console.log(err.stack);
-        res.status(404).json({message: "User has no avatar"});
-      } else {
-        let body = new FormData();
-        body.append('image', data);
-        // Or body.append('upload', base64Image);
-        body.append('regions', 'us'); // Change to your country
-        res.send({image: data});
-      }
-    });
-  }
-});
-
 
 router.get("/", (req, res) => {
   res.send("This should be login api");
