@@ -17,7 +17,7 @@ router.post("/:pid/avatar", upload.single("image"), function(req, res) {
     var ext = req.body.image.split(';')[0].match(/jpeg|png|gif/)[0];
     // strip off the data: url prefix to get just the base64-encoded bytes
     let base64Image = req.body.image.split(";base64,").pop();
-    fs.writeFile(`public/images/avatars/${req.params.pid}_avatar.png`, base64Image, { encoding: "base64" }, function(
+    fs.writeFile(`public/images/${req.params.pid}_avatar.png`, base64Image, { encoding: "base64" }, function(
       err
     ) {
       if (err) {

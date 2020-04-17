@@ -67,7 +67,7 @@ app.use("/api/purchase", purchaseRouter);
 app.use("/api/sell", sellRouter);
 app.use("/api/history", historyRouter);
 app.use("/api/bounty-system", bountyRouter);
-app.use('/media', express.static(__dirname + '/public/images/'));
+app.use('/media', express.static(__dirname + '/public/'));
 app.use(express.json());
 
 app.use(function(req, res, next) {
