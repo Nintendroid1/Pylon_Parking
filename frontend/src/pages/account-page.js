@@ -46,7 +46,7 @@ const styles = theme => ({
   }
 });
 
-let AccountPage = ({ classes, socket, ...props }) => {
+let AccountPage = ({ classes, history, socket, ...props }) => {
   const [user, updateUser] = useState({
     pid: '',
     first_name: '',
@@ -82,7 +82,8 @@ let AccountPage = ({ classes, socket, ...props }) => {
       const url = `${apiprefix}/users/${localStorage.olivia_pid}/avatar`;
       const response = await makeImageAPICall('POST', url, imageURI.imageData);
       if (response.status === 200) {
-        localStorage.avatar = imageURI.imageData;
+        localStorage.avatar = `/media/images/${localStorage.olivia_pid}_avatar.png`;
+        history.go(0);
       }
     } catch (err) {
       console.log(err.stack);

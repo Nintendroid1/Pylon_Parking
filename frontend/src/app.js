@@ -152,7 +152,7 @@ const App = ({ classes, ...props }) => {
 
   return (
     <React.Fragment>
-      <CustomSnackbar 
+      <CustomSnackbar
         isOpen={openSnackbar}
         updateIsOpen={setOpenSnackbar}
         verticalPos={snackbarOptions.verticalPos}
@@ -247,9 +247,9 @@ const App = ({ classes, ...props }) => {
                   reqLogin={true}
                   hidden={false}
                   render={() => (
-                    <SellPage 
-                      isLoggedIn={isLoggedIn} 
-                      socket={userSocket} 
+                    <SellPage
+                      isLoggedIn={isLoggedIn}
+                      socket={userSocket}
                       setOpenSnackbar={setOpenSnackbar}
                       updateSnackbarOptions={updateSnackbarOptions}
                       snackbarOptions={snackbarOptions}
@@ -266,7 +266,11 @@ const App = ({ classes, ...props }) => {
                   reqAdmin={false}
                   reqLogin={true}
                   render={() => (
-                    <AccountPage socket={userSocket} isLoggedIn={isLoggedIn} />
+                    <AccountPage
+                      socket={userSocket}
+                      history={history}
+                      isLoggedIn={isLoggedIn}
+                    />
                   )}
                 />
                 <Route
@@ -279,8 +283,8 @@ const App = ({ classes, ...props }) => {
                   reqAdmin={false}
                   reqLogin={true}
                   render={() => (
-                    <ProfilePage 
-                      socket={userSocket} 
+                    <ProfilePage
+                      socket={userSocket}
                       isLoggedIn={isLoggedIn}
                       setOpenSnackbar={setOpenSnackbar}
                       updateSnackbarOptions={updateSnackbarOptions}
@@ -299,7 +303,7 @@ const App = ({ classes, ...props }) => {
                 reqAdmin={false}
                 reqLogin={false}
                 render={() => (
-                  <BountySystem 
+                  <BountySystem
                     setOpenSnackbar={setOpenSnackbar}
                     updateSnackbarOptions={updateSnackbarOptions}
                     snackbarOptions={snackbarOptions}
@@ -315,14 +319,14 @@ const App = ({ classes, ...props }) => {
                 hidden={true}
                 reqAdmin={false}
                 reqLogin={true}
-                render={() => 
-                  <UpdateUserInfo 
-                    isLoggedIn={isLoggedIn} 
+                render={() => (
+                  <UpdateUserInfo
+                    isLoggedIn={isLoggedIn}
                     setOpenSnackbar={setOpenSnackbar}
                     updateSnackbarOptions={updateSnackbarOptions}
                     snackbarOptions={snackbarOptions}
                   />
-                }
+                )}
               />
               <Route
                 path="/zones/:zone_id/spot/:spot_id"
@@ -331,14 +335,14 @@ const App = ({ classes, ...props }) => {
                 label="Spot Page"
                 reqAdmin={false}
                 reqLogin={false}
-                render={() => 
-                  <ParkingSpot 
-                    socket={parkingSpotSocket} 
+                render={() => (
+                  <ParkingSpot
+                    socket={parkingSpotSocket}
                     setOpenSnackbar={setOpenSnackbar}
                     updateSnackbarOptions={updateSnackbarOptions}
                     snackbarOptions={snackbarOptions}
                   />
-                }
+                )}
               />
               <Route
                 path="/zones/:zone_id"
@@ -347,14 +351,14 @@ const App = ({ classes, ...props }) => {
                 hidden={true}
                 reqAdmin={false}
                 reqLogin={false}
-                render={() => 
-                  <Zone 
-                    socket={parkingLotSocket} 
+                render={() => (
+                  <Zone
+                    socket={parkingLotSocket}
                     setOpenSnackbar={setOpenSnackbar}
                     updateSnackbarOptions={updateSnackbarOptions}
                     snackbarOptions={snackbarOptions}
                   />
-                }
+                )}
               />
             </TabChooser>
           </Router>

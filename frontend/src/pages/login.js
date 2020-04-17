@@ -35,11 +35,10 @@ const LoginTab = ({
   // console.log(history);
   // console.log(props);
   let loadUserImage = async () => {
-    const url = `${apiprefix}/users/${localStorage.olivia_pid}/avatar`;
-    let response = await makeAPICall('GET', url);
+    let image_path = `/media/images/${localStorage.olivia_pid}_avatar.png`;
+    let response = await makeAPICall('GET', image_path);
     if (response.status === 200) {
-      let rbody = await response.json();
-      localStorage.avatar = `data:image/png;base64,${rbody.image}`;
+      localStorage.avatar = `/media/images/${localStorage.olivia_pid}_avatar.png`;
     }
   };
   // handle user login
