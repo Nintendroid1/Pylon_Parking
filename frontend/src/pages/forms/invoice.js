@@ -14,9 +14,7 @@ class InvoiceInfo extends React.Component {
   constructor(props) {
     super(props);
     const { spotInfo } = props.spotInfo;
-    this.listToPrint = [
-      { name: 'Buyer ID', value: spotInfo.buyer_id }
-    ];
+    this.listToPrint = [{ name: 'Buyer ID', value: spotInfo.buyer_id }];
   }
 
   render() {
@@ -37,43 +35,32 @@ class InvoiceInfo extends React.Component {
       </Table>
     );
   }
-};
+}
 
-const Invoice = (props) => {
+const Invoice = props => {
   const { spotInfo } = props;
   const componentRef = useRef();
 
   const handleOnClick = () => {
     history.push('/');
     window.location.href = `${process.env.PUBLIC_URL}/`;
-  }
+  };
 
   return (
     <>
-      <Button
-        variant='contained'
-        color='default'
-        onClick={handleOnClick}
-      >
+      <Button variant="contained" color="default" onClick={handleOnClick}>
         Close
       </Button>
-      <ReactToPrint 
-        trigger={() => 
-          <Button
-            variant="contained"
-            color="default"
-            startIcon={<PrintIcon />}
-          >
+      <ReactToPrint
+        trigger={() => (
+          <Button variant="contained" color="default" startIcon={<PrintIcon />}>
             Print
           </Button>
-        }
+        )}
         content={() => componentRef.current}
         onAfterPrint={handleOnClick}
       />
-      <InvoiceInfo 
-        ref={componentRef}
-        spotInfo={spotInfo}
-      />
+      <InvoiceInfo ref={componentRef} spotInfo={spotInfo} />
     </>
   );
 };
