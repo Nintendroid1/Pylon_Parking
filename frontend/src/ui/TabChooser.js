@@ -352,6 +352,9 @@ function TabChooser({
               className={classes.circular}
               alt="userIcon"
               src={`${localStorage.avatar}`}
+              onError={() => {
+                localStorage.avatar = null;
+              }}
             />
           </>
         );
