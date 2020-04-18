@@ -247,7 +247,7 @@ const App = ({ classes, ...props }) => {
                   reqLogin={true}
                   hidden={false}
                   render={() => (
-                    <SellPage 
+                    <SellPage
                       isLoggedIn={isLoggedIn} 
                       socket={userSocket} 
                       setOpenSnackbar={setOpenSnackbar}
@@ -299,7 +299,7 @@ const App = ({ classes, ...props }) => {
                 reqAdmin={false}
                 reqLogin={false}
                 render={() => (
-                  <BountySystem 
+                  <BountySystem
                     setOpenSnackbar={setOpenSnackbar}
                     updateSnackbarOptions={updateSnackbarOptions}
                     snackbarOptions={snackbarOptions}
@@ -332,7 +332,8 @@ const App = ({ classes, ...props }) => {
                 reqAdmin={false}
                 reqLogin={false}
                 render={() => 
-                  <ParkingSpot 
+                  <ParkingSpot
+                    userSocket={userSocket}
                     socket={parkingSpotSocket} 
                     setOpenSnackbar={setOpenSnackbar}
                     updateSnackbarOptions={updateSnackbarOptions}
@@ -349,6 +350,7 @@ const App = ({ classes, ...props }) => {
                 reqLogin={false}
                 render={() => 
                   <Zone 
+                    userSocket={userSocket}
                     socket={parkingLotSocket} 
                     setOpenSnackbar={setOpenSnackbar}
                     updateSnackbarOptions={updateSnackbarOptions}

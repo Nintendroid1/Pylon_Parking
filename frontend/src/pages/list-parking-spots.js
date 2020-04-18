@@ -466,6 +466,7 @@ const Zone = ({
   updateUser,
   updateAdmin,
   socket,
+  userSocket,
   setOpenSnackbar,
   snackbarOptions,
   updateSnackbarOptions,
@@ -648,8 +649,8 @@ const Zone = ({
       updateMessage(<Invoice spotInfo={resbody.body} />);
       
       // Page redirect to the homepage.
-      history.push('/');
-      window.location.href = `${process.env.PUBLIC_URL}/`;
+      //history.push('/');
+      //window.location.href = `${process.env.PUBLIC_URL}/`;
     } else {
       updateSnackbarOptions({
         ...snackbarOptions,
@@ -678,6 +679,14 @@ const Zone = ({
   useEffect(() => {
     console.log(zoneId);
     console.log(socket);
+    userSocket.on(`sell-${localStorage.olivia_pid}`, data => {
+      setOpenSnackbar(false);
+      updateSnackbarOptions({
+        ...snackbarOptions,
+        message: 'You Got Rich! Go To Account To See How Much Disposable Income You Have.',
+        severity: 'info'
+      })
+    });
     socket.on(`zone-${zoneId}`, data => {
       //console.log("Big Test ASDFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF");
       //console.log(data);
