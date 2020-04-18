@@ -508,9 +508,17 @@ const SellPage = ({
     // }
     socket.on(`user-${localStorage.olivia_pid}`, data => {
       const index = spotsOwned.findIndex(
-        e =>
-          Number(e.zone_id) === Number(data.zone_id) &&
-          Number(e.spot_id) === Number(data.spot_id)
+        e => {
+          const tempStartTime = convertMilitaryToEpoch(e.date, e.start_time);
+          const tempEndTime = convertMilitaryToEpoch(e.date, e.end_time);
+
+          return (
+            Number(e.zone_id) === Number(data.zone_id) &&
+            Number(e.spot_id) === Number(data.spot_id) &&
+            tempStartTime <= Number(data.start_time) &&
+            tempEndTime >= Number(data.start_time)
+          );
+        }
       );
 
       spotsOwned = spotsOwned.splice(index, 1);
