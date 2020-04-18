@@ -28,7 +28,7 @@ import {
   timeDiffInEpoch15
 } from './forms/time-filter';
 import queryString from 'query-string';
-import invoice from './forms/invoice';
+import Invoice from './forms/invoice';
 import {
   withStyles,
   withTheme,
@@ -646,8 +646,8 @@ const Zone = ({
           'You Used Bribery. It Was Super Effective! You Got The Parking Spot!',
         severity: 'success'
       });
-      updateMessage(<Invoice spotInfo={resbody.body} />);
-      
+      updateMessage(<Invoice spotInfo={respbody.body} />);
+
       // Page redirect to the homepage.
       //history.push('/');
       //window.location.href = `${process.env.PUBLIC_URL}/`;

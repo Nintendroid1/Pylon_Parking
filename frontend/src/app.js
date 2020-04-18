@@ -152,7 +152,7 @@ const App = ({ classes, ...props }) => {
 
   return (
     <React.Fragment>
-      <CustomSnackbar 
+      <CustomSnackbar
         isOpen={openSnackbar}
         updateIsOpen={setOpenSnackbar}
         verticalPos={snackbarOptions.verticalPos}
@@ -266,7 +266,11 @@ const App = ({ classes, ...props }) => {
                   reqAdmin={false}
                   reqLogin={true}
                   render={() => (
-                    <AccountPage socket={userSocket} isLoggedIn={isLoggedIn} />
+                    <AccountPage
+                      socket={userSocket}
+                      history={history}
+                      isLoggedIn={isLoggedIn}
+                    />
                   )}
                 />
                 <Route
@@ -279,8 +283,8 @@ const App = ({ classes, ...props }) => {
                   reqAdmin={false}
                   reqLogin={true}
                   render={() => (
-                    <ProfilePage 
-                      socket={userSocket} 
+                    <ProfilePage
+                      socket={userSocket}
                       isLoggedIn={isLoggedIn}
                       setOpenSnackbar={setOpenSnackbar}
                       updateSnackbarOptions={updateSnackbarOptions}
@@ -315,14 +319,14 @@ const App = ({ classes, ...props }) => {
                 hidden={true}
                 reqAdmin={false}
                 reqLogin={true}
-                render={() => 
-                  <UpdateUserInfo 
-                    isLoggedIn={isLoggedIn} 
+                render={() => (
+                  <UpdateUserInfo
+                    isLoggedIn={isLoggedIn}
                     setOpenSnackbar={setOpenSnackbar}
                     updateSnackbarOptions={updateSnackbarOptions}
                     snackbarOptions={snackbarOptions}
                   />
-                }
+                )}
               />
               <Route
                 path="/zones/:zone_id/spot/:spot_id"

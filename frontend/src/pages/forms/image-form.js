@@ -95,22 +95,22 @@ function ImageForm({ onSubmit, message, classes, isLoading, setLoading }) {
     onSubmit(tempImage);
   };
   let loadUserImage = async () => {
-    const url = `${apiprefix}/users/${localStorage.olivia_pid}/avatar`;
-    setLoading(true);
-    let response = await makeAPICall('GET', url);
-    if (response.status === 200) {
-      let rbody = await response.json();
-      setLoading(false);
-      setPreviewImage(
-        <img
-          src={`data:image/png;base64,${rbody.image}`}
-          className={classes.circularPreview}
-          alt="user-profile"
-        />
-      );
-    } else {
-      setLoading(false);
-    }
+    // const url = `${apiprefix}/users/${localStorage.olivia_pid}/avatar`;
+    // setLoading(true);
+    // let response = await makeAPICall('GET', url);
+    // if (response.status === 200) {
+    //   let rbody = await response.json();
+    //   setLoading(false);
+    setPreviewImage(
+      <img
+        src={`${localStorage.avatar}`}
+        className={classes.circularPreview}
+        alt="user-profile"
+      />
+    );
+    // } else {
+    //   setLoading(false);
+    // }
   };
   //const { classes } = props;
   useEffect(() => {
