@@ -59,4 +59,5 @@ module.exports= {
   broadcastParkingSpotInfo,
   broadcastTransactionHistoryInfo,
   broadcastUserInfo,
+  broadcastSellPageInfo
 }

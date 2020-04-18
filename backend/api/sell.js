@@ -3,7 +3,7 @@ const router = express.Router();
 const jwt = require('./jwt');
 const db = require('../db');
 const { requireLogin } = require("./auth.js");
-//const socketAPI = require("../realtime/socket-broadcaster");
+const socketAPI = require("../realtime/socket-broadcaster");
 
 router.use(express.json());
 
@@ -29,6 +29,30 @@ router.post('/', requireLogin, (req,res) => {
                         }
                         else {
                             res.status(200).json({message: "Success", rows: response.rows});
+
+                            const socket = req.app.settings["socket-api"];
+                            
+                            const indexOfLastRow = response.rows.length - 1;
+                            const totalPrice = response.rows.reduce((acc, curr) => {
+                                return acc + Number(curr.price);
+                            }, 0);
+
+                            const zonePageData = {
+                                isAvail: true,
+                                parkingInfo: {
+                                    start_time: Number(response.rows[0].time_code),
+                                    end_time: Number(response.rows[indexOfLastRow].time) + (15 * 60 * 1000),
+                                    zone_id: Number(response.rows[0].zone_id),
+                                    spot_id: Number(response.rows[0].spot_id),
+                                    price: totalPrice
+                                }
+                            }
+
+                            socketAPI.broadcastZoneInfo(
+                                socket,
+                                spotPurchasedInfo.zone_id,
+                                zonePageData
+                            );
                         }
                     });
                 }
