@@ -69,36 +69,6 @@ router.post("/", requireLogin, (req, res) => {
                 console.log(err.stack);
                 res.status(500).json({ message: "Internal error" });
               } else {
-                /*
-                                Socket updating other users that this spot has been acquired.
-                            */
-                // Getting the socket, which is in the settings object.
-                const socket = req.app.settings["socket-api"];
-                let updatedParkingSpotInfo = null; // object that would be sent back as if the get specific parking spot with parking spot id was called.
-
-                const parkingSpotInfoForTransactionHistory = null; // object containing info for the transaction history page, in case someone viewing entire history.
-
-                db.query(
-                  "SELECT * FROM parking_times WHERE spot_ID = $1 AND zone_ID = $2",
-                  [req.params.spot_id, req.params.zone_id],
-                  (dbres, err) => {
-                    if (err) {
-                      console.log("it's me");
-                      console.log(err.stack);
-                    } else {
-                      updatedParkingSpotInfo = dbres.rows;
-                      // Send updated info to clients viewing this parking spot.
-                      // id: [zone_id]-[spot_id]
-                      const parkingSpotId =
-                        req.body.spot.zone_id + "-" + req.body.spot.spot_id;
-                      socketAPI.broadcastParkingSpotInfo(
-                        socket,
-                        parkingSpotId,
-                        updatedParkingSpotInfo
-                      );
-                    }
-                  }
-                );
 
                 // Send updated info to clients viewing this parking spot in the zones page.
                 // TODO
@@ -146,15 +116,90 @@ router.post("/", requireLogin, (req, res) => {
                     message: "Spot aquired",
                     spot: result.rows,
                     spot_page: zone_call,
-                    recipt: {
+                    receipt: {
                       start_time: req.body.spot.start_time,
                       end_time: req.body.spot.end_time,
                       zone_id: req.body.spot.zone_id,
                       spot_id: req.body.spot.spot_id,
                       total_price: totalPrice
-                    },
-                    responseInfo: responseObject
+                    }
                   });
+                
+                /*
+                  responseObject = [{"pid":"admin","start_time":1583040600,"end_time":1583041500,"zone_id":"1","spot_id":"1","price":1}]
+                */
+
+                const respObjLastIndex = responseObject.length - 1;
+                const spotPurchasedInfo = {
+                  isAvail: false,
+                  parkingInfo: {
+                    start_time: responseObject[0].start_time,
+                    end_time: responseObject[respObjLastIndex].end_time,
+                    zone_id: Number(responseObject[0].zone_id),
+                    spot_id: Number(responseObject[0].spot_id)
+                  }
+                }
+
+                const spotsSoldByOtherUser = responseObject.filter(e => e.pid !== "admin");
+
+                const socket = req.app.settings["socket-api"];
+
+                const parkingSpotId = spotPurchasedInfo.zone_id + '-' + spotPurchasedInfo.spot_id;
+
+                // Updating the list parking spots page.
+                socketAPI.broadcastZoneInfo(
+                  socket,
+                  spotPurchasedInfo.zone_id,
+                  spotPurchasedInfo
+                );
+
+                // Updating the user profile, sell page, and parking spot page.
+                // Also letting the user know that a parking spot was sold if they are
+                // logged in.
+                spotsSoldByOtherUser.forEach(e => {
+                  // Sending token amount to add to their balance.
+                  socketAPI.broadcastUserInfo(
+                    socket,
+                    e.pid,
+                    e.price
+                  );
+
+                  // Info to send to the sell page for a specific user
+                  const sellPageData = {
+                    zone_id: e.zone_id,
+                    spot_id: e.spot_id,
+                    start_time: e.start_time
+                  };
+
+                  // Sending the sell page info to the given user.
+                  socketAPI.broadcastSellPageInfo(
+                    socket,
+                    e.pid,
+                    sellPageData
+                  );
+
+                  // Info to send to the parking spot page so that it can be updated.
+                  const parkingSpotPageData = {
+                    start_time: e.start_time,
+                    end_time: e.end_time,
+                    price: e.price
+                  };
+
+                  // Sending the given info to the specific spot.
+                  socketAPI.broadcastParkingSpotInfo(
+                    socket,
+                    parkingSpotId,
+                    parkingSpotPageData
+                  );
+
+                  // Telling the specific user that one of their parking spots they
+                  // are selling was sold.
+                  socketAPI.broadcastSellSuccess(
+                    socket,
+                    e.pid,
+                    `Congrats, parking spot ${parkingSpotId} was just sold for ${e.price}`
+                  )
+                })
               }
             }
           );
