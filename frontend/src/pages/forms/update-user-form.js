@@ -1,21 +1,18 @@
+/**
+ * Form used to update the user password.
+ */
+
 import React, { useState } from 'react';
-import PropTypes from 'prop-types';
-import Avatar from '@material-ui/core/Avatar';
-import Button from '@material-ui/core/Button';
-import CssBaseline from '@material-ui/core/CssBaseline';
-import FormControl from '@material-ui/core/FormControl';
 import Input from '@material-ui/core/Input';
 import InputLabel from '@material-ui/core/InputLabel';
-import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
-import Paper from '@material-ui/core/Paper';
-import Typography from '@material-ui/core/Typography';
-import withStyles from '@material-ui/core/styles/withStyles';
-import { CircularProgress } from '@material-ui/core';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import Visibility from '@material-ui/icons/Visibility';
 import VisibilityOff from '@material-ui/icons/VisibilityOff';
 import IconButton from '@material-ui/core/IconButton';
 
+/*
+  A custom component that allows the user to enter their password.
+*/
 const CustomPassword = ({ password, propName, handleChange, hasError }) => {
   const [showPassword, updateShowPassword] = useState(false);
 
@@ -47,6 +44,10 @@ const CustomPassword = ({ password, propName, handleChange, hasError }) => {
   );
 };
 
+/*
+  Creates the form to allow the user to enter their old and
+  new password.
+*/
 const UpdatePasswordForm = onSubmit => {
   const [password, updatePassword] = useState({
     currentPassword: '',
@@ -55,13 +56,16 @@ const UpdatePasswordForm = onSubmit => {
     hasNewPasswordMismatch: false
   });
 
-  // Should also do some input sanitization.
   const handleChange = name => event => {
     console.log(event);
     let { value } = event.target;
     let hasPasswordMismatch = false;
+    const validChar = /^[0-9a-zA-Z]+$/;
 
-    if (
+    // Sanitizes input to only alphanumerics.
+    if (!value.match(validChar)) {
+      hasPasswordMismatch = true;
+    } else if (
       password.confirmPassword !== '' &&
       password.newPassword !== password.confirmPassword
     ) {
@@ -75,6 +79,7 @@ const UpdatePasswordForm = onSubmit => {
     }); // update corresponding field in values object
   };
 
+  // Handles submitting the form.
   const handleSubmit = event => {
     event.preventDefault();
     onSubmit({

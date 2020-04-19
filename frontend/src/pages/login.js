@@ -1,3 +1,8 @@
+/**
+ * Exports the component that handles the login page, which includes
+ * redirecting users back to their old page.
+ */
+
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { makeAPICall } from '../api';
@@ -15,6 +20,12 @@ const styles = theme => ({
   }
 });
 
+/**
+ * The component that is exported. Handles the form used for 
+ * login and handles the API call for user login.
+ * 
+ * @param {Object} param0 
+ */
 const LoginTab = ({
   isDark,
   updateLogin,
@@ -27,13 +38,16 @@ const LoginTab = ({
   // a user message to be displayed, if any
   const [message, updateMessage] = useState(null);
   const [isLoading, setLoading] = useState(false);
+
+  // Finds the url of the next place to send the user.
+  // For example, if the user wanted to view zones, but was not
+  // logged in, then after login, redirect back to zones page.
   const nextLocation =
     history.location.state !== undefined
       ? history.location.state.from
       : { pathname: '/' };
 
-  // console.log(history);
-  // console.log(props);
+  // Loads the avatar used by the user.
   let loadUserImage = async () => {
     let image_path = `/media/images/${localStorage.olivia_pid}_avatar.png`;
     let response = await makeAPICall('GET', image_path);
@@ -41,6 +55,7 @@ const LoginTab = ({
       localStorage.avatar = `/media/images/${localStorage.olivia_pid}_avatar.png`;
     }
   };
+  
   // handle user login
   const userLogin = async values => {
     setLoading(true);

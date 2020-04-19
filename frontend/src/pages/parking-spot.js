@@ -1,3 +1,7 @@
+/**
+ * 
+ */
+
 import React, { useState, useEffect } from 'react';
 import clsx from 'clsx';
 import Table from '@material-ui/core/Table';
@@ -23,11 +27,7 @@ import {
 import {
   withStyles,
   withTheme,
-  useTheme,
-  MuiThemeProvider,
-  createMuiTheme
-} from '@material-ui/core/styles';
-import Box from '@material-ui/core/Box';
+  useTheme} from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
 import SimpleChart from '../ui/SimpleChart';
@@ -85,34 +85,6 @@ const styles = theme => ({
   }
 });
 
-const TempInput = [
-  { start_time: '7:00', end_time: '12:00', cost: '2' },
-  { start_time: '12:00', end_time: '13:00', cost: '3' },
-  { start_time: '13:00', end_time: '14:00', cost: '2' },
-  { start_time: '14:00', end_time: '21:00', cost: '1' }
-];
-
-/*
-const TableData = props => {
-
-  if (props.parkingInfo !== null){
-  return props.parkingInfo.map(parkingSpot => {
-    return (
-      <>
-        <TableRow>
-          <TableCell>{parkingSpot.start_time}</TableCell>
-          <TableCell>{parkingSpot.end_time}</TableCell>
-          <TableCell>{parkingSpot.cost}</TableCell>
-        </TableRow>
-      </>
-    );
-  });
-}
-
-return (<></>);
-};
-*/
-
 // Issue where props.parkingInfo is null, meaning useEffect has not been called yet and error returns.
 const TableData = props => {
   return props.parkingInfo.map(parkingSpot => {
@@ -149,15 +121,16 @@ const MakeTable = props => {
 };
 
 const handleParkingInfoChanges = (
+  parkingSpotInfo,
   updateparkingSpotInfo,
   newParkingSpotInfo
 ) => {
-  newParkingSpotInfo.forEach(e => {
-    e.start_time = convertEpochToMilitary(e.start_time);
-    e.end_time = convertEpochToMilitary(e.end_time);
-  });
+  newParkingSpotInfo.start_time = convertEpochToMilitary(newParkingSpotInfo.start_time);
+  newParkingSpotInfo.end_time = convertEpochToMilitary(newParkingSpotInfo.end_time);
+  
+  parkingSpotInfo.splice(1, 0, newParkingSpotInfo);
 
-  updateparkingSpotInfo(newParkingSpotInfo);
+  updateparkingSpotInfo(parkingSpotInfo);
 };
 
 const ParkingSpot = ({
@@ -194,7 +167,6 @@ const ParkingSpot = ({
     end_time: '24:00'
   });
 
-  const theme = useTheme();
   // Data and options for price graph
   let [series, updateSeries] = useState([
     {
@@ -359,7 +331,7 @@ const ParkingSpot = ({
     // expect data to be the entire information, not just the new info.
     // Like if an api get request was made.
     socket.on(`parkingSpot-${zone_id}-${spot_id}`, data =>
-      handleParkingInfoChanges(updateparkingSpotInfo, data)
+      handleParkingInfoChanges(parkingSpotInfo, updateparkingSpotInfo, data)
     );
   }, []);
 

@@ -1,4 +1,8 @@
-// All components used in the specific zones page expects the time to be military time.
+/**
+ * The default export component in this file is for the zones page, which handles the
+ * listing of parking spots for a specific zone, time, and date. It also handles the
+ * UI and logic for buying a spot. 
+ * */ 
 
 import React, { useState, useEffect } from 'react';
 import { makeAPICall } from '../api';
@@ -13,17 +17,15 @@ import history from '../history';
 import { Link } from 'react-router-dom';
 import apiprefix from './apiprefix';
 import orderBy from 'lodash/orderBy';
-import Button from '@material-ui/core/Button';
 import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 import IconButton from '@material-ui/core/IconButton';
-import { ConfirmationDialogFieldButton } from './forms/parking-spot-components';
+import { ConfirmationDialogFieldButton, LoadingDialog, MessageDialog } from './forms/parking-spot-components';
 import {
   TimeFilter,
   convertMilitaryToEpoch,
   convertEpochToMilitary,
   convertMilitaryTimeToNormal,
   sortByMilitaryTime,
-  getCurrentTimeInUTC,
   compareMilitaryTime,
   timeDiffInEpoch15
 } from './forms/time-filter';
@@ -31,11 +33,7 @@ import queryString from 'query-string';
 import Invoice from './forms/invoice';
 import {
   withStyles,
-  withTheme,
-  MuiThemeProvider,
-  createMuiTheme
-} from '@material-ui/core/styles';
-import CustomSnackbar from '../ui/snackbars';
+  withTheme} from '@material-ui/core/styles';
 import HokieKoinIcon from '../images/hokie_coin.js';
 
 const styles = theme => ({
@@ -57,33 +55,22 @@ const styles = theme => ({
   }
 });
 
-// const styles = theme => ({
-//   root: {
-//     display: 'flex',
-//     flexGrow: 1
-//   }
-// });
-// The time input is wrong format for lodash to sort in.
-// Can code custom sorter for this if needed.
-// const TempInput = [
-//   { id: '1', time: '12:00', cost: 1 },
-//   { id: '2', time: '13:00', cost: 1 },
-//   { id: '3', time: '14:00', cost: 4 },
-//   { id: '4', time: '1:00', cost: 9 },
-//   { id: '5', time: '2:00', cost: 12 },
-//   { id: '6', time: '6:00', cost: 1 }
-// ];
-
+/**
+ * List storing the headers for the table being shown on this page.
+ */
 const headerCells = [
   { id: 'spot_id', label: 'Spot #' },
   { id: 'price', label: 'Approximate Total Cost' },
   { id: 'start_time', label: 'Next Available Start Time' },
   { id: 'end_time', label: 'Next Available End Time' },
   { id: 'details', label: 'Spot Details' }
-  // { id: 'available', label: 'Is Available' }
-  // { id: 'cost', label: 'Average Cost/15 minutes' }
 ];
 
+/**
+ * The content to be displayed on the confirmation of buy request page.
+ * 
+ * @param {list} infoList 
+ */
 const popUpContent = infoList => {
   return (
     <>
@@ -105,16 +92,23 @@ const popUpContent = infoList => {
   );
 };
 
+/**
+ * A component that lists formats all the data to be listed in the table body.
+ * 
+ * @param {Object} param0 
+ */
 function TableData({ classes, ...props }) {
   const { parkingInfo, handleBuyRequest, zoneId, date } = props;
   const data = parkingInfo.map(e => ({
     ...e
   }));
 
+  // Handles the buy request.
   const handleOnConfirm = val => privateKey => {
     handleBuyRequest(val, privateKey);
   };
 
+  // Generates the React components for each row of the table.
   return data.map(parkingSpot => {
     const infoList = [
       { name: 'Zone ID', value: zoneId },
@@ -181,6 +175,11 @@ function TableData({ classes, ...props }) {
   });
 }
 
+/**
+ * The component that makes the entire table being shown on the page.
+ * 
+ * @param {Object} param0 
+ */
 function MakeTable({
   columnToSort,
   order,
@@ -189,9 +188,7 @@ function MakeTable({
   classes,
   handleBuyRequest,
   zoneId,
-  date,
-  ...props
-}) {
+  date}) {
   return (
     <Table stickyHeader>
       <TableHead>
@@ -237,10 +234,10 @@ function MakeTable({
 /**
  * Called by socket when spot is made available.
  *
- * @param {*} parkingSpotsInfo current list of parking spots.
- * @param {*} updateParkingSpotsInfo update current list of spots.
- * @param {*} parkingInfo new parking spot sent by socket.
- * @param {*} currentTimeFilter the current filtering client uses.
+ * @param {list} parkingSpotsInfo current list of parking spots.
+ * @param {function} updateParkingSpotsInfo update current list of spots.
+ * @param {object} parkingInfo new parking spot sent by socket.
+ * @param {object} currentTimeFilter the current filtering client uses.
  */
 const handleParkingSpotAvailable = (
   parkingSpotsInfo,
@@ -248,6 +245,7 @@ const handleParkingSpotAvailable = (
   parkingInfo,
   currentTimeFilter
 ) => {
+  // Convert the time to epoch time for usage later.
   const year = currentTimeFilter.date.getUTCFullYear();
   const month = currentTimeFilter.date.getUTCMonth();
   const day = currentTimeFilter.date.getUTCDate();
@@ -362,16 +360,6 @@ const handleParkingSpotUnavailable = (
     !(parkingInfo.end_time <= timeFilterStartTimeEpoch) &&
     !(timeFilterEndTimeEpoch <= parkingInfo.start_time)
   ) {
-    // Get snippet of valid data.
-
-    // For start time, if new data start time is after filter start time,
-    // then keep it, otherwise, use filter time.
-    // parkingInfo.start_time = timeFilterStartTimeEpoch < parkingInfo.start_time ? parkingInfo.start_time : timeFilterStartTimeEpoch;
-
-    // For end time, if new data end time is before filter end time, then
-    // keep it, otherwise, use filter time.
-    // parkingInfo.end_time = parkingInfo.end_time < timeFilterEndTimeEpoch ? parkingInfo.end_time : timeFilterEndTimeEpoch;
-
     parkingInfo.start_time = convertEpochToMilitary(parkingInfo.start_time);
     parkingInfo.end_time = convertEpochToMilitary(parkingInfo.end_time);
 
@@ -415,6 +403,8 @@ const handleParkingSpotUnavailable = (
               listedSpots[i].start_time,
               listedSpots[i].end_time
             );
+
+          // Update the price.
           listedSpots[i].price -=
             spotPricePer15 *
             timeDiffInEpoch15(listedSpots[i].start_time, parkingInfo.end_time);
@@ -458,6 +448,13 @@ const handleParkingSpotUnavailable = (
   }
 };
 
+/**
+ * The component being exported; The component for the entire zone page.
+ * Handles the GET request for fetching the initial data, handles the filtering,
+ * and the buying logic.
+ * 
+ * @param {Object} param0 
+ */
 const Zone = ({
   isDark,
   updateLogin,
@@ -466,11 +463,10 @@ const Zone = ({
   updateUser,
   updateAdmin,
   socket,
+  userSocket,
   setOpenSnackbar,
   snackbarOptions,
-  updateSnackbarOptions,
-  ...props
-}) => {
+  updateSnackbarOptions}) => {
   // To be used if paging
   /*
   const findCurrentPageBasedOnPath = (location) => {
@@ -478,18 +474,30 @@ const Zone = ({
     return isNaN(Number(tempQuery.page)) ? 0 : Number(tempQuery.page);
   }*/
 
+  // Initializing state information.
   setOpenSnackbar(false);
   const [message, updateMessage] = useState(null);
   const [parkingSpotsInfo, updateParkingSpotsInfo] = useState(null);
   const [order, updateOrder] = useState('asc');
   const [columnToSort, updatecolumnToSort] = useState('spot_id');
+  const [loadingDialogField, updateLoadingDialogField] = useState({
+    open: false,
+    message: ''
+  });
+  const [openMessageDialog, updateOpenMessageDialog] = useState(false);
+  const [messageDialogField, updateMessageDialogField] = useState({
+    message: '',
+    dialogTitle: ''
+  });
 
+  // Checks if the user wants a specific date, otherwise go with default (today).
   // Expected url: ./list_parking_spots/:parkingLotId/?date=month-day-year
   let tempUrl = window.location.pathname;
   let zoneId = Number(tempUrl.substring(tempUrl.lastIndexOf('/') + 1));
 
   let urlDate = queryString.parse(window.location.search.substring(1)).date;
-  let tempDate = getCurrentTimeInUTC();
+  let tempDateEpoch = Date.now(); // UTC Epoch
+  let tempDate = new Date(); // The date in local time.
 
   if (urlDate !== undefined && urlDate.length === 8) {
     let month = Number(urlDate.substring(0, 2));
@@ -497,12 +505,16 @@ const Zone = ({
     let year = Number(urlDate.substring(4));
 
     // Time picker displays time in local time, so need to convert to EDT for now.
+    // Gets the EDT for this date at time 00:00.
+    tempDateEpoch = Date.UTC(year, month, day);
     tempDate = new Date(Date.UTC(year, month, day) + 4 * 60 * 60 * 1000);
   }
 
+  // Initializing time filtering options.
+  // Stores the date in EDT.
   const [currentTimeFilter, updateCurrentTimeFilter] = useState({
     date: tempDate,
-    startTime: '00:00',
+    startTime: convertEpochToMilitary(tempDateEpoch),
     endTime: '23:59'
   });
 
@@ -513,9 +525,11 @@ const Zone = ({
   };
 
   // GET   /api/zones/:zone_id
+  // API call for fetching the initial data.
   const listParkingSpots = async () => {
-    const startUTCEpoch = convertMilitaryToEpoch(tempDate, '00:00');
-    const endUTCEpoch = convertMilitaryToEpoch(tempDate, '23:59');
+    // The backend expects times in utc, so need to convert to UTC.
+    const startUTCEpoch = convertMilitaryToEpoch(new Date(tempDateEpoch), currentTimeFilter.startTime);
+    const endUTCEpoch = convertMilitaryToEpoch(new Date(tempDateEpoch), '23:59');
     const newURL = `${apiprefix}/zones/${zoneId}/?startTime=${startUTCEpoch}&endTime=${endUTCEpoch}`;
 
     let response = await makeAPICall('GET', newURL);
@@ -540,14 +554,16 @@ const Zone = ({
     }
   };
 
-  // const listParkingSpots = ({ ...props }) => {
-  //   updateParkingSpotInfo(TempInput);
-  //   updateMessage(null);
-  // };
-
   const handleFiltering = async (value, checkBoxes) => {
+    updateLoadingDialogField({
+      open: true,
+      message: 'Please Hold On While Our Team Fabricates Data'
+    });
+
+    // date is in local time.
     const { date, startTime, endTime } = value;
 
+    // Parse the date for month, day, and year.
     const month =
       date.getMonth().toString().length === 1
         ? '0' + date.getMonth().toString()
@@ -557,17 +573,27 @@ const Zone = ({
       date.getDate().toString().length === 1
         ? '0' + date.getDate().toString()
         : date.getDate().toString();
+
+    // Update url to reflect the date.
     const newDate = `${month}${day}${year}`;
     history.push(`/zones/${zoneId}?date=${newDate}`);
 
-    const startUTCEpoch = convertMilitaryToEpoch(date, startTime);
-    const endUTCEpoch = convertMilitaryToEpoch(date, endTime);
+    // Convert date to utc because function expects utc date.
+    const UTCDate = new Date(date.getTime() - 4 * 60 * 60 * 1000)
+    const startUTCEpoch = convertMilitaryToEpoch(UTCDate, startTime);
+    const endUTCEpoch = convertMilitaryToEpoch(UTCDate, endTime);
 
+    // URL for the backend.
     const newURL = `${apiprefix}/zones/${zoneId}/?startTime=${startUTCEpoch}&endTime=${endUTCEpoch}`;
     let response = await makeAPICall('GET', newURL);
     let resbody = await response.json();
+    updateLoadingDialogField({
+      open: false,
+      message: ''
+    });
 
     if (response.status === 200) {
+      // Filtering the results for exact matches.
       resbody.parkingInfo.filter(e => {
         if (
           checkBoxes.startTimeBox &&
@@ -591,14 +617,35 @@ const Zone = ({
         e.end_time = convertEpochToMilitary(e.end_time);
         e.price = Number(e.price).toFixed(3);
       });
+
       updateParkingSpotsInfo(resbody.parkingInfo);
       updateMessage(null);
     } else {
+      updateMessageDialogField({
+        dialogTitle: 'Error',
+        message: 'We Do Not Recognize That Time As Being Real.'
+      });
+      updateOpenMessageDialog(true);
       updateMessage(<div>Fail</div>);
     }
   };
 
+  /*
+    Handles the buy requests.
+
+    parkingInfo = {
+      start_time,
+      end_time,
+      date,
+      zone_id,
+      spot_id
+    }
+  */
   const handleBuyRequest = async (parkingInfo, privateKey) => {
+    updateLoadingDialogField({
+      open: true,
+      message: 'Your Request Is Currently Being Processed By Our Elite Team Of Trained Monkeys'
+    });
     updateSnackbarOptions({
       ...snackbarOptions,
       message:
@@ -607,12 +654,14 @@ const Zone = ({
     });
     setOpenSnackbar(true);
 
+    // The date is in local time, but function expects utc, so need to convert.
+    const UTCDate = new Date(parkingInfo.date.getTime() - 4 * 60 * 60 * 1000);
     const startUTCEpoch = convertMilitaryToEpoch(
-      parkingInfo.date,
+      UTCDate,
       parkingInfo.start_time
     );
     const endUTCEpoch = convertMilitaryToEpoch(
-      parkingInfo.date,
+      UTCDate,
       parkingInfo.end_time
     );
 
@@ -629,28 +678,36 @@ const Zone = ({
       }
     };
 
-    console.log(url);
     const response = await makeAPICall('POST', url, json);
-    console.log('WAIT2');
     const respbody = await response.json();
-    console.log(respbody);
     setOpenSnackbar(false);
+    updateOpenMessageDialog(false);
+    updateMessageDialogField({
+      dialogTitle: '',
+      message: ''
+    });
 
     if (response.status === 200) {
-      // Redirect them to invoice page.
-      console.log('Successfully purchased spot!');
-      updateSnackbarOptions({
-        ...snackbarOptions,
-        message:
-          'You Used Bribery. It Was Super Effective! You Got The Parking Spot!',
-        severity: 'success'
+      updateMessageDialogField({
+        dialogTitle: 'Error',
+        message: 'You Used Bribery. It Was Super Effective! You Got The Parking Spot!',
+
       });
-      updateMessage(<Invoice spotInfo={respbody.body} />);
+      updateOpenMessageDialog(true);
+      console.log('Successfully purchased spot!');
+
+      // Displays the invoice instead of the tables.
+      // updateMessage(<Invoice spotInfo={json} />);
 
       // Page redirect to the homepage.
       history.push('/');
       window.location.href = `${process.env.PUBLIC_URL}/`;
     } else {
+      updateMessageDialogField({
+        dialogTitle: 'Error',
+        message: 'Squatters Were Spotted At Your Desired Spot. What Would You Like To Do?'
+      });
+      updateOpenMessageDialog(true);
       updateSnackbarOptions({
         ...snackbarOptions,
         message:
@@ -661,34 +718,29 @@ const Zone = ({
     }
 
     setOpenSnackbar(true);
-
-    // For testing purposes.
-    // console.log(`
-    //   Start Time: ${time.start_time} \n
-    //   End Time: ${time.end_time} \n
-    //   Private Key: ${privateKey}
-    // `);
-    // make smart contract and redirect to invoice.
   };
 
+  // Calls the function after the first render.
   useEffect(() => {
     listParkingSpots();
   }, []);
 
+  // Contains the socket stuff, which will update the page or notify the user of changes.
   useEffect(() => {
-    console.log(zoneId);
-    console.log(socket);
+    // Socket for handling user personal info.
+    userSocket.on(`sell-${localStorage.olivia_pid}`, () => {
+      setOpenSnackbar(false);
+
+      // Make it so that the data variable stores the message.
+      updateSnackbarOptions({
+        ...snackbarOptions,
+        message: 'You Got Rich! Go To Account To See How Much Disposable Income You Have.',
+        severity: 'info'
+      })
+    });
+
+    // Socket for handling changes to parking spots for this zone.
     socket.on(`zone-${zoneId}`, data => {
-      //console.log("Big Test ASDFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF");
-      //console.log(data);
-      // data should also include info on whether it is a spot being made available or unavailable.
-      // TODO
-      // handleParkingSpotTimeChange(
-      //   parkingSpotsInfo,
-      //   updateParkingSpotsInfo,
-      //   data,
-      //   currentTimeFilter
-      // );
       if (data.isAvail) {
         handleParkingSpotAvailable(
           parkingSpotsInfo,
@@ -707,12 +759,20 @@ const Zone = ({
     });
   }, []);
 
-  // There might be an issue with the date that is displayed on confirmation page
-  // because it is created in EDT, but never converted to UTC time.
   return (
     <>
       <div>
         <Typography>
+          <MessageDialog 
+            message={messageDialogField.message}
+            dialogTitle={messageDialogField.dialogTitle}
+            open={openMessageDialog}
+            setOpen={updateOpenMessageDialog}
+          />
+          <LoadingDialog 
+            message={loadingDialogField.message}
+            open={loadingDialogField.open}
+          />
           {message ? (
             <div>{message}</div>
           ) : (

@@ -1,3 +1,8 @@
+/**
+ * The component that handles the main map page. Displays the map and
+ * links to the different parking spots.
+ */
+
 import React, { useState, useEffect } from 'react';
 import { Typography, Card, CardMedia } from '@material-ui/core';
 import { Link } from 'react-router-dom';
@@ -41,6 +46,12 @@ const styles = theme => ({
   }
 });
 
+/**
+ * The component that is exported. Displays the map and the links to
+ * the different zones.
+ * 
+ * @param {Object} param0 
+ */
 const MainMap = ({ classes, ...props }) => {
   // Make api request to get list of available zones
   // todo
@@ -63,11 +74,8 @@ const MainMap = ({ classes, ...props }) => {
     console.log(res_body);
     updateZones(res_body.zones);
   };
-  // useEffect(() => {
+  
 
-  // // do anything only one time if you pass empty array []
-  // // keep in mind, that component will be rendered one time (with default values) before we get here
-  // }, [] )
   useEffect(() => {
     get_zones();
   }, []);

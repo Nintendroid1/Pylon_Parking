@@ -1,3 +1,8 @@
+/**
+ * The component that shows the user profile, which includes the 
+ * user's pid, total number of tokens, etc.
+ */
+
 import React, { useState, useEffect } from 'react';
 import { makeAPICall } from '../api';
 import { withStyles } from '@material-ui/core/styles';
@@ -7,10 +12,7 @@ import TableCell from '@material-ui/core/TableCell';
 import TableRow from '@material-ui/core/TableRow';
 import { Typography, LinearProgress } from '@material-ui/core';
 import RequireAuthentication from '../RequireAuthentication';
-import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
-import { Link } from 'react-router-dom';
-import EditIcon from '@material-ui/icons/Edit';
 import apiprefix from './apiprefix';
 import Paper from '@material-ui/core/Paper';
 import Container from '@material-ui/core/Container';
@@ -44,7 +46,12 @@ const styles = theme => ({
   }
 });
 
-let ProfilePage = ({ classes, socket, ...props }) => {
+/**
+ * The component that is exported. Shows the user's profile in a table.
+ * 
+ * @param {Object} param0 
+ */
+let ProfilePage = ({ setOpenSnackbar, updateSnackbarOptions, snackbarOptions, classes, socket }) => {
   const [user, updateUser] = useState({
     pid: '',
     first_name: '',
@@ -52,7 +59,7 @@ let ProfilePage = ({ classes, socket, ...props }) => {
     email: '',
     balance: ''
   });
-  const [hasCalled, updateCall] = useState(false);
+  const [] = useState(false);
   const [isLoading, setLoading] = useState(false);
 
   let loadUser = async () => {
@@ -79,13 +86,23 @@ let ProfilePage = ({ classes, socket, ...props }) => {
     loadUser();
   }, []);
 
+  // Socket logic.
   useEffect(() => {
-    // data = {
-    //  parkingId: parking spot sold off,
-    //  money: # hokie tokens in wallet now.
-    // }
+    // Tells the user that a spot has been sold off.
+    socket.on(`sell-${localStorage.olivia_pid}`, data => {
+      setOpenSnackbar(false);
+
+      // Make it so that the data variable stores the message.
+      updateSnackbarOptions({
+        ...snackbarOptions,
+        message: 'You Got Rich! Go To Account To See How Much Disposable Income You Have.',
+        severity: 'info'
+      })
+    });
+
+    // data = money earned
     socket.on(`user-${localStorage.olivia_pid}`, data => {
-      updateUser({ ...user, money: data.money });
+      updateUser({ ...user, money: user.money + Number(data) });
     });
   }, []);
   return (

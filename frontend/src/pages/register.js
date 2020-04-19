@@ -1,15 +1,17 @@
+/**
+ * The exported component allows the user to register for 
+ * an account.
+ */
+
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { makeAPICall } from '../api';
 import UserForm from './forms/registerform';
 import { Typography, LinearProgress } from '@material-ui/core';
-import { Redirect, withRouter } from 'react-router';
+import { Redirect } from 'react-router';
 import apiprefix from './apiprefix';
 import {
-  withStyles,
-  MuiThemeProvider,
-  createMuiTheme
-} from '@material-ui/core/styles';
+  withStyles} from '@material-ui/core/styles';
 
 const styles = theme => ({
   main: {
@@ -41,6 +43,11 @@ const styles = theme => ({
   }
 });
 
+/**
+ * Handles the components and API call used for registering a new user.
+ * 
+ * @param {Object} param0 
+ */
 const RegisterTab = ({ isDark, updateLogin, updateUser, updateAdmin }) => {
   // an user message to be displayed, if any
   const [mess, updateMessage] = useState(null);
@@ -56,6 +63,8 @@ const RegisterTab = ({ isDark, updateLogin, updateUser, updateAdmin }) => {
     let body = await res.json();
     updateMessage(body.message);
     setLoading(false);
+
+    // Successful registration.
     if (res.status === 200) {
       setMsgColor(isDark ? '#FFFFFF' : '#000000');
       updateOk(true);

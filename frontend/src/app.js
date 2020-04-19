@@ -218,7 +218,6 @@ const App = ({ classes, ...props }) => {
                   component={Dashboard}
                 />
                 <Route
-                  exact
                   path="/transaction_history"
                   label="Transaction History"
                   key="/transaction_history"
@@ -230,6 +229,7 @@ const App = ({ classes, ...props }) => {
                   render={() => (
                     <TransactionHistory
                       classes={classes}
+                      userSocket={userSocket}
                       socket={transactionHistorySocket}
                       setOpenSnackbar={setOpenSnackbar}
                       updateSnackbarOptions={updateSnackbarOptions}
@@ -248,8 +248,8 @@ const App = ({ classes, ...props }) => {
                   hidden={false}
                   render={() => (
                     <SellPage
-                      isLoggedIn={isLoggedIn}
-                      socket={userSocket}
+                      isLoggedIn={isLoggedIn} 
+                      socket={userSocket} 
                       setOpenSnackbar={setOpenSnackbar}
                       updateSnackbarOptions={updateSnackbarOptions}
                       snackbarOptions={snackbarOptions}
@@ -304,6 +304,7 @@ const App = ({ classes, ...props }) => {
                 reqLogin={false}
                 render={() => (
                   <BountySystem
+                    userSocket={userSocket}
                     setOpenSnackbar={setOpenSnackbar}
                     updateSnackbarOptions={updateSnackbarOptions}
                     snackbarOptions={snackbarOptions}
@@ -335,14 +336,15 @@ const App = ({ classes, ...props }) => {
                 label="Spot Page"
                 reqAdmin={false}
                 reqLogin={false}
-                render={() => (
+                render={() => 
                   <ParkingSpot
-                    socket={parkingSpotSocket}
+                    userSocket={userSocket}
+                    socket={parkingSpotSocket} 
                     setOpenSnackbar={setOpenSnackbar}
                     updateSnackbarOptions={updateSnackbarOptions}
                     snackbarOptions={snackbarOptions}
                   />
-                )}
+                }
               />
               <Route
                 path="/zones/:zone_id"
@@ -351,14 +353,15 @@ const App = ({ classes, ...props }) => {
                 hidden={true}
                 reqAdmin={false}
                 reqLogin={false}
-                render={() => (
-                  <Zone
-                    socket={parkingLotSocket}
+                render={() => 
+                  <Zone 
+                    userSocket={userSocket}
+                    socket={parkingLotSocket} 
                     setOpenSnackbar={setOpenSnackbar}
                     updateSnackbarOptions={updateSnackbarOptions}
                     snackbarOptions={snackbarOptions}
                   />
-                )}
+                }
               />
             </TabChooser>
           </Router>

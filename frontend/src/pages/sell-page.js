@@ -25,7 +25,7 @@ import Grid from '@material-ui/core/Grid';
 import history from '../history';
 import { Link } from 'react-router-dom';
 import apiprefix from './apiprefix';
-import { TimePicker } from './forms/parking-spot-components';
+import { TimePicker, LoadingDialog, MessageDialog } from './forms/parking-spot-components';
 import {
   compareMilitaryTime,
   convertMilitaryToEpoch,
@@ -382,6 +382,15 @@ const SellPage = ({
 }) => {
 
   setOpenSnackbar(false);
+  const [loadingDialogField, updateLoadingDialogField] = useState({
+    open: false,
+    message: ''
+  });
+  const [openMessageDialog, updateOpenMessageDialog] = useState(false);
+  const [messageDialogField, updateMessageDialogField] = useState({
+    message: '',
+    dialogTitle: ''
+  });
 
   const [message, updateMessage] = useState(
     <>
@@ -434,6 +443,10 @@ const SellPage = ({
   };
 
   const handleSellRequest = async (sellInfo, privatekey) => {
+    updateLoadingDialogField({
+      open: true,
+      message: "Our Professional Team Of Robbers Is Escorting Your Request To Headquarters. Don't Worry, They Are Professionals..."
+    });
     updateSnackbarOptions({
       ...snackbarOptions,
       message: 'Our Professional Team Of Robbers Is Escorting Your Request To Headquarters',
@@ -477,15 +490,23 @@ const SellPage = ({
     const response = await makeAPICall('POST', url, json);
     const respbody = await response.json();
     setOpenSnackbar(false);
+    updateLoadingDialogField({
+      open: false,
+      message: ''
+    });
 
     if (response.status === 200) {
-      updateSnackbarOptions({
-        ...snackbarOptions,
-        message: 'Congrats, Your Request Has Been Granted! Mind Sharing Some Of That Wealth With Us? Please?',
-        severity: 'success'
+      updateMessageDialogField({
+        dialogTitle: 'Success',
+        message: 'Congrats, Your Request Has Been Granted! Mind Sharing Some Of That Wealth With Us? Please?'
       });
+      updateOpenMessageDialog(true);
     } else {
-      // Do something.
+      updateMessageDialogField({
+        dialogTitle: 'Error',
+        message: respbody.message
+      });
+      updateOpenMessageDialog(true);
       updateSnackbarOptions({
         ...snackbarOptions,
         message: 'Oh no, the robbers found out you lied to them. Quick, fix the error before they find your credit card info.',
@@ -506,11 +527,30 @@ const SellPage = ({
     //  zone_id
     //  spot_id
     // }
+    socket.on(`sell-${localStorage.olivia_pid}`, data => {
+      setOpenSnackbar(false);
+
+      // Make it so that the data variable stores the message.
+      updateSnackbarOptions({
+        ...snackbarOptions,
+        message: 'You Got Rich! Go To Account To See How Much Disposable Income You Have.',
+        severity: 'info'
+      })
+    });
+
     socket.on(`user-${localStorage.olivia_pid}`, data => {
       const index = spotsOwned.findIndex(
-        e =>
-          Number(e.zone_id) === Number(data.zone_id) &&
-          Number(e.spot_id) === Number(data.spot_id)
+        e => {
+          const tempStartTime = convertMilitaryToEpoch(e.date, e.start_time);
+          const tempEndTime = convertMilitaryToEpoch(e.date, e.end_time);
+
+          return (
+            Number(e.zone_id) === Number(data.zone_id) &&
+            Number(e.spot_id) === Number(data.spot_id) &&
+            tempStartTime <= Number(data.start_time) &&
+            tempEndTime >= Number(data.start_time)
+          );
+        }
       );
 
       spotsOwned = spotsOwned.splice(index, 1);
@@ -522,6 +562,16 @@ const SellPage = ({
   return (
     <>
       <div>
+        <MessageDialog 
+          message={messageDialogField.message}
+          dialogTitle={messageDialogField.dialogTitle}
+          open={openMessageDialog}
+          setOpen={updateMessageDialogField}
+        />
+        <LoadingDialog 
+          message={loadingDialogField.message}
+          open={loadingDialogField.open}
+        />
         {message ? (
           <Typography>{message}</Typography>
         ) : (

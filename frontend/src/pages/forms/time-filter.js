@@ -1,3 +1,7 @@
+/**
+ * Contains functions and components used in manipulating time.
+ */
+
 import React, { useState } from 'react';
 import 'date-fns';
 import Grid from '@material-ui/core/Grid';
@@ -29,10 +33,11 @@ const styles = theme => ({
   }
 });
 
-// Number of seconds between UTC time and EST time.
-const UTCToESTInSec = 4 * 60 * 60;
+/*
+  Finds the difference in time between the two given military times.
 
-// returns time in minutes.
+  Returns the time in minutes.
+*/
 const militaryTimeDifference = (startTime, endTime) => {
   let [startTimeHour, startTimeMinute] = startTime
     .split(':')
@@ -48,12 +53,20 @@ const militaryTimeDifference = (startTime, endTime) => {
   return timeDiff;
 };
 
+/*
+  Returns true if the given military time is a multiple
+  of 15 minutes, false otherwise.
+*/
 const isTimeMultipleOf15 = time => {
   const [, minute] = time.split(':').map(e => Number(e));
 
   return minute % 15 === 0;
 };
 
+/*
+  Returns the given military time rounded up to the nearest 15
+  minutes.
+*/
 const roundUpToNearest15 = time => {
   const [hour, minute] = time.split(':').map(e => Number(e));
   const newTime =
@@ -62,6 +75,9 @@ const roundUpToNearest15 = time => {
   return newTime;
 };
 
+/*
+  Converts the military time to standard US time in AM/PM.
+*/
 const convertMilitaryTimeToNormal = time => {
   let [hour, minutes] = time.split(':');
   let period = 'AM';
@@ -76,17 +92,28 @@ const convertMilitaryTimeToNormal = time => {
 
 // sortDirection === 'asc' means earliest to latest
 // sortDirection === 'desc' means latest to earliest.
+/*
+  Sorts the list of military times given the direction to sort
+  and the property in the object to sort.
+*/
 const sortByMilitaryTime = (data, sortDirection, columnToSort) => {
   const sortedData = data.sort(compareParkingSpotTimes(columnToSort));
   return sortDirection === 'asc' ? sortedData : sortedData.reverse();
 };
 
+/*
+  Compares two parking spot times based on the property to compare.
+  i.e. start_time or end_time.
+*/
 const compareParkingSpotTimes = columnToSort => (spot1, spot2) => {
   return compareMilitaryTime(spot1[columnToSort], spot2[columnToSort]);
 };
 
 // If time1 earlier than time2, then return -1.
 // If time2 earlier than time1, then return 1.
+/*
+  Compares two military times.
+*/
 const compareMilitaryTime = (time1, time2) => {
   time1 = time1.split(':').map(e => Number(e));
   time2 = time2.split(':').map(e => Number(e));
@@ -104,18 +131,13 @@ const compareMilitaryTime = (time1, time2) => {
   return 0;
 };
 
-// const convertNormalToMilitary = time => {
-//   let [hour, minute, temp] = time.split(':');
-//   const [minute, period] = temp.split(' ');
-//   if (period === 'PM') {
-//     hour = Number(hour) + 12;
-//   }
-//   return hour + ':' + minute;
-// };
-
-const convertEpochToMilitary = epoch => {
+/*
+  Converts the given epoch time to military time.
+  If the time zone is not specified, then defaults to UTC.
+*/
+const convertEpochToMilitary = (epoch, timeZone='UTC') => {
   const option = {
-    timeZone: 'UTC',
+    timeZone: timeZone,
     hour12: false,
     hour: '2-digit',
     minute: '2-digit'
@@ -125,15 +147,28 @@ const convertEpochToMilitary = epoch => {
   return temp_date.toLocaleTimeString('en-US', option);
 };
 
+/*
+  Finds the number of 15 minutes intervals between the 
+  given start and end time, which are Epochs.
+*/
 const timeDiffInEpoch15 = (startTime, endTime) => {
   return (endTime - startTime) / (1000 * 60 * 15);
 };
 
+/*
+  Returns the current time in UTC time, meaning the time is UTC,
+  but read as if it was EDT.
+*/
 const getCurrentTimeInUTC = () => {
-  return new Date(Date.now() - (4 * 60 * 60 * 1000));
+  // Date.now() returns UTC time.
+  return new Date(Date.now() + (4 * 60 * 60 * 1000));
 }
 
 // Expects military time.
+/*
+  Converts military time to Epoch, expects the date to be
+  UTC and the time to be correct in UTC.
+*/
 const convertMilitaryToEpoch = (date, time) => {
   const [hour, minute] = time.split(':');
   const year = date.getUTCFullYear();
@@ -143,10 +178,16 @@ const convertMilitaryToEpoch = (date, time) => {
   return new Date(Date.UTC(year, month, day, hour, minute)).getTime() / 1000;
 };
 
+/*
+  Converts Epoch to Standard US AM/PM time.
+*/
 const convertEpochToNormal = epoch => {
-  return new Date(epoch).toUTCString();
+  return convertMilitaryTimeToNormal(convertEpochToMilitary(epoch));
 };
 
+/*
+  Component used to filter the date.
+*/
 const DateFilter = ({ time, handleDateFilter, updateTime, ...props }) => {
   const handleOnClick = event => {
     event.preventDefault();
@@ -163,6 +204,9 @@ const DateFilter = ({ time, handleDateFilter, updateTime, ...props }) => {
   );
 };
 
+/*
+  A component that displays a date component.
+*/
 const CustomDatePicker = ({ time, updateTime, handleDateChange, ...props }) => {
   return (
     <>
@@ -185,6 +229,10 @@ const CustomDatePicker = ({ time, updateTime, handleDateChange, ...props }) => {
 
 // Used by list-parking-spots.js.
 // Filtering by date and time.
+/*
+  Component that allows for filtering by date, start time, and
+  end time.
+*/
 const TimeFilter = ({
   isDark,
   updateLogin,
@@ -197,18 +245,6 @@ const TimeFilter = ({
   updateCurrentTimeFilter,
   ...props
 }) => {
-  /*
-  let today = new Date();
-  let timeSplit = today.toTimeString().split(':');
-  let currTime = timeSplit[0].concat(':', timeSplit[1]);
-
-  const [time, updateTime] = useState({
-    date: today,
-    startTime: currTime,
-    endTime: '24:00',
-    privateKey: '',
-    showPrivateKey: false
-  });*/
 
   const [checkBoxes, updateCheckBoxes] = useState({
     startTimeBox: false,
@@ -219,7 +255,7 @@ const TimeFilter = ({
     updateCheckBoxes({ ...checkBoxes, [event.target.name]: event.target.checked });
   };
 
-
+  // Handles the filtering.
   const handleSubmit = event => {
     event.preventDefault();
     onSubmit(currentTimeFilter, checkBoxes);
@@ -230,6 +266,7 @@ const TimeFilter = ({
     updateCurrentTimeFilter({ ...currentTimeFilter, [name]: value });
   };
 
+  // Handles a change in date, which is an automatic filtering.
   const handleDateChange = newDate => {
     console.log(newDate);
 
@@ -408,65 +445,3 @@ export {
   DateFilter,
   timeDiffInEpoch15
 };
-
-/*
-
-const TimeFilter = props => {
-  const { onSubmit, popUpTitle, popUpContent } = props;
-
-  let today = new Date();
-  let timeSplit = today.toTimeString().split(':');
-  let currTime = timeSplit[0].concat(':', timeSplit[1]);
-
-  const [time, updateTime] = useState({
-    date: today,
-    startTime: currTime,
-    endTime: '24:00',
-    privateKey: '',
-    showPrivateKey: false
-  });
-
-  const handleDateChange = newDate => {
-    updateTime({ ...time, date: newDate });
-  };
-
-  const handleSubmit = () => {
-    onSubmit(time);
-  };
-
-  return (
-    <>
-      <MuiPickersUtilsProvider utils={DateFnsUtils}>
-        <form>
-          <Grid container justify="space-around">
-            <KeyboardDatePicker
-              disableToolbar
-              variant="inline"
-              format="MM/dd/yyyy"
-              margin="normal"
-              label="Date"
-              value={time.date}
-              onChange={handleDateChange}
-              KeyboardButtonProps={{
-                'aria-label': 'change date'
-              }}
-            />
-          </Grid>
-          <Grid>
-            <StartEndTime
-              time={time}
-              buttonName={'Filter'}
-              updateTime={updateTime}
-              popUpTitle={popUpTitle}
-              popUpContent={popUpContent}
-              handleOnConfirm={handleSubmit}
-            />
-          </Grid>
-        </form>
-      </MuiPickersUtilsProvider>
-    </>
-  );
-};
-
-export default TimeFilter;
-*/
