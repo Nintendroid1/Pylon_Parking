@@ -1,13 +1,18 @@
+/**
+ * The transaction page shows the blockchain, either partially or in
+ * full depending on the user filtering options.
+ */
+
 import React, { useState, useEffect } from 'react';
 import { makeAPICall } from '../api';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
 import TableHead from '@material-ui/core/TableHead';
-import TableFooter from '@material-ui/core/TableFooter';
 import TableRow from '@material-ui/core/TableRow';
 import TablePagination from '@material-ui/core/TablePagination';
 import apiprefix from './apiprefix';
+import history from '../history';
 import 'date-fns';
 import { Typography, Select } from '@material-ui/core';
 import queryStrings from 'query-string';
@@ -15,15 +20,8 @@ import TextField from '@material-ui/core/TextField';
 import MenuItem from '@material-ui/core/MenuItem';
 import Button from '@material-ui/core/Button';
 import {
-  convertEpochToMilitary,
-  convertMilitaryToEpoch
-} from './forms/time-filter';
-import {
   withStyles,
-  withTheme,
-  MuiThemeProvider,
-  createMuiTheme
-} from '@material-ui/core/styles';
+  withTheme} from '@material-ui/core/styles';
 import CircularProgress from '@material-ui/core/CircularProgress';
 
 const styles = theme => ({
@@ -39,6 +37,7 @@ const styles = theme => ({
   }
 });
 
+// Handles the filtering options.
 const FilterSelectField = ({ classes, ...props }) => {
   const { listOfFilterOptions, filterOption, updateFilterOption } = props;
 
@@ -76,10 +75,14 @@ const getEntriesForPage = (page, numEntriesPerPage, listOfTransactions) => {
     endIndex = listOfTransactions.length;
   }
 
-  // return listOfTransactions.slice(startIndex, endIndex);
-  return [];
+  return listOfTransactions.slice(startIndex, endIndex);
 };
 
+/**
+ * Returns the components used for the header of the table.
+ * 
+ * @param {Object} props 
+ */
 const TransactionTableHeader = props => {
   const { tableHeaders } = props;
 
@@ -95,12 +98,15 @@ const TransactionTableHeader = props => {
   );
 };
 
+/**
+ * Returns the components used in the body of the table.
+ * 
+ * @param {Object} param0 
+ */
 const TransactionsTableBody = ({
   page,
   numEntriesPerPage,
-  listOfTransactions,
-  ...props
-}) => {
+  listOfTransactions}) => {
   const rows = getEntriesForPage(page, numEntriesPerPage, listOfTransactions);
 
   return (
@@ -117,6 +123,11 @@ const TransactionsTableBody = ({
   );
 };
 
+/**
+ * Makes the transaction history table.
+ * 
+ * @param {Object} param0 
+ */
 const TransactionTable = ({
   userId,
   listOfTransactions,
@@ -125,8 +136,7 @@ const TransactionTable = ({
   numEntriesPerPage,
   updateNumEntriesPerPage,
   tableHeaders,
-  getEntireHistory,
-  ...props
+  getEntireHistory
 }) => {
   const listOfFilterOptions = [
     'None',
@@ -141,6 +151,7 @@ const TransactionTable = ({
     isDisabled: false
   });
   const [displayList, updateDisplayList] = useState(listOfTransactions);
+  const [hasEntireHistory, updateHasEntireHistory] = useState(false);
   /*
   const [timeFilter, updateTimeFilter] = useState({
     startTime: '00:00',
@@ -149,23 +160,25 @@ const TransactionTable = ({
 
   const handleChangePage = (event, newPage) => {
     updatePage(newPage);
+    history.push(`/transaction_history?page=${newPage}&numEntries=${numEntriesPerPage}`);
   };
 
   const handleChangeNumEntriesPerPage = event => {
     updateNumEntriesPerPage(parseInt(event.target.value, 10));
     updatePage(0);
+    history.push(`/transaction_history?page=${0}&numEntries=${event.target.value}`);
   };
 
   const handleTextFieldChange = event => {
     updateTextFieldValue({ ...textFieldValue, value: event.target.value });
   };
 
-  const handleClickFilter = event => {
-    // Not sure if this is allowed.
-    // Need to check for re-renders and other errors.
-    // useEffect(() => {
-    //   getEntireHistory();
-    // }, []);
+  const handleClickFilter = async () => {
+    // Get the entire history if haven't.
+    if (!hasEntireHistory) {
+      getEntireHistory();
+      updateHasEntireHistory(true);
+    }
 
     // If no filter option, then display all, otherwise, filter base on filter option.
     const temp =
@@ -177,17 +190,6 @@ const TransactionTable = ({
     updateDisplayList(temp);
   };
 
-  //Not sure what it does.
-
-  /*
-SelectProps={{
-          inputProps: { 'aria-label': 'rows per page' },
-          native: true,
-        }}
-  */
-
-  // Add in filtering option?
-  // Filter by a specific parking id, buyer or seller.
   return (
     <>
       <div>
@@ -227,7 +229,10 @@ SelectProps={{
   );
 };
 
-// Must change if including the parking spot times.
+/*
+  Handles adding the new parking spot sent through the socket.
+  Expects the times to be sorted.
+*/
 const handleNewTransaction = (
   listOfTransactions,
   updateListOfTransactions,
@@ -237,6 +242,9 @@ const handleNewTransaction = (
   updateListOfTransactions(listOfTransactions);
 };
 
+/*
+  Updates the page the table is on.
+*/
 const updatePageInfo = (queryPage, currPage, updatePage) => {
   if (
     queryPage !== undefined &&
@@ -247,6 +255,9 @@ const updatePageInfo = (queryPage, currPage, updatePage) => {
   }
 };
 
+/*
+  Updates the number of entries displayed on the page.
+*/
 const updateNumEntryInfo = (
   queryNumEntry,
   currNumEntry,
@@ -261,8 +272,13 @@ const updateNumEntryInfo = (
   }
 };
 
-// Must change epoch if any to military time.
-const TransactionHistory = ({ socket, classes, ...props }) => {
+/**
+ * The component that is exported. It creates the transaction history page.
+ * The default setting is personal history only.
+ * 
+ * @param {Object} param0 
+ */
+const TransactionHistory = ({ setOpenSnackbar, updateSnackbarOptions, snackbarOptions, userSocket, socket, classes }) => {
   const [message, updateMessage] = useState(
     <CircularProgress size={100} className={classes.circProgress} />
   );
@@ -277,9 +293,9 @@ const TransactionHistory = ({ socket, classes, ...props }) => {
     buyerId: 'Buyer ID'
   };
 
-  //const url = `/transaction_history`;
   const url = `${apiprefix}/transaction_history`;
 
+  // GET request for a specific user's personal history.
   const getUserTransactionHistory = async () => {
     const response = await makeAPICall(
       'GET',
@@ -290,12 +306,17 @@ const TransactionHistory = ({ socket, classes, ...props }) => {
     if (response.status === 200) {
       const queryParams = queryStrings.parse(window.location.search);
 
-      updatePageInfo(queryParams.page, page, updatePage);
-      updateNumEntryInfo(
-        queryParams.numEntries,
-        numEntriesPerPage,
-        updateNumEntriesPerPage
-      );
+      // Updates the url based on the page and number of entries.
+      if (typeof queryParams.page === 'undefined' || typeof queryParams.numEntries === 'undefined') {
+        history.push(`/transaction_history?page=${page}&numEntries=${numEntriesPerPage}`);
+      } else {
+        updatePageInfo(queryParams.page, page, updatePage);
+        updateNumEntryInfo(
+          queryParams.numEntries,
+          numEntriesPerPage,
+          updateNumEntriesPerPage
+        );
+      }
 
       updateListOfTransactions(respbody.listOfTransactions);
     } else {
@@ -303,6 +324,7 @@ const TransactionHistory = ({ socket, classes, ...props }) => {
     }
   };
 
+  // Gets the entire transaction history, only called if the user hits filter.
   const getEntireHistory = async () => {
     const response = await makeAPICall('GET', url);
     const respbody = await response.json();
@@ -310,12 +332,16 @@ const TransactionHistory = ({ socket, classes, ...props }) => {
     if (response.status === 200) {
       const queryParams = queryStrings.parse(window.location.search);
 
-      updatePageInfo(queryParams.page, page, updatePage);
-      updateNumEntryInfo(
-        queryParams.numEntries,
-        numEntriesPerPage,
-        updateNumEntriesPerPage
-      );
+      if (typeof queryParams.page === 'undefined' || typeof queryParams.numEntries === 'undefined') {
+        history.push(`/transaction_history?page=${page}&numEntries=${numEntriesPerPage}`);
+      } else {
+        updatePageInfo(queryParams.page, page, updatePage);
+        updateNumEntryInfo(
+          queryParams.numEntries,
+          numEntriesPerPage,
+          updateNumEntriesPerPage
+        );
+      }
 
       updateListOfTransactions(respbody.listOfTransactions);
     } else {
@@ -327,8 +353,20 @@ const TransactionHistory = ({ socket, classes, ...props }) => {
     getUserTransactionHistory();
   }, []);
 
-  // need to update for correct user.
+  // Handles the socket logic.
   useEffect(() => {
+    // Socket for handling user personal info.
+    userSocket.on(`sell-${localStorage.olivia_pid}`, () => {
+      setOpenSnackbar(false);
+
+      // Make it so that the data variable stores the message.
+      updateSnackbarOptions({
+        ...snackbarOptions,
+        message: 'You Got Rich! Go To Account To See How Much Disposable Income You Have.',
+        severity: 'info'
+      })
+    });
+
     socket.on('transactionHistory', data =>
       handleNewTransaction(listOfTransactions, updateListOfTransactions, data)
     );

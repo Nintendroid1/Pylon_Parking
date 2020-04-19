@@ -218,7 +218,6 @@ const App = ({ classes, ...props }) => {
                   component={Dashboard}
                 />
                 <Route
-                  exact
                   path="/transaction_history"
                   label="Transaction History"
                   key="/transaction_history"
@@ -230,6 +229,7 @@ const App = ({ classes, ...props }) => {
                   render={() => (
                     <TransactionHistory
                       classes={classes}
+                      userSocket={userSocket}
                       socket={transactionHistorySocket}
                       setOpenSnackbar={setOpenSnackbar}
                       updateSnackbarOptions={updateSnackbarOptions}
@@ -304,6 +304,7 @@ const App = ({ classes, ...props }) => {
                 reqLogin={false}
                 render={() => (
                   <BountySystem
+                    userSocket={userSocket}
                     setOpenSnackbar={setOpenSnackbar}
                     updateSnackbarOptions={updateSnackbarOptions}
                     snackbarOptions={snackbarOptions}

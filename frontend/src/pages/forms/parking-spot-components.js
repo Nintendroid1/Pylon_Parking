@@ -1,3 +1,7 @@
+/**
+ * Contains functions and components that are used by other components.
+ */
+
 import React, { useState } from 'react';
 import IconButton from '@material-ui/core/IconButton';
 import 'date-fns';
@@ -15,6 +19,7 @@ import Visibility from '@material-ui/icons/Visibility';
 import VisibilityOff from '@material-ui/icons/VisibilityOff';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
+import CircularProgress from '@material-ui/core/CircularProgress';
 import { isTimeMultipleOf15, roundUpToNearest15 } from './time-filter';
 import {
   withStyles,
@@ -29,6 +34,9 @@ const styles = theme => ({
   }
 });
 
+/*
+  Component for displaying the cost.
+*/
 const CostField = props => {
   const { cost } = props;
 
@@ -48,6 +56,10 @@ const CostField = props => {
 
 // The private key is stored in the 'key' property of the privateKey object,
 // which is a state and is the time state originally.
+/*
+  Creates the private key field to allow the user to enter
+  their private key.
+*/
 const PrivateKeyField = props => {
   const { privateKey, updatePrivateKey } = props;
 
@@ -89,6 +101,10 @@ const PrivateKeyField = props => {
   );
 };
 
+/*
+  A component that allows the user to pick a time by selecting
+  the hour, minutes, and AM/PM. Also updates the info.
+*/
 const TimePicker = ({
   handleTimeChange,
   time,
@@ -131,6 +147,10 @@ const TimePicker = ({
   );
 };
 
+/*
+  Component that displays the given message with the given
+  dialog title in a Dialog component.
+*/
 const MessageDialog = (props) => {
   const { message, dialogTitle, open, setOpen } = props;
   
@@ -155,6 +175,32 @@ const MessageDialog = (props) => {
   );
 };
 
+/*
+  A dialog component that displays the message and a loading
+  icon in a dialog. There is no way for user to close it, coder
+  has to manually close it.
+*/
+const LoadingDialog = (props) => {
+  const { message, open } = props;
+
+  return (
+    <>
+      <Dialog open={open}>
+        <DialogContent>
+          <DialogContentText>{message}</DialogContentText>
+        </DialogContent>
+        <DialogContent>
+          <CircularProgress />
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+}
+
+/*
+  A custom dialog component that displays the given message and
+  asks for the private key if needed.
+*/
 const ConfirmationDialogFieldButton = ({
   buttonMessage,
   messageTitle,
@@ -194,38 +240,6 @@ const ConfirmationDialogFieldButton = ({
     handleOnConfirm(privateKey.privateKey);
   };
 
-  // Change from wrapping in form to make it a dialog with form inside.
-  /*
-  return (
-    <div>
-      <Button variant="outlined" color={buttonColor} onClick={handleClickOpen}>
-        {buttonMessage}
-      </Button>
-      <Dialog open={open} onClose={handleClose}>
-        <DialogTitle>{messageTitle}</DialogTitle>
-        <DialogContent>
-          <form onSubmit={handleSubmit}>
-            <Grid>{messageContent}</Grid>
-            {requireKey ? (
-              <Grid>
-                <PrivateKeyField
-                  privateKey={privateKey}
-                  updatePrivateKey={updatePrivateKey}
-                />
-              </Grid>
-            ) : null}
-            <Button onClick={handleClose} color="primary">
-              Cancel
-            </Button>
-            <Button type="submit" color="primary">
-              Confirm
-            </Button>
-          </form>
-        </DialogContent>
-      </Dialog>
-    </div>
-  );*/
-
   return (
     <div>
       <Button variant="outlined" color={buttonColor} onClick={handleClickOpen}>
@@ -258,6 +272,11 @@ const ConfirmationDialogFieldButton = ({
 };
 
 // Used by parking-spot.js
+/*
+  A component that contains a start time time picker, an end time
+  time picker, and a date picker. Also calculates the price for of
+  the spots given the specified start time and end time.
+*/
 const StartEndTime = props => {
   const {
     time,
@@ -321,5 +340,6 @@ export {
   PrivateKeyField,
   CostField,
   TimePicker,
-  MessageDialog
+  MessageDialog,
+  LoadingDialog
 };

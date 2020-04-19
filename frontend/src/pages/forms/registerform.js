@@ -1,3 +1,8 @@
+/**
+ * Form shown and used on the register page to allow users to
+ * register.
+ */
+
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import Button from '@material-ui/core/Button';
@@ -54,11 +59,6 @@ const styles = theme => ({
 
 /* Form used for register new users. */
 const UserForm = ({ onSubmit, message, classes, isLoading, messageColor }) => {
-  // we are using controlled components as per
-  // https://reactjs.org/docs/forms.html#controlled-components
-  // although instead of setState etc. as in class-based components
-  // we are using the Hooks API
-  // internal state that represents current state of the form
   const [values, setValues] = useState({
     pid: '',
     password: '',

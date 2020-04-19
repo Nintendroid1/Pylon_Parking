@@ -1,3 +1,7 @@
+/**
+ * The welcome page.
+ */
+
 import React from 'react';
 import { Typography } from '@material-ui/core';
 import { Link } from 'react-router-dom';
@@ -9,6 +13,9 @@ const styles = theme => ({
   }
 });
 
+/*
+  The component that is exported. Shows the welcome page.
+*/
 const WelcomeTab = ({ classes, ...props }) => {
   return (
     <>
@@ -17,7 +24,7 @@ const WelcomeTab = ({ classes, ...props }) => {
       </Typography>
       <Typography component={'span'} variant="h6">
         <div align="center" style={{ paddingTop: '30px' }}>
-          {'Parkings spots of the future'}
+          {'Parkings spots of the past, present, and future'}
         </div>
       </Typography>
     </>
