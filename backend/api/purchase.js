@@ -154,35 +154,50 @@ router.post("/", requireLogin, (req, res) => {
                 );
 
                 // Updating the user profile, sell page, and parking spot page.
+                // Also letting the user know that a parking spot was sold if they are
+                // logged in.
                 spotsSoldByOtherUser.forEach(e => {
+                  // Sending token amount to add to their balance.
                   socketAPI.broadcastUserInfo(
                     socket,
                     e.pid,
                     e.price
                   );
 
+                  // Info to send to the sell page for a specific user
                   const sellPageData = {
                     zone_id: e.zone_id,
                     spot_id: e.spot_id,
                     start_time: e.start_time
                   };
 
+                  // Sending the sell page info to the given user.
                   socketAPI.broadcastSellPageInfo(
                     socket,
                     e.pid,
                     sellPageData
                   );
 
+                  // Info to send to the parking spot page so that it can be updated.
                   const parkingSpotPageData = {
                     start_time: e.start_time,
                     end_time: e.end_time,
                     price: e.price
                   };
 
+                  // Sending the given info to the specific spot.
                   socketAPI.broadcastParkingSpotInfo(
                     socket,
                     parkingSpotId,
                     parkingSpotPageData
+                  );
+
+                  // Telling the specific user that one of their parking spots they
+                  // are selling was sold.
+                  socketAPI.broadcastSellSuccess(
+                    socket,
+                    e.pid,
+                    `Congrats, parking spot ${parkingSpotId} was just sold for ${e.price}`
                   )
                 })
               }

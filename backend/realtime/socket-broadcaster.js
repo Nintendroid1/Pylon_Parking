@@ -29,6 +29,8 @@ function broadcastParkingSpotInfo(io, parkingSpotId, data) {
   io.of(`parking_spot`).emit(`parkingSpot-${parkingSpotId}`, data);
 }
 
+// Broadcasting money to be added to specific user.
+// Used when a parking spot the user was selling was sold.
 function broadcastUserInfo(io, userId, data) {
   if (io === null) {
     console.log("Socket has not been initialized");
@@ -37,6 +39,17 @@ function broadcastUserInfo(io, userId, data) {
   io.of(`user`).emit(`userInfo-${userId}`, data);
 }
 
+// Broadcasting to the specific user that a parking spot was sold.
+function broadcastSellSuccess(io, userId, data) {
+  if (io === null) {
+    console.log("Socket has not been initialized");
+  }
+
+  io.of(`user`).emit(`sell-${userId}`, data);
+}
+
+// Sending the parking spot that was just put up for sale to the 
+// specific user.
 function broadcastSellPageInfo(io, userId, data) {
   if (io === null) {
     console.log("Socket has not been initialized");
@@ -59,5 +72,6 @@ module.exports= {
   broadcastParkingSpotInfo,
   broadcastTransactionHistoryInfo,
   broadcastUserInfo,
-  broadcastSellPageInfo
+  broadcastSellPageInfo,
+  broadcastSellSuccess
 }
