@@ -1,11 +1,11 @@
 {
-    "pid": "admin",
-    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE1ODYzNjY1NDEsInBpZCI6ImFkbWluIiwiYWRtaW4iOjEsImlhdCI6MTU4NjM2Mjk0MX0.GGWWxkruDYPElHktjY2BTke_DL7QEFbCIfYTpiIZ-KQ",
+    "pid": "ebunstonec",
+    "key": "testkey",
     "spot": {
         "spot_id": "1",
         "zone_id": "1",
-        "start_time": "1587355300",
-        "end_time": "1587355600",
+        "start_time": "1583040600",
+        "end_time": "1583048700",
         "price": "30"
     }
 }
