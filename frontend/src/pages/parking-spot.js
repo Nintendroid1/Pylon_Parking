@@ -193,7 +193,10 @@ const ParkingSpot = ({
       updateSeries([
         {
           name: 'prices',
-          data: resbody.parkingInfo.map(spot => spot.price)
+          // Change the map to limit the prices to only spots within a small time window
+          data: resbody.parkingInfo
+            .filter((spot, index) => index % 89 === 0)
+            .map(spot => spot.price)
         }
       ]);
 
