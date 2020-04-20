@@ -23,6 +23,7 @@ import {
   withStyles,
   withTheme} from '@material-ui/core/styles';
 import CircularProgress from '@material-ui/core/CircularProgress';
+import { convertEpochToMilitary, convertMilitaryTimeToNormal } from './forms/time-filter';
 
 const styles = theme => ({
   root: {
@@ -85,13 +86,20 @@ const getEntriesForPage = (page, numEntriesPerPage, listOfTransactions) => {
  */
 const TransactionTableHeader = props => {
   const { tableHeaders } = props;
-
+ 
   return (
     <>
       <TableHead>
         <TableRow>
-          <TableCell>{tableHeaders.parkingId}</TableCell>
-          <TableCell />
+          {
+            tableHeaders.map(e => {
+              return (
+                <>
+                  <TableCell>{e}</TableCell>
+                </>
+              );
+            })
+          }
         </TableRow>
       </TableHead>
     </>
@@ -108,14 +116,18 @@ const TransactionsTableBody = ({
   numEntriesPerPage,
   listOfTransactions}) => {
   const rows = getEntriesForPage(page, numEntriesPerPage, listOfTransactions);
-
+  
   return (
     <>
       <TableBody>
         {rows.map(row => (
           <TableRow>
-            <TableCell>{row.parkingId}</TableCell>
-            <TableCell />
+            <TableCell>{`${row.zone_id}-${row.spot_id}`}</TableCell>
+            <TableCell>{row.buyer}</TableCell>
+            <TableCell>{row.seller}</TableCell>
+            <TableCell>{convertMilitaryTimeToNormal(row.start_time)}</TableCell>
+            <TableCell>{convertMilitaryTimeToNormal(row.end_time)}</TableCell>
+            <TableCell>{row.quantity}</TableCell>
           </TableRow>
         ))}
       </TableBody>
@@ -286,12 +298,15 @@ const TransactionHistory = ({ setOpenSnackbar, updateSnackbarOptions, snackbarOp
   const [page, updatePage] = useState(0);
   const [numEntriesPerPage, updateNumEntriesPerPage] = useState(10);
 
-  // Table header.
-  const tableHeaders = {
-    parkingId: 'Parking ID',
-    sellerId: 'Seller ID',
-    buyerId: 'Buyer ID'
-  };
+  // Table header. Also the order to display headers in.
+  const tableHeaders = [
+    'Parking ID',
+    'Buyer PID',
+    'Seller PID',
+    'Start Time',
+    'End Time',
+    'Total Price',
+  ];
 
   const url = `${apiprefix}/transaction_history`;
 
@@ -304,6 +319,30 @@ const TransactionHistory = ({ setOpenSnackbar, updateSnackbarOptions, snackbarOp
     const respbody = await response.json();
 
     if (response.status === 200) {
+      /*
+        response body is the following object:
+        {
+          data: [
+            {
+              user: "park.vt", 
+              quantity: "10.0000 VTP",
+              spot_id: 123, 
+              zone_id: 456, 
+              time_code: 1586401381, 
+              buyer: "alice", 
+              seller: "bob"
+            }
+          ]
+        }
+      */
+
+      // Formatting response
+      respbody.data.forEach(e => {
+        e.quantity = e.quantity.split(' ')[0];
+        e.start_time = convertEpochToMilitary(time_code);
+        e.end_time = convertEpochToMilitary(time_code + 15 * 60 * 1000);
+      });
+
       const queryParams = queryStrings.parse(window.location.search);
 
       // Updates the url based on the page and number of entries.
@@ -318,7 +357,7 @@ const TransactionHistory = ({ setOpenSnackbar, updateSnackbarOptions, snackbarOp
         );
       }
 
-      updateListOfTransactions(respbody.listOfTransactions);
+      updateListOfTransactions(respbody.data);
     } else {
       updateMessage('Error has occurred');
     }
@@ -331,6 +370,13 @@ const TransactionHistory = ({ setOpenSnackbar, updateSnackbarOptions, snackbarOp
 
     if (response.status === 200) {
       const queryParams = queryStrings.parse(window.location.search);
+
+      // Formatting response
+      respbody.data.forEach(e => {
+        e.quantity = e.quantity.split(' ')[0];
+        e.start_time = convertEpochToMilitary(time_code);
+        e.end_time = convertEpochToMilitary(time_code + 15 * 60 * 1000);
+      });
 
       if (typeof queryParams.page === 'undefined' || typeof queryParams.numEntries === 'undefined') {
         history.push(`/transaction_history?page=${page}&numEntries=${numEntriesPerPage}`);
