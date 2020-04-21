@@ -236,7 +236,7 @@ const popUpContent = sellInfoList => {
 const SellingParkingSpotTableBody = props => {
   const { parkingSpotsInfo, handleSellRequest } = props;
   const [sellInfo, updateSellInfo] = useState({
-    date: Date.now(),
+    date: new Date(),
     spot_id: -1,
     zone_id: -1,
     start_time: '24:00',
@@ -263,9 +263,9 @@ const SellingParkingSpotTableBody = props => {
 
     // Not sure if the sellInfo is update yet, last time it was not.
     let sellInfoList = [
-      { name: 'Zone ID', value: sellInfo.zone_id },
-      { name: 'Spot ID', value: sellInfo.spot_id },
-      { name: 'Date', value: sellInfo.date.toDateString() },
+      { name: 'Zone ID', value: spotInfo.zone_id },
+      { name: 'Spot ID', value: spotInfo.spot_id },
+      { name: 'Date', value: parkingSpotsInfo[index].date.toDateString() },
       {
         name: 'Start Time',
         value: convertMilitaryTimeToNormal(sellInfo.start_time)
