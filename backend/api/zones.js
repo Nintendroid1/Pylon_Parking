@@ -95,8 +95,8 @@ router.get("/:zone_id", (req, res) => {
     INNER JOIN zones Z ON Z.zone_id = F.zone_id \
   GROUP BY \
     F.zone_id, \
-    Z.zone_name, \
-    F.spot_id \
+    F.spot_id, \
+    Z.zone_name \
   ORDER BY \
     F.spot_id ASC',
       [req.params.zone_id, req.query.startTime, req.query.endTime]
@@ -145,8 +145,8 @@ router.get("/:zone_id", (req, res) => {
           ON Z.zone_id = F.zone_id \
     GROUP BY \
       F.zone_id, \
-      Z.zone_name, \
-      F.spot_id \
+      F.spot_id, \
+      Z.zone_name \
     ORDER BY \
       F.spot_id ASC',
       [req.params.zone_id, todayStartTime, todayEndTime]
