@@ -474,7 +474,6 @@ const Zone = ({
   }*/
 
   // Initializing state information.
-  setOpenSnackbar(false);
   const [message, updateMessage] = useState(null);
   const [parkingSpotsInfo, updateParkingSpotsInfo] = useState(null);
   const [order, updateOrder] = useState('asc');

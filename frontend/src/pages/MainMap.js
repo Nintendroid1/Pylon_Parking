@@ -91,7 +91,7 @@ const MainMap = ({ classes, ...props }) => {
           }
         }}
       >
-        {`Zone ${idx}: ${z.zone_name}`}
+        {`Zone ${idx + 1}: ${z.zone_name}`}
       </Link>
     </li>
   ));
