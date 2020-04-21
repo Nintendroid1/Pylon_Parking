@@ -16,6 +16,7 @@
     "connect-multiparty": "^2.2.0",
     "eosjs": "^20.0.3",
     "eosjs-api": "^7.0.4",
+    "eosjs-ecc": "^4.0.7",
     "express": "^4.17.1",
     "express-kun": "^1.0.24",
     "form-data": "^3.0.0",
