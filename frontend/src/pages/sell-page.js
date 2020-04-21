@@ -85,21 +85,36 @@ const SellingMessageContent = (
   parkingSpotStartTime,
   parkingSpotEndTime,
   sellInfo,
-  updateSellInfo
+  updateSellInfo,
+  validTime,
+  updateValidTime
 ) => {
+  // update start and end time to be the parking spot time.
+  updateSellInfo({
+    ...sellInfo,
+    start_time: parkingSpotStartTime,
+    end_time: parkingSpotEndTime
+  });
+
+  const today = new Date();
+  const isToday = true;
+
+  if (today.getFullYear() !== sellInfo.date.getUTCFullYear() ||
+      today.getMonth() !== sellInfo.date.getUTCMonth() ||
+      today.getDate() !== sellInfo.date.getUTCDate()) {
+
+    isToday = false;
+  }
+
+  const [hour, minutes] = today.toTimeString().split(':');
+  const currTime = hour + minutes;
+
   const [validCost, updateValidCost] = useState({
     hasError: false,
     errorMessage: ''
   });
 
   const priceClasses = priceStyles();
-
-  const [validTime, updateValidTime] = useState({
-    start_timeHasError: false,
-    start_timeErrorMessage: '',
-    end_timeHasError: false,
-    end_timeErrorMessage: ''
-  });
 
   const [totalCost, UpdateTotalCost] = useState(0);
 
@@ -113,16 +128,12 @@ const SellingMessageContent = (
 
     updateSellInfo({ ...sellInfo, [name]: value });
 
-    // this is not true because parking spots can be in the future.
-    let today = new Date(Date.now());
-    let timeSplit = today.toTimeString().split(':');
-    let currTime = timeSplit[0].concat(':', timeSplit[1]);
-
-    // chosen start time is before parking spot start time.
+    // chosen start time is before parking spot start time or before current time if 
+    // spot purchased for today.
     if (
-      name === 'start_time' &&
-      compareMilitaryTime(value, currTime) < 0 &&
-      compareMilitaryTime(value, parkingSpotStartTime) < 0
+      (name === 'start_time' &&
+      compareMilitaryTime(value, parkingSpotStartTime) < 0) ||
+      (isToday && compareMilitaryTime(value, currTime) < 0)
     ) {
       updateValidTime({
         ...validTime,
@@ -133,26 +144,37 @@ const SellingMessageContent = (
 
     // chosen end time is after parking spot end time.
     else if (
-      name === 'end_time' &&
-      compareMilitaryTime(value, parkingSpotEndTime) > 0
+      (name === 'end_time' &&
+      compareMilitaryTime(value, parkingSpotEndTime) > 0)
     ) {
       updateValidTime({
         ...validTime,
         end_timeHasError: true,
-        start_timeErrorMessage: 'End Time Cannot Be After Purchased Time.'
+        end_timeErrorMessage: 'End Time Cannot Be After Purchased Time.'
       });
+    } 
+    
+    // Chosen end time is before the chosen start time.
+    else if (name === 'end_time' && compareMilitaryTime(sellInfo.start_time, value) > 0) {
+      updateValidTime({
+        ...validTime,
+        end_timeHasError: true,
+        end_timeErrorMessage: 'End Time Cannot Be Before Start Time.'
+      });
+    } else {
+      updateValidTime({
+        start_timeErrorMessage: '*Your Time Will Be Rounded Up To The Nearest 15 Minutes',
+        start_timeHasError: false,
+        end_timeHasError: false,
+        end_timeErrorMessage: '*Your Time Will Be Rounded Up To The Nearest 15 Minutes'
+      })
     }
   };
 
   const handleOnChangeCost = event => {
     const cost = event.target.value;
 
-    if (isNaN(cost)) {
-      updateValidCost({
-        hasError: true,
-        errorMessage: 'Invalid characters detected. Must be a decimal number'
-      });
-    } else if (Number(cost) < 0) {
+    if (Number(cost) < 0) {
       updateValidCost({
         hasError: true,
         errorMessage: 'Cost must be at least 0'
@@ -213,6 +235,7 @@ const SellingMessageContent = (
               <TextField
                 required
                 error={validCost.hasError}
+                type='number'
                 label={'Cost Per 15 minutes'}
                 value={sellInfo.cost}
                 helperText={validCost.errorMessage}
@@ -265,12 +288,23 @@ const SellingParkingSpotTableBody = props => {
   });
   const [openConfirm, setOpenConfirm] = useState(false);
   const [sellInfoList, updateSellInfoList] = useState([]);
+  const [validTime, updateValidTime] = useState({
+    start_timeHasError: false,
+    start_timeErrorMessage: '*Your Time Will Be Rounded Up To The Nearest 15 Minutes',
+    end_timeHasError: false,
+    end_timeErrorMessage: '*Your Time Will Be Rounded Up To The Nearest 15 Minutes'
+  });
 
   const handleOnConfirm = privateKey => {
     handleSellRequest(sellInfo, privateKey);
   };
 
   const handleSellInfo = spotInfo => () => {
+
+    if (validTime.start_timeHasError || validTime.end_timeHasError) {
+      return;
+    }
+
     // console.log(sellInfo);
     const index = parkingSpotsInfo.findIndex(
       e => e.spot_id === spotInfo.spot_id && e.zone_id === spotInfo.zone_id
@@ -332,7 +366,9 @@ const SellingParkingSpotTableBody = props => {
                       parkingSpot.start_time,
                       parkingSpot.end_time,
                       sellInfo,
-                      updateSellInfo
+                      updateSellInfo,
+                      validTime,
+                      updateValidTime
                     )}
                     handleOnConfirm={handleSellInfo(parkingSpot)}
                     buttonColor="secondary"
