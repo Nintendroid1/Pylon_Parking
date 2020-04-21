@@ -22,13 +22,13 @@ const CustomSnackbar = ({
     updateIsOpen(false);
   };
 
-  console.log('vertical position '  + typeof verticalPos);
-  console.log('horizontal position '  + typeof horizontalPos);
+  const vertical = verticalPos;
+  const horizontal = horizontalPos;
 
   return (
     <>
       <Snackbar
-        anchorOrigin={{ verticalPos, horizontalPos }}
+        anchorOrigin={{ vertical, horizontal }}
         open={isOpen}
         autoHideDuration={6000}
         onClose={handleOnClose}
