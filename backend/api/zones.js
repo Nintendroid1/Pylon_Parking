@@ -88,7 +88,7 @@ router.get("/:zone_id", (req, res) => {
     Z.zone_name, F.spot_id, \
     F.zone_id, \
     MIN(F.time_code) as "start_time", \
-    MAX(F.time_code) + 900 as "end_time", \
+    MAX(F.time_code) + 899 as "end_time", \
     SUM(F.price) as "price" \
   FROM \
     filtered_times F \
@@ -137,7 +137,7 @@ router.get("/:zone_id", (req, res) => {
       F.spot_id, \
       F.zone_id, \
       MIN(F.time_code) as "start_time", \
-      MAX(F.time_code) + 900 as "end_time", \
+      MAX(F.time_code) + 899 as "end_time", \
       SUM(F.price) as "price" \
     FROM \
       filtered_times F \
