@@ -244,7 +244,7 @@ const SellingMessageContent = (
             </TableCell>
           </TableRow>
           <TableRow>
-            <TableCell>Total Calculated Price For Entire Time Period:</TableCell>
+            <TableCell>Total Price:</TableCell>
             <TableCell>
               <TextField disabled value={totalCost} InputProps={{ priceClasses }} />
             </TableCell>
@@ -528,12 +528,14 @@ const SellPage = ({
 
     // Make api request.
     /*
-    date: Date.now(),
-    spot_id: -1,
-    zone_id: -1,
-    start_time: '24:00',
-    end_time: '24:00',
-    cost: 0
+    sellInfo = {
+      date: Date.now(),
+      spot_id: -1,
+      zone_id: -1,
+      start_time: '24:00',
+      end_time: '24:00',
+      cost: 0
+    }
     */
     const url = `${apiprefix}/sell`;
     const json = {
