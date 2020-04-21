@@ -79,7 +79,8 @@ const roundUpToNearest15 = time => {
   Converts the military time to standard US time in AM/PM.
 */
 const convertMilitaryTimeToNormal = time => {
-  let [hour, minutes] = time.split(':').map(e => Number(e));
+  let [hour, minutes] = time.split(':');
+  hour = Number(hour);
   let period = 'AM';
 
   if (hour > 12) {
