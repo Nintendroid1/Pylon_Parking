@@ -208,6 +208,7 @@ const ConfirmationDialogWithPassword = ({
   messageContent,
   handleOnConfirm,
   buttonColor,
+  requireKey,
   ...props
 }) => {
 
