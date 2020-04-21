@@ -144,7 +144,8 @@ const convertEpochToMilitary = (epoch) => {
   };
 
   const temp_date = new Date(epoch * 1000);
-  return temp_date.toLocaleTimeString('en-US', option);
+  const retval = temp_date.toLocaleTimeString('en-US', option)
+  return retval === '24:00' ? '00:00' : retval;
 };
 
 /*
@@ -274,7 +275,7 @@ const TimeFilter = ({
     const newDateObj = {
       date: newDate,
       startTime: '00:00',
-      endTime: '24:00'
+      endTime: '23:59'
     };
 
     const resetCheckBoxes = {
