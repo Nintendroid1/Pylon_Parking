@@ -339,8 +339,8 @@ const TransactionHistory = ({ setOpenSnackbar, updateSnackbarOptions, snackbarOp
       // Formatting response
       respbody.data.forEach(e => {
         e.quantity = e.quantity.split(' ')[0];
-        e.start_time = convertEpochToMilitary(time_code);
-        e.end_time = convertEpochToMilitary(time_code + 15 * 60 * 1000);
+        e.start_time = convertEpochToMilitary(e.time_code);
+        e.end_time = convertEpochToMilitary(e.time_code + 15 * 60 * 1000);
       });
 
       const queryParams = queryStrings.parse(window.location.search);
@@ -374,8 +374,8 @@ const TransactionHistory = ({ setOpenSnackbar, updateSnackbarOptions, snackbarOp
       // Formatting response
       respbody.data.forEach(e => {
         e.quantity = e.quantity.split(' ')[0];
-        e.start_time = convertEpochToMilitary(time_code);
-        e.end_time = convertEpochToMilitary(time_code + 15 * 60 * 1000);
+        e.start_time = convertEpochToMilitary(e.time_code);
+        e.end_time = convertEpochToMilitary(e.time_code + 15 * 60 * 1000);
       });
 
       if (typeof queryParams.page === 'undefined' || typeof queryParams.numEntries === 'undefined') {

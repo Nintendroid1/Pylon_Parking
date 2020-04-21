@@ -514,7 +514,7 @@ const Zone = ({
   // Stores the date in EDT.
   const [currentTimeFilter, updateCurrentTimeFilter] = useState({
     date: tempDate,
-    startTime: convertEpochToMilitary(tempDateEpoch / 1000),
+    startTime: convertEpochToMilitary(Math.trunc(tempDateEpoch / 1000)),
     endTime: '23:59'
   });
 
