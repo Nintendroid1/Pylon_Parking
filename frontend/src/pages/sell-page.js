@@ -158,7 +158,7 @@ const SellingMessageContent = (
         errorMessage: 'Cost must be at least 0'
       });
     } else {
-      updateSellInfo({ ...sellInfo, price: Number(cost) });
+      updateSellInfo({ ...sellInfo, cost: Number(cost) });
       // update the total cost.
       if (
         !validCost.hasError &&
@@ -214,7 +214,7 @@ const SellingMessageContent = (
                 required
                 error={validCost.hasError}
                 label={'Cost Per 15 minutes'}
-                value={sellInfo.price}
+                value={sellInfo.cost}
                 helperText={validCost.errorMessage}
                 onChange={handleOnChangeCost}
               />
@@ -599,7 +599,7 @@ const SellPage = ({
           message={messageDialogField.message}
           dialogTitle={messageDialogField.dialogTitle}
           open={openMessageDialog}
-          setOpen={updateMessageDialogField}
+          setOpen={updateOpenMessageDialog}
         />
         <LoadingDialog 
           message={loadingDialogField.message}
