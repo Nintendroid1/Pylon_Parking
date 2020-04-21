@@ -39,6 +39,7 @@ import Box from '@material-ui/core/Box';
 import { ConfirmationDialogFieldButton } from './forms/parking-spot-components';
 import {
   withStyles,
+  makeStyles,
   withTheme,
   MuiThemeProvider,
   createMuiTheme
@@ -51,6 +52,17 @@ const styles = theme => ({
   },
   circProgress: {
     marginTop: '200px'
+  }
+});
+
+const priceStyles = makeStyles({
+  underline: {
+    "&&&:before": {
+      borderBottom: "none"
+    },
+    "&&:after": {
+      borderBottom: "none"
+    }
   }
 });
 
@@ -79,6 +91,8 @@ const SellingMessageContent = (
     hasError: false,
     errorMessage: ''
   });
+
+  const priceClasses = priceStyles();
 
   const [validTime, updateValidTime] = useState({
     start_timeHasError: false,
@@ -204,7 +218,7 @@ const SellingMessageContent = (
           </TableRow>
           <TableRow>
             <TableCell>Total Calculated Price For Entire Time Period:</TableCell>
-            <Box>{totalCost}</Box>
+            <TextField disabled value={totalCost} InputProps={{ priceClasses }} />
           </TableRow>
         </TableBody>
       </Table>
