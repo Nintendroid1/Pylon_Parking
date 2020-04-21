@@ -80,7 +80,7 @@ const MainMap = ({ classes, ...props }) => {
     get_zones();
   }, []);
 
-  var zoneList = zones.map(z => (
+  var zoneList = zones.map((z, idx) => (
     <li style={{ listStyleType: 'none' }}>
       <Link
         className={classes.zoneLink}
@@ -91,7 +91,7 @@ const MainMap = ({ classes, ...props }) => {
           }
         }}
       >
-        {z.zone_name}
+        {`Zone ${idx}: ${z.zone_name}`}
       </Link>
     </li>
   ));
