@@ -315,14 +315,20 @@ const TransactionHistory = ({ userSocket, socket, classes }) => {
     'Total Price',
   ];
 
-  const url = `${apiprefix}/transaction_history`;
+  const url = `${apiprefix}/history`;
 
   // GET request for a specific user's personal history.
   const getUserTransactionHistory = async () => {
+    // testing purposes.
     const response = await makeAPICall(
       'GET',
-      `${url}/${localStorage.olivia_pid}/spots`
+      `${url}`
     );
+    /*
+    const response = await makeAPICall(
+      'GET',
+      `${url}/${localStorage.olivia_pid}`
+    );*/
     const respbody = await response.json();
 
     if (response.status === 200) {
