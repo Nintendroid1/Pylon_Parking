@@ -183,7 +183,7 @@ const SellingMessageContent = (
               <TimePicker
                 isRequired={true}
                 handleTimeChange={handleTimeChange}
-                time={sellInfo.start_time}
+                time={sellInfo.end_time}
                 name={'end_time'}
                 label={'End Time'}
               />
@@ -203,10 +203,8 @@ const SellingMessageContent = (
             </TableCell>
           </TableRow>
           <TableRow>
-            <TableCell>Total Price For Entire Time Period:</TableCell>
-            <TableCell>
-              <TextField disabled label={'Total Cost'} value={totalCost} />
-            </TableCell>
+            <TableCell>Total Calculated Price For Entire Time Period:</TableCell>
+            <Box>{totalCost}</Box>
           </TableRow>
         </TableBody>
       </Table>
@@ -348,7 +346,7 @@ const SellingParkingSpotTableHeader = () => {
           <TableCell>Date</TableCell>
           <TableCell>Start Time</TableCell>
           <TableCell>End Time</TableCell>
-          <TableCell>Average Price Per 15 minutes</TableCell>
+          <TableCell>Total Price</TableCell>
         </TableRow>
       </TableHead>
     </>
