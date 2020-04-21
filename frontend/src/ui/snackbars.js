@@ -22,8 +22,8 @@ const CustomSnackbar = ({
     updateIsOpen(false);
   };
 
-  console.log('vertical position'  + verticalPos);
-  console.log('horizontal position'  + horizontalPos);
+  console.log('vertical position '  + typeof verticalPos);
+  console.log('horizontal position '  + typeof horizontalPos);
 
   return (
     <>
