@@ -586,7 +586,7 @@ const SellPage = ({
   // Change to something more meaningful.
   return (
     <>
-      <div style="overflow: visible">
+      <div>
         <CustomSnackbar
           isOpen={openSnackbar}
           updateIsOpen={setOpenSnackbar}
