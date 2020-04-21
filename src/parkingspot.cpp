@@ -41,7 +41,7 @@ private:
     }
     
     uint64_t secondary_key() const {
-      std::string key = "Spot_ID:" + std::to_string(spot_id) + "Zone_ID:" + std::to_string(zone_id) +"Timecode:" + std::to_string(timeclock);
+      std::string key = std::to_string(spot_id) + std::to_string(timeclock) + std::to_string(zone_id) ;
       return std::stoi(key);
     }
   };
@@ -95,12 +95,12 @@ public:
       park_index parkdeck(get_self(), get_first_receiver().value);
 
       //Iterator for parking spots using spot_id as key
-      std::string key = "Spot_ID:" + std::to_string(spot_id) + "Zone_ID:" + std::to_string(zone_id) +"Timecode:" + std::to_string(time_code);
-      
+      std::string key = std::to_string(spot_id) + std::to_string(time_code) + std::to_string(zone_id) ;
+      print("Query:", key);
       //Iterate with secondary key
       auto secparkdeck = parkdeck.get_index<name("seckey")>();
       auto iterator = secparkdeck.find(std::stoi(key));
-
+      print("Made it after secparkdeck creation");
       if( iterator == secparkdeck.end()) {
             //The parking spot isn't in the table
             parkdeck.emplace(user, [&](auto& row) {
@@ -128,7 +128,7 @@ public:
     park_index parkdeck(get_self(), get_first_receiver().value);
 
     //Iterator for parking spots using spot_id as key
-    std::string key = "Spot_ID:" + std::to_string(spot_id) + "Zone_ID:" + std::to_string(zone_id) +"Timecode:" + std::to_string(time_code);
+    std::string key = std::to_string(spot_id) + std::to_string(time_code) + std::to_string(zone_id) ;
 
     //Iterate with secondary key
     auto secparkdeck = parkdeck.get_index<name("seckey")>();
@@ -179,7 +179,7 @@ public:
       park_index parkdeck(get_self(), get_first_receiver().value);
 
       //Iterator for parking spots using spot_id as key
-      std::string key = "Spot_ID:" + std::to_string(spot_id) + "Zone_ID:" + std::to_string(zone_id) +"Timecode:" + std::to_string(time_code);
+      std::string key = std::to_string(spot_id) + std::to_string(time_code) + std::to_string(zone_id) ;
 
       //Iterate with secondary key
       auto secparkdeck = parkdeck.get_index<name("seckey")>();
