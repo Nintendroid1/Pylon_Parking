@@ -5,6 +5,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { makeAPICall } from '../api';
+import CustomSnackbar from './ui/snackbars';
 import { withStyles } from '@material-ui/core/styles';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
