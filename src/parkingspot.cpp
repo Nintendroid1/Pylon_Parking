@@ -28,14 +28,22 @@ private:
 
   //Parking spot to store the info
   struct [[eosio::table]] pspot {
-    uint64_t spot_id; //key
+    uint64_t id;
+    uint64_t spot_id;
     uint64_t zone_id;
-    std::vector<uint32_t>  timeclock; //Time information in 15 min intervals
+    uint32_t  timeclock; //Time information in 15 min intervals
     bool available;
     name owner;
 
     //Sets primary key to be the spot id
-    uint64_t primary_key() const {return spot_id;}
+    uint64_t  primary_key() const {
+      return id;
+    }
+    
+    uint64_t secondary_key() const {
+      std::string key = "Spot_ID:" + std::to_string(spot_id) + "Zone_ID:" + std::to_string(zone_id) +"Timecode:" + std::to_string(timeclock);
+      return std::stoi(key);
+    }
   };
 
   void send_summary(name user, std::string message) {
@@ -56,7 +64,8 @@ private:
   /*_n is the name of the table
   * takes in a pspot value
   */
-  typedef eosio::multi_index<"pspots"_n, pspot> park_index;
+  typedef eosio::multi_index<"pspots"_n, pspot,  
+      indexed_by<"seckey"_n, const_mem_fun<pspot, uint64_t, &pspot::secondary_key>>> park_index;
 
 public:
  //"code" param is the account the contract is deployed to
@@ -86,13 +95,19 @@ public:
       park_index parkdeck(get_self(), get_first_receiver().value);
 
       //Iterator for parking spots using spot_id as key
-      auto iterator = parkdeck.find(spot_id);
+      std::string key = "Spot_ID:" + std::to_string(spot_id) + "Zone_ID:" + std::to_string(zone_id) +"Timecode:" + std::to_string(time_code);
+      
+      //Iterate with secondary key
+      auto secparkdeck = parkdeck.get_index<name("seckey")>();
+      auto iterator = secparkdeck.find(std::stoi(key));
 
-      if( iterator == parkdeck.end() ) {
+      if( iterator == secparkdeck.end()) {
             //The parking spot isn't in the table
             parkdeck.emplace(user, [&](auto& row) {
+                row.id = parkdeck.available_primary_key();
                 row.spot_id = spot_id;
                 row.zone_id = zone_id;
+                row.timeclock = time_code;
                 row.available = true;
                 row.owner = owner;//Should be VT by default
             });
@@ -100,29 +115,32 @@ public:
             send_summary(user, " successfully inserted parking spot");
         }
         else {
-            //The parking spot is in the table
-            print("ALREADY EXISTS! Parking Spot: ", spot_id, " in Zone: ", zone_id);
+              //The parking spot is in the table
+              print("ALREADY EXISTS! Parking Spot: ", spot_id, " in Zone: ", zone_id);
         }
   }
 
   //Erases parking spot 
-  //TODO Change only to admin access
   [[eosio::action]]
-  void erase(name user, uint64_t spot_id, uint64_t zone_id) {
+  void erase(name user, uint64_t spot_id, uint32_t time_code, uint64_t zone_id) {
     require_auth(user);
 
     park_index parkdeck(get_self(), get_first_receiver().value);
 
     //Iterator for parking spots using spot_id as key
-    auto iterator = parkdeck.find(spot_id);
+    std::string key = "Spot_ID:" + std::to_string(spot_id) + "Zone_ID:" + std::to_string(zone_id) +"Timecode:" + std::to_string(time_code);
 
-    if( iterator == parkdeck.end() ) {
+    //Iterate with secondary key
+    auto secparkdeck = parkdeck.get_index<name("seckey")>();
+    auto iterator = secparkdeck.find(std::stoi(key));
+
+    if( iterator == secparkdeck.end() ) {
           //The parking spot isn't in the table
           //    check(iterator != addresses.end(), "Record does not exist");
           print("DOES NOT EXIST! Parking Spot: ", spot_id, " in Zone: ", zone_id);
       }
       else {
-          parkdeck.erase(iterator);
+          secparkdeck.erase(iterator);
           print("REMOVED Parking Spot: ", spot_id, " in Zone: ", zone_id, " on: ", current_time_point().sec_since_epoch());
           send_summary(user, " successfully removed parking spot");
 
@@ -133,7 +151,7 @@ public:
   //Updates parking spot available
   [[eosio::action]]
   // [[eosio::on_notify("eosio.token::transfer")]]
-  void modavail(name user, eosio::asset quantity, uint64_t spot_id, uint64_t zone_id, uint32_t time_code, name buyer, name seller) {
+  void modavail(name user, eosio::asset quantity, uint64_t spot_id, uint64_t zone_id, uint32_t time_code, name buyer) {
     //Ensure not transferring to self
     // if (owner == get_self() || user != get_self()) {
     //   return;
@@ -161,80 +179,34 @@ public:
       park_index parkdeck(get_self(), get_first_receiver().value);
 
       //Iterator for parking spots using spot_id as key
-      auto iterator = parkdeck.find(spot_id);
+      std::string key = "Spot_ID:" + std::to_string(spot_id) + "Zone_ID:" + std::to_string(zone_id) +"Timecode:" + std::to_string(time_code);
 
-      if( iterator == parkdeck.end() ) {
+      //Iterate with secondary key
+      auto secparkdeck = parkdeck.get_index<name("seckey")>();
+      auto iterator = secparkdeck.find(std::stoi(key));
+
+      if( iterator == secparkdeck.end() ) {
             //The parking spot isn't in the table
             //    check(iterator != addresses.end(), "Record does not exist");
             print("DOES NOT EXIST! Parking Spot: ", spot_id, " in Zone: ", zone_id);
-        }
-        else {
-          //require_auth(buyer);
+      }
+      else {
+        secparkdeck.modify(iterator, user, [&](auto& row) {
+          //require_auth(row.owner);
+          //end_summary(row.owner, " transferring ownership");
           action transferSeller = action(
             permission_level{buyer,"active"_n},
             "eosio.token"_n,
             "transfer"_n,
-            std::make_tuple(buyer, seller, quantity, std::string("payment from buyer"))
+            std::make_tuple(buyer, row.owner, quantity, std::string("payment from buyer"))
           );
           transferSeller.send();
-            //Get money from user
-            // balance_table balanceBuy(get_self(), buyer.value);
-            // auto bal_it_buy = balanceBuy.find(hokie_coin.raw());
+          row.available = false;
+          row.owner = buyer;
+      });
 
-            // if (bal_it_buy != balanceBuy.end()) {
-            //   //Subtract from exisiting money
-            //   balanceBuy.modify(bal_it_buy, get_self(), [&](auto &row) {
-            //     if(row.funds < quantity) {
-            //       print("Insufficient Funds From Buyer");
-            //       return;
-            //     }
-            //     row.funds -= quantity;
-            //   });
-            // }
-            // else {
-            //     print("No Account Found for Buyer - Creating Account");
-            //     balanceBuy.emplace(get_self(), [&](auto &row) {
-            //       eosio::asset x(0, hokie_coin);
-            //       row.funds = x;
-            //     });
-            //     return;
-            //   }
-
-            // //Transfer money to old owner
-            // balance_table balanceSell(get_self(), seller.value);
-            // auto bal_it_sell = balanceSell.find(hokie_coin.raw());
-
-            // if (bal_it_sell != balanceSell.end()) {
-            //   //Add to exisiting money
-            //   balanceSell.modify(bal_it_sell, get_self(), [&](auto &row) {
-            //     row.funds += quantity;
-            //   });
-            // }
-            // else {
-            //   //Give new money
-            //   balanceSell.emplace(get_self(), [&](auto &row) {
-            //     row.funds = quantity;
-            //   });
-            // }
-
-            parkdeck.modify(iterator, user, [&](auto& row) {
-                bool found = false;
-                for (auto it = begin (row.timeclock); it != end (row.timeclock); ++it) {
-                      if(*it == time_code) {
-                        found = true;
-                      }
-                  }
-                if(!found) {
-                  row.timeclock.push_back(time_code);
-                }
-                //require_auth(row.owner);
-                //end_summary(row.owner, " transferring ownership");
-                row.available = false;
-                row.owner = buyer;
-            });
-
-            print("Parking Spot: ", spot_id, " in Zone: ", zone_id, " is owned by ", buyer, " for: ", time_code, ". Transaction on ", current_time_point().sec_since_epoch());
-            send_summary(user, " successfully changed parking spot availability");
-        }
+          print("Parking Spot: ", spot_id, " in Zone: ", zone_id, " is owned by ", buyer, " for: ", time_code, ". Transaction on ", current_time_point().sec_since_epoch());
+          send_summary(user, " successfully changed parking spot availability");
+      }
   }
 };
