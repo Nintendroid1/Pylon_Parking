@@ -182,6 +182,8 @@ const SellingMessageContent = (
             <TableCell>Start Time:</TableCell>
             <TableCell>
               <TimePicker
+                hasError={validTime.start_timeHasError}
+                errorMessage={validTime.start_timeErrorMessage}
                 isRequired={true}
                 handleTimeChange={handleTimeChange}
                 time={sellInfo.start_time}
@@ -194,6 +196,8 @@ const SellingMessageContent = (
             <TableCell>End Time:</TableCell>
             <TableCell>
               <TimePicker
+                hasError={validTime.end_timeHasError}
+                errorMessage={validTime.end_timeErrorMessage}
                 isRequired={true}
                 handleTimeChange={handleTimeChange}
                 time={sellInfo.end_time}
@@ -576,7 +580,7 @@ const SellPage = ({
   // Change to something more meaningful.
   return (
     <>
-      <div>
+      <div style="overflow: visible">
         <MessageDialog 
           message={messageDialogField.message}
           dialogTitle={messageDialogField.dialogTitle}
