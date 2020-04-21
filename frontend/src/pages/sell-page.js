@@ -394,13 +394,16 @@ const SellPage = ({
   socket, 
   isLoggedIn, 
   classes,
-  setOpenSnackbar,
-  snackbarOptions,
-  updateSnackbarOptions,
   ...props 
 }) => {
 
-  setOpenSnackbar(false);
+  const [openSnackbar, setOpenSnackbar] = useState(false);
+  const [snackbarOptions, updateSnackbarOptions] = useState({
+    verticalPos: 'top',
+    horizontalPos: 'center',
+    message: '',
+    severity: 'info'
+  });
   const [loadingDialogField, updateLoadingDialogField] = useState({
     open: false,
     message: ''
@@ -581,6 +584,14 @@ const SellPage = ({
   return (
     <>
       <div style="overflow: visible">
+        <CustomSnackbar
+          isOpen={openSnackbar}
+          updateIsOpen={setOpenSnackbar}
+          verticalPos={snackbarOptions.verticalPos}
+          horizontalPos={snackbarOptions.horizontalPos}
+          message={snackbarOptions.message}
+          severity={snackbarOptions.severity}
+        />
         <MessageDialog 
           message={messageDialogField.message}
           dialogTitle={messageDialogField.dialogTitle}

@@ -152,14 +152,6 @@ const App = ({ classes, ...props }) => {
 
   return (
     <React.Fragment>
-      <CustomSnackbar
-        isOpen={openSnackbar}
-        updateIsOpen={setOpenSnackbar}
-        verticalPos={snackbarOptions.verticalPos}
-        horizontalPos={snackbarOptions.horizontalPos}
-        message={snackbarOptions.message}
-        severity={snackbarOptions.severity}
-      />
       <MuiThemeProvider theme={isDark ? darkTheme : lightTheme}>
         <div className={classes.root}>
           <CssBaseline />
@@ -231,9 +223,6 @@ const App = ({ classes, ...props }) => {
                       classes={classes}
                       userSocket={userSocket}
                       socket={transactionHistorySocket}
-                      setOpenSnackbar={setOpenSnackbar}
-                      updateSnackbarOptions={updateSnackbarOptions}
-                      snackbarOptions={snackbarOptions}
                     />
                   )}
                 />
@@ -250,9 +239,6 @@ const App = ({ classes, ...props }) => {
                     <SellPage
                       isLoggedIn={isLoggedIn} 
                       socket={userSocket} 
-                      setOpenSnackbar={setOpenSnackbar}
-                      updateSnackbarOptions={updateSnackbarOptions}
-                      snackbarOptions={snackbarOptions}
                     />
                   )}
                 />
@@ -286,9 +272,6 @@ const App = ({ classes, ...props }) => {
                     <ProfilePage
                       socket={userSocket}
                       isLoggedIn={isLoggedIn}
-                      setOpenSnackbar={setOpenSnackbar}
-                      updateSnackbarOptions={updateSnackbarOptions}
-                      snackbarOptions={snackbarOptions}
                     />
                   )}
                 />
@@ -305,9 +288,6 @@ const App = ({ classes, ...props }) => {
                 render={() => (
                   <BountySystem
                     userSocket={userSocket}
-                    setOpenSnackbar={setOpenSnackbar}
-                    updateSnackbarOptions={updateSnackbarOptions}
-                    snackbarOptions={snackbarOptions}
                   />
                 )}
               />
@@ -323,9 +303,6 @@ const App = ({ classes, ...props }) => {
                 render={() => (
                   <UpdateUserInfo
                     isLoggedIn={isLoggedIn}
-                    setOpenSnackbar={setOpenSnackbar}
-                    updateSnackbarOptions={updateSnackbarOptions}
-                    snackbarOptions={snackbarOptions}
                   />
                 )}
               />
@@ -339,10 +316,7 @@ const App = ({ classes, ...props }) => {
                 render={() => 
                   <ParkingSpot
                     userSocket={userSocket}
-                    socket={parkingSpotSocket} 
-                    setOpenSnackbar={setOpenSnackbar}
-                    updateSnackbarOptions={updateSnackbarOptions}
-                    snackbarOptions={snackbarOptions}
+                    socket={parkingSpotSocket}
                   />
                 }
               />
@@ -356,10 +330,7 @@ const App = ({ classes, ...props }) => {
                 render={() => 
                   <Zone 
                     userSocket={userSocket}
-                    socket={parkingLotSocket} 
-                    setOpenSnackbar={setOpenSnackbar}
-                    updateSnackbarOptions={updateSnackbarOptions}
-                    snackbarOptions={snackbarOptions}
+                    socket={parkingLotSocket}
                   />
                 }
               />

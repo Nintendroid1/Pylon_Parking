@@ -51,7 +51,14 @@ const styles = theme => ({
  * 
  * @param {Object} param0 
  */
-let ProfilePage = ({ setOpenSnackbar, updateSnackbarOptions, snackbarOptions, classes, socket }) => {
+let ProfilePage = ({ classes, socket }) => {
+  const [openSnackbar, setOpenSnackbar] = useState(false);
+  const [snackbarOptions, updateSnackbarOptions] = useState({
+    verticalPos: 'top',
+    horizontalPos: 'center',
+    message: '',
+    severity: 'info'
+  });
   const [user, updateUser] = useState({
     pid: '',
     first_name: '',
@@ -108,6 +115,14 @@ let ProfilePage = ({ setOpenSnackbar, updateSnackbarOptions, snackbarOptions, cl
   return (
     <>
       <div className={classes.root}>
+        <CustomSnackbar
+          isOpen={openSnackbar}
+          updateIsOpen={setOpenSnackbar}
+          verticalPos={snackbarOptions.verticalPos}
+          horizontalPos={snackbarOptions.horizontalPos}
+          message={snackbarOptions.message}
+          severity={snackbarOptions.severity}
+        />
         <Container maxWidth="lg" className={classes.container}>
           <Grid container spacing={3}>
             <Grid item xs={12} md={8} lg={9}>

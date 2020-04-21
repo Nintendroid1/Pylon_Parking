@@ -250,7 +250,7 @@ const ReportField = props => {
 /*
   The component that is exported. Makes the API call to send a report.
 */
-const BountySystem = ({ classes, userSocket, setOpenSnackbar, snackbarOptions, updateSnackbarOptions }) => {
+const BountySystem = ({ classes, userSocket }) => {
   const [message, updateMessage] = useState({
     message: '',
     dialogTitle: ''
@@ -259,6 +259,13 @@ const BountySystem = ({ classes, userSocket, setOpenSnackbar, snackbarOptions, u
   const [loadingDialogField, updateLoadingDialogField] = useState({
     open: false,
     message: ''
+  });
+  const [openSnackbar, setOpenSnackbar] = useState(false);
+  const [snackbarOptions, updateSnackbarOptions] = useState({
+    verticalPos: 'top',
+    horizontalPos: 'center',
+    message: '',
+    severity: 'info'
   });
 
   // Sends the info captured by the camera to the backend for further processing.
@@ -321,6 +328,14 @@ const BountySystem = ({ classes, userSocket, setOpenSnackbar, snackbarOptions, u
   return (
     <>
       <Typography>
+        <CustomSnackbar
+          isOpen={openSnackbar}
+          updateIsOpen={setOpenSnackbar}
+          verticalPos={snackbarOptions.verticalPos}
+          horizontalPos={snackbarOptions.horizontalPos}
+          message={snackbarOptions.message}
+          severity={snackbarOptions.severity}
+        />
         <MessageDialog 
           open={openMessageDialog}
           setOpen={setOpenMessageDialog}

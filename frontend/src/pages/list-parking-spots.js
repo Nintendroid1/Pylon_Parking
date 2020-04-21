@@ -463,10 +463,8 @@ const Zone = ({
   updateUser,
   updateAdmin,
   socket,
-  userSocket,
-  setOpenSnackbar,
-  snackbarOptions,
-  updateSnackbarOptions}) => {
+  userSocket
+}) => {
   // To be used if paging
   /*
   const findCurrentPageBasedOnPath = (location) => {
@@ -488,6 +486,13 @@ const Zone = ({
   const [messageDialogField, updateMessageDialogField] = useState({
     message: '',
     dialogTitle: ''
+  });
+  const [openSnackbar, setOpenSnackbar] = useState(false);
+  const [snackbarOptions, updateSnackbarOptions] = useState({
+    verticalPos: 'top',
+    horizontalPos: 'center',
+    message: '',
+    severity: 'info'
   });
 
   // Checks if the user wants a specific date, otherwise go with default (today).
@@ -763,6 +768,14 @@ const Zone = ({
     <>
       <div>
         <Typography>
+          <CustomSnackbar
+            isOpen={openSnackbar}
+            updateIsOpen={setOpenSnackbar}
+            verticalPos={snackbarOptions.verticalPos}
+            horizontalPos={snackbarOptions.horizontalPos}
+            message={snackbarOptions.message}
+            severity={snackbarOptions.severity}
+          />
           <MessageDialog 
             message={messageDialogField.message}
             dialogTitle={messageDialogField.dialogTitle}

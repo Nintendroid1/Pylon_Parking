@@ -290,7 +290,14 @@ const updateNumEntryInfo = (
  * 
  * @param {Object} param0 
  */
-const TransactionHistory = ({ setOpenSnackbar, updateSnackbarOptions, snackbarOptions, userSocket, socket, classes }) => {
+const TransactionHistory = ({ userSocket, socket, classes }) => {
+  const [openSnackbar, setOpenSnackbar] = useState(false);
+  const [snackbarOptions, updateSnackbarOptions] = useState({
+    verticalPos: 'top',
+    horizontalPos: 'center',
+    message: '',
+    severity: 'info'
+  });
   const [message, updateMessage] = useState(
     <CircularProgress size={100} className={classes.circProgress} />
   );
@@ -421,6 +428,14 @@ const TransactionHistory = ({ setOpenSnackbar, updateSnackbarOptions, snackbarOp
   return (
     <>
       <div>
+        <CustomSnackbar
+          isOpen={openSnackbar}
+          updateIsOpen={setOpenSnackbar}
+          verticalPos={snackbarOptions.verticalPos}
+          horizontalPos={snackbarOptions.horizontalPos}
+          message={snackbarOptions.message}
+          severity={snackbarOptions.severity}
+        />
         {message ? (
           <Typography align="center">{message}</Typography>
         ) : (
