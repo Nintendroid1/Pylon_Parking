@@ -496,10 +496,10 @@ const Zone = ({
   let zoneId = Number(tempUrl.substring(tempUrl.lastIndexOf('/') + 1));
 
   let urlDate = queryString.parse(window.location.search.substring(1)).date;
-  let tempDateEpoch = Date.now(); // UTC Epoch
+  let tempDateEpoch = Date.now() - 4 * 60 * 60 * 1000; // UTC Epoch
   let tempDate = new Date(); // The date in local time.
 
-  if (urlDate !== undefined && urlDate.length === 8) {
+  if (typeof urlDate !== 'undefined' && urlDate.length === 8) {
     let month = Number(urlDate.substring(0, 2));
     let day = Number(urlDate.substring(2, 4));
     let year = Number(urlDate.substring(4));
@@ -514,7 +514,7 @@ const Zone = ({
   // Stores the date in EDT.
   const [currentTimeFilter, updateCurrentTimeFilter] = useState({
     date: tempDate,
-    startTime: convertEpochToMilitary(tempDateEpoch),
+    startTime: convertEpochToMilitary(tempDateEpoch / 1000),
     endTime: '23:59'
   });
 

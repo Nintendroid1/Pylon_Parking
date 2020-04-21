@@ -135,9 +135,9 @@ const compareMilitaryTime = (time1, time2) => {
   Converts the given epoch time to military time.
   If the time zone is not specified, then defaults to UTC.
 */
-const convertEpochToMilitary = (epoch, timeZone='UTC') => {
+const convertEpochToMilitary = (epoch) => {
   const option = {
-    timeZone: timeZone,
+    timeZone: 'UTC',
     hour12: false,
     hour: '2-digit',
     minute: '2-digit'
