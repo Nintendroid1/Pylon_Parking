@@ -691,6 +691,10 @@ const Zone = ({
       dialogTitle: '',
       message: ''
     });
+    updateLoadingDialogField({
+      open: false,
+      message: ''
+    });
 
     if (response.status === 200) {
       updateMessageDialogField({
