@@ -121,9 +121,9 @@ function TableData({ classes, ...props }) {
       },
       {
         name: 'End Time',
-        value: convertMilitaryTimeToNormal(parkingSpot.start_time)
+        value: convertMilitaryTimeToNormal(parkingSpot.end_time)
       },
-      { name: 'Approximate Total', value: parkingSpot.price }
+      { name: 'Total Price', value: parkingSpot.price }
     ];
 
     const requestParams = {
