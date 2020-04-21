@@ -3,6 +3,7 @@ const router = express.Router();
 const jwt = require("./jwt");
 const db = require("../db");
 const fs = require("fs");
+const conf = require("./config.js");
 // const { withJWTAuthMiddleware } = require("express-kun");
 // const { createSecureRouter, getTokenFromBearer } = require("./auth.js");
 // const secureRouter = createSecureRouter(router);
@@ -10,6 +11,11 @@ const FormData = require('form-data');
 var multer = require("multer");
 var upload = multer({ dest: "../public/data/uploads/" });
 const { requireLogin } = require("./auth.js");
+
+const { Api, JsonRpc, RpcError } = require('eosjs');
+const { JsSignatureProvider } = require('eosjs/dist/eosjs-jssig');      // development only
+const fetch = require('node-fetch');                                    // node only; not needed in browsers
+const { TextEncoder, TextDecoder } = require('util');                   // node only; native TextEncoder/Decoder
 
 router.post("/:pid/avatar", upload.single("image"), function(req, res) {
   if (req.body.image) {
@@ -214,10 +220,72 @@ router.post("/register", async function(req, res) {
                 res.status(500).json({ message: "Internal server error" });
               } else {
                 console.log(dbres.rows[0]);
-                res.status(200).json({
-                  token: jwt.createJWT(req.body.user.pid, 0),
-                  user: { ...req.body.user, admin: 0 },
-                  message: "Succesuflly created user"
+                //Add to chain
+                const signatureProvider = new JsSignatureProvider([conf.adminKey]);
+                const rpc = new JsonRpc('http://127.0.0.1:8888', { fetch });
+                const api = new Api({ rpc, signatureProvider, textDecoder: new TextDecoder(), textEncoder: new TextEncoder() });
+
+                let {PrivateKey, PublicKey, Signature, Aes, key_utils, config} = require('eosjs-ecc');
+                let privateWif;
+                PrivateKey.randomKey().then(privateKey => {
+                  privateWif = privateKey.toWif();
+                  let pubkey = PrivateKey.fromString(privateWif).toPublic().toString();
+                  api.transact({
+                    actions: [{
+                      account: 'eosio',
+                      name: 'newaccount',
+                      authorization: [{
+                        actor: 'admin',
+                        permission: 'active',
+                      }],
+                      data: {
+                        creator: 'admin',
+                        name: req.body.user.pid.toLowerCase(),
+                        owner: {
+                          threshold: 1,
+                          keys: [{
+                            key: pubkey,
+                            weight: 1
+                          }],
+                          accounts: [],
+                          waits: []
+                        },
+                        active: {
+                          threshold: 1,
+                          keys: [{
+                            key: pubkey,
+                            weight: 1
+                          }],
+                          accounts: [],
+                          waits: []
+                        },
+                      },
+                    }]
+                  }, {
+                    blocksBehind: 3,
+                    expireSeconds: 30,
+                  })
+                  .then(blockRes => {
+                    console.log(blockRes);
+                    res.status(200).json({
+                      token: jwt.createJWT(req.body.user.pid, 0),
+                      user: { ...req.body.user, admin: 0 },
+                      publicKey: pubkey,
+                      privateKey: privateWif,
+                      message: "Succesuflly created user"
+                    });
+                  })
+                  .catch(err => {
+                    console.log(err);
+                    db.query("DELETE from users WHERE pid = $1", [req.body.user.pid], (err, dbres) => {
+                      if (err) {
+                        console.log(err.stack);
+                        res.status(500).json({ message: "Internal server error, database failed to update" });
+                      } else {
+                        res.status(500).json({message: "Internal Server Error"});
+                      }
+                    });
+                  });
                 });
               }
             });
