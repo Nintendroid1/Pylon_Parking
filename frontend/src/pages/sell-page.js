@@ -221,7 +221,9 @@ const SellingMessageContent = (
           </TableRow>
           <TableRow>
             <TableCell>Total Calculated Price For Entire Time Period:</TableCell>
-            <TextField disabled value={totalCost} InputProps={{ priceClasses }} />
+            <TableCell>
+              <TextField disabled value={totalCost} InputProps={{ priceClasses }} />
+            </TableCell>
           </TableRow>
         </TableBody>
       </Table>
