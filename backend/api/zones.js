@@ -23,8 +23,8 @@ router.get("/all", (req, res) => {
 
 router.get("/:zone_id/spot/:spot_id", (req, res) => {
   if (req.query.startTime && req.query.endTime) {
-      db.query(
-        "SELECT Z.zone_name, P.*\
+    db.query(
+      "SELECT Z.zone_name, P.*\
         FROM spot_range P\
         INNER JOIN zones Z\
         ON P.zone_id = Z.zone_id\
@@ -39,21 +39,20 @@ router.get("/:zone_id/spot/:spot_id", (req, res) => {
         req.params.zone_id,
         req.query.startTime,
         req.query.endTime
-      ],
-      ).then((err, dbres) => {
-        // AND P.start_time >= (SELECT EXTRACT(epoch FROM date_trunc('day', NOW()))) AND P.end_time <= (SELECT EXTRACT(epoch FROM date_trunc('day', NOW() + INTERVAL '1 day')))\
-    // db.query(
-    //   "SELECT * FROM parking_times WHERE spot_ID = $1 AND zone_ID = $2 AND time_code >= $3 AND time_code <= $4 AND availability = true",
+      ]
+    ).then((err, dbres) => {
+      // AND P.start_time >= (SELECT EXTRACT(epoch FROM date_trunc('day', NOW()))) AND P.end_time <= (SELECT EXTRACT(epoch FROM date_trunc('day', NOW() + INTERVAL '1 day')))\
+      // db.query(
+      //   "SELECT * FROM parking_times WHERE spot_ID = $1 AND zone_ID = $2 AND time_code >= $3 AND time_code <= $4 AND availability = true",
       // (err, dbres) => {
-        if (err) {
-          console.log(err.stack);
-          res.status(500).json({ message: "Internal server error" });
-        } else {
-          // console.log(dbres);
-          res.status(200).json({ parkingInfo: dbres.rows });
-        }
+      if (err) {
+        console.log(err.stack);
+        res.status(500).json({ message: "Internal server error" });
+      } else {
+        // console.log(dbres);
+        res.status(200).json({ parkingInfo: dbres.rows });
       }
-    );
+    });
   } else {
     db.query(
       "SELECT * FROM parking_times WHERE spot_ID = $1 AND zone_ID = $2 AND availability = true",
@@ -74,8 +73,32 @@ router.get("/:zone_id/spot/:spot_id", (req, res) => {
 router.get("/:zone_id", (req, res) => {
   if (req.query.startTime && req.query.endTime) {
     db.query(
-      'WITH filtered_times AS (SELECT * FROM parking_times WHERE zone_id = $1 AND time_code >= $2 AND time_code <= $3 AND availability = true)\
-      SELECT spot_id, zone_id, MIN(time_code) as "start_time", MAX(time_code) + 900 as "end_time", SUM(price) as "price" FROM filtered_times GROUP BY zone_id, spot_id ORDER BY spot_id ASC',
+      'WITH filtered_times AS ( \
+    SELECT \
+      * \
+    FROM \
+      parking_times \
+    WHERE \
+      zone_id = $1 \
+      AND time_code >= $2 \
+      AND time_code <= $3 \
+      AND availability = true \
+  ) \
+  SELECT \
+    Z.zone_name, F.spot_id, \
+    F.zone_id, \
+    MIN(F.time_code) as "start_time", \
+    MAX(F.time_code) + 900 as "end_time", \
+    SUM(F.price) as "price" \
+  FROM \
+    filtered_times F \
+    INNER JOIN zones Z ON Z.zone_id = F.zone_id \
+  GROUP BY \
+    F.zone_id, \
+    Z.zone_name, \
+    F.spot_id \
+  ORDER BY \
+    F.spot_id ASC',
       [req.params.zone_id, req.query.startTime, req.query.endTime]
     ).then((dbres, err) => {
       if (err) {
@@ -93,11 +116,39 @@ router.get("/:zone_id", (req, res) => {
     const month = todayDate.getMonth();
     const day = todayDate.getDate();
 
-    let todayStartTime = new Date(Date.UTC(year, month, day, 0, 0)).getTime() / 1000;
-    let todayEndTime = new Date(Date.UTC(year, month, day, 23, 59)).getTime() / 1000;
+    let todayStartTime =
+      new Date(Date.UTC(year, month, day, 0, 0)).getTime() / 1000;
+    let todayEndTime =
+      new Date(Date.UTC(year, month, day, 23, 59)).getTime() / 1000;
     db.query(
-      'WITH filtered_times AS (SELECT * FROM parking_times WHERE zone_id = $1 AND time_code >= $2 AND time_code <= $3 AND availability = true)\
-      SELECT spot_id, zone_id, MIN(time_code) as "start_time", MAX(time_code) + 900 as "end_time", SUM(price) as "price" FROM filtered_times GROUP BY zone_id, spot_id, availability ORDER BY spot_id ASC',
+      'WITH filtered_times AS ( \
+      SELECT \
+        * \
+      FROM \
+        parking_times \
+      WHERE \
+        zone_id = $1 \
+        AND time_code >= $2 \
+        AND time_code <= $3 \
+        AND availability = true \
+    )  \
+    SELECT \
+      Z.zone_name, \
+      F.spot_id, \
+      F.zone_id, \
+      MIN(F.time_code) as "start_time", \
+      MAX(F.time_code) + 900 as "end_time", \
+      SUM(F.price) as "price" \
+    FROM \
+      filtered_times F \
+          INNER JOIN zones Z \
+          ON Z.zone_id = F.zone_id \
+    GROUP BY \
+      F.zone_id, \
+      Z.zone_name, \
+      F.spot_id \
+    ORDER BY \
+      F.spot_id ASC',
       [req.params.zone_id, todayStartTime, todayEndTime]
     ).then((dbres, err) => {
       if (err) {
