@@ -198,19 +198,18 @@ const LoadingDialog = (props) => {
 }
 
 /*
-  A custom dialog component that displays the given message and
-  asks for the private key if needed.
+  Confirmation dialog with password field.
 */
-const ConfirmationDialogFieldButton = ({
+const ConfirmationDialogWithPassword = ({
+  open,
+  setOpen,
   buttonMessage,
   messageTitle,
   messageContent,
   handleOnConfirm,
   buttonColor,
-  requireKey,
   ...props
 }) => {
-  const [open, setOpen] = useState(false);
 
   if (typeof requireKey === 'undefined') {
     requireKey = true;
@@ -220,10 +219,6 @@ const ConfirmationDialogFieldButton = ({
     privateKey: '',
     showPrivateKey: false
   });
-
-  const handleClickOpen = () => {
-    setOpen(true);
-  };
 
   const handleClose = () => {
     setOpen(false);
@@ -242,9 +237,6 @@ const ConfirmationDialogFieldButton = ({
 
   return (
     <div>
-      <Button variant="outlined" color={buttonColor} onClick={handleClickOpen}>
-        {buttonMessage}
-      </Button>
       <Dialog open={open} onClose={handleClose}>
         <DialogTitle>{messageTitle}</DialogTitle>
         <DialogContent>
@@ -267,6 +259,44 @@ const ConfirmationDialogFieldButton = ({
           </form>
         </DialogContent>
       </Dialog>
+    </div>
+  );
+};
+
+/*
+  A custom dialog component that displays the given message and
+  asks for the private key if needed.
+*/
+const ConfirmationDialogFieldButton = ({
+  buttonMessage,
+  messageTitle,
+  messageContent,
+  handleOnConfirm,
+  buttonColor,
+  requireKey,
+  ...props
+}) => {
+  const [open, setOpen] = useState(false);
+
+  const handleClickOpen = () => {
+    setOpen(true);
+  };
+
+  return (
+    <div>
+      <Button variant="outlined" color={buttonColor} onClick={handleClickOpen}>
+        {buttonMessage}
+      </Button>
+      <ConfirmationDialogWithPassword 
+        open={open}
+        setOpen={setOpen}
+        buttonMessage={buttonMessage}
+        messageTitle={messageTitle}
+        messageContent={messageContent}
+        handleOnConfirm={handleOnConfirm}
+        buttonColor={buttonColor}
+        requireKey={requireKey}
+      />
     </div>
   );
 };
@@ -341,5 +371,6 @@ export {
   CostField,
   TimePicker,
   MessageDialog,
-  LoadingDialog
+  LoadingDialog,
+  ConfirmationDialogWithPassword
 };

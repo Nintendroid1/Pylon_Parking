@@ -25,7 +25,7 @@ import Grid from '@material-ui/core/Grid';
 import history from '../history';
 import { Link } from 'react-router-dom';
 import apiprefix from './apiprefix';
-import { TimePicker, LoadingDialog, MessageDialog } from './forms/parking-spot-components';
+import { TimePicker, LoadingDialog, MessageDialog, ConfirmationDialogFieldButton, ConfirmationDialogWithPassword } from './forms/parking-spot-components';
 import {
   compareMilitaryTime,
   convertMilitaryToEpoch,
@@ -36,7 +36,6 @@ import {
   militaryTimeDifference
 } from './forms/time-filter';
 import Box from '@material-ui/core/Box';
-import { ConfirmationDialogFieldButton } from './forms/parking-spot-components';
 import {
   withStyles,
   makeStyles,
@@ -257,6 +256,8 @@ const SellingParkingSpotTableBody = props => {
     end_time: '24:00',
     cost: 0
   });
+  const [openConfirm, setOpenConfirm] = useState(false);
+  const [sellInfoList, updateSellInfoList] = useState([]);
 
   const handleOnConfirm = privateKey => {
     handleSellRequest(sellInfo, privateKey);
@@ -275,38 +276,40 @@ const SellingParkingSpotTableBody = props => {
       zone_id: spotInfo.zone_id
     });
 
-    // Not sure if the sellInfo is update yet, last time it was not.
-    let sellInfoList = [
-      { name: 'Zone ID', value: spotInfo.zone_id },
-      { name: 'Spot ID', value: spotInfo.spot_id },
-      { name: 'Date', value: parkingSpotsInfo[index].date.toDateString() },
-      {
-        name: 'Start Time',
-        value: convertMilitaryTimeToNormal(sellInfo.start_time)
-      },
-      {
-        name: 'End Time',
-        value: convertMilitaryTimeToNormal(sellInfo.end_time)
-      },
-      { name: 'Price per 15 To Sell For', value: sellInfo.cost }
-    ];
-
-    return (
-      <>
-        <ConfirmationDialogFieldButton
-          buttonMessage="Sell"
-          messageTitle={`Sell Parking Spot ${sellInfo.zone_id}-${sellInfo.spot_id}`}
-          requireKey={true}
-          messageContent={popUpContent(sellInfoList)}
-          handleOnConfirm={handleOnConfirm}
-          buttonColor="secondary"
-        />
-      </>
+    // info to be used when making the confirmation dialog.
+    updateSellInfoList(
+      [
+        { name: 'Zone ID', value: spotInfo.zone_id },
+        { name: 'Spot ID', value: spotInfo.spot_id },
+        { name: 'Date', value: parkingSpotsInfo[index].date.toDateString() },
+        {
+          name: 'Start Time',
+          value: convertMilitaryTimeToNormal(sellInfo.start_time)
+        },
+        {
+          name: 'End Time',
+          value: convertMilitaryTimeToNormal(sellInfo.end_time)
+        },
+        { name: 'Price per 15 To Sell For', value: sellInfo.cost }
+      ]
     );
+
+    // Opens the confirmation dialog screen.
+    setOpenConfirm(true);
   };
 
   return (
     <>
+      <ConfirmationDialogWithPassword 
+        open={openConfirm}
+        setOpen={setOpenConfirm}
+        buttonMessage="Confirm"
+        messageTitle={`Sell Parking Spot ${sellInfo.zone_id}-${sellInfo.spot_id}`}
+        requireKey={true}
+        messageContent={popUpContent(sellInfoList)}
+        handleOnConfirm={handleOnConfirm}
+        buttonColor="secondary"
+      />
       <TableBody>
         {parkingSpotsInfo.map((parkingSpot, i) => {
           console.log(parkingSpot);
