@@ -280,6 +280,7 @@ const SellingParkingSpotTableBody = props => {
   const { parkingSpotsInfo, handleSellRequest } = props;
   const [sellInfo, updateSellInfo] = useState({
     date: new Date(),
+    idx: -1,
     spot_id: -1,
     zone_id: -1,
     start_time: '24:00',
@@ -312,6 +313,7 @@ const SellingParkingSpotTableBody = props => {
 
     updateSellInfo({
       ...sellInfo,
+      idx: index,
       date: parkingSpotsInfo[index].date,
       spot_id: spotInfo.spot_id,
       zone_id: spotInfo.zone_id
@@ -559,6 +561,33 @@ const SellPage = ({
     });
 
     if (response.status === 200) {
+      let newList = [];
+      let curr = null;
+      respbody.body.rows.forEach(e => {
+        if (curr === null) {
+          curr = e;
+          curr.start_time = Number(curr.time_code);
+          curr.end_time = curr.start_time + 15 * 60 * 1000;
+        } else {
+          if (curr.end_time === Number(e.time_code)) {
+            curr.end_time += 15 * 60 * 1000;
+          } else {
+            newList.append(curr);
+            curr = null;
+          }
+        }
+      });
+
+      // Remove old stuff from the list.
+      spotsOwned.splice(sellInfo.idx, 1);
+
+      // Adding new stuff to the list.
+      newList.forEach((e, idx) => {
+        spotsOwned.splice(sellInfo.idx + idx, 0, e);
+      });
+
+      updateSpotsOwned(spotsOwned);
+
       updateMessageDialogField({
         dialogTitle: 'Success',
         message: 'Congrats, Your Request Has Been Granted! Mind Sharing Some Of That Wealth With Us? Please?'
