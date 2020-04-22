@@ -89,12 +89,14 @@ const SellingMessageContent = (
   validTime,
   updateValidTime
 ) => {
-  // update start and end time to be the parking spot time.
-//  updateSellInfo({
-//    ...sellInfo,
-//    start_time: parkingSpotStartTime,
-//    end_time: parkingSpotEndTime
-//  });
+  useEffect(() => {
+    // update start and end time to be the parking spot time.
+    updateSellInfo({
+      ...sellInfo,
+      start_time: parkingSpotStartTime,
+      end_time: parkingSpotEndTime
+    });
+  }, []);
 
   const today = new Date();
   let isToday = true;
