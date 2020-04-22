@@ -356,7 +356,7 @@ const TransactionHistory = ({ userSocket, socket, classes }) => {
       respbody.data.forEach(e => {
         e.quantity = e.quantity.split(' ')[0];
         e.start_time = convertEpochToMilitary(e.time_code);
-        e.end_time = convertEpochToMilitary(e.time_code + 15 * 60 * 1000);
+        e.end_time = convertEpochToMilitary(e.time_code + 15 * 60);
       });
 
       const queryParams = queryStrings.parse(window.location.search);

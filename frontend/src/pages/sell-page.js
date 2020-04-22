@@ -567,11 +567,13 @@ const SellPage = ({
         if (curr === null) {
           curr = e;
           curr.start_time = Number(curr.time_code);
-          curr.end_time = curr.start_time + 15 * 60 * 1000;
+          curr.end_time = curr.start_time + 15 * 60;
         } else {
           if (curr.end_time === Number(e.time_code)) {
-            curr.end_time += 15 * 60 * 1000;
+            curr.end_time += 15 * 60;
           } else {
+            curr.start_time = convertEpochToMilitary(curr.start_time);
+            curr.end_time = convertEpochToMilitary(curr.end_time);
             newList.append(curr);
             curr = null;
           }
