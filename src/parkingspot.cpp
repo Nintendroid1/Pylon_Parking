@@ -40,9 +40,7 @@ private:
     }
     
     uint128_t  secondary_key() const {
-      std::string key = std::to_string(spot_id) + std::to_string(timeclock) + std::to_string(zone_id) +char('\0');
-      uint128_t  key_int = std::stoul (key,nullptr,0); 
-
+      uint128_t  key_int = (spot_id*10000000000000)+(timeclock*1000)+zone_id; 
       return key_int;
     }
   };
@@ -96,10 +94,8 @@ public:
       park_index parkdeck(get_self(), get_first_receiver().value);
 
       //Iterator for parking spots using spot_id as key
-      std::string key = std::to_string(spot_id) + std::to_string(time_code) + std::to_string(zone_id) + char('\0');
-      print("Query:", key);
-      uint128_t  key_int = std::stoul (key,nullptr,0); 
-      print("Conversion done");
+      uint128_t  key_int = (spot_id*1000000000)+(time_code*1000)+zone_id; 
+      print("Query:%u", key_int);
       //Iterate with secondary key
       auto secparkdeck = parkdeck.get_index<name("seckey")>();
       print("Made it after secparkdeck creation");
@@ -132,8 +128,8 @@ public:
     park_index parkdeck(get_self(), get_first_receiver().value);
 
     //Iterator for parking spots using spot_id as key
-    std::string key = std::to_string(spot_id) + std::to_string(time_code) + std::to_string(zone_id) + char('\0');
-    uint128_t key_int = std::stoul (key,nullptr,0); 
+    uint128_t  key_int = (spot_id*10000000000000)+(time_code*1000)+zone_id; 
+
 
     //Iterate with secondary key
     auto secparkdeck = parkdeck.get_index<name("seckey")>();
@@ -197,9 +193,7 @@ public:
       park_index parkdeck(get_self(), get_first_receiver().value);
 
       //Iterator for parking spots using spot_id as key
-      std::string key = std::to_string(spot_id) + std::to_string(time_code) + std::to_string(zone_id) + char('\0');
-      uint128_t key_int = std::stoul (key,nullptr,0); 
- 
+      uint128_t  key_int = (spot_id*10000000000000)+(time_code*1000)+zone_id; 
 
       //Iterate with secondary key
       auto secparkdeck = parkdeck.get_index<name("seckey")>();
