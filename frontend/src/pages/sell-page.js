@@ -497,8 +497,6 @@ const SellPage = ({
         e.end_time = convertEpochToMilitary(e.end_time);
       });
 
-      console.log("here");
-
       updateSpotsOwned(respbody.parkingSpotsInfo);
       updateMessage(null);
     } else {
