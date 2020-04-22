@@ -122,14 +122,16 @@ const TransactionsTableBody = ({
     <>
       <TableBody>
         {rows.map(row => (
-          <TableRow>
-            <TableCell>{`${row.zone_id}-${row.spot_id}`}</TableCell>
-            <TableCell>{row.buyer}</TableCell>
-            <TableCell>{row.seller}</TableCell>
-            <TableCell>{convertMilitaryTimeToNormal(row.start_time)}</TableCell>
-            <TableCell>{convertMilitaryTimeToNormal(row.end_time)}</TableCell>
-            <TableCell>{row.quantity}</TableCell>
-          </TableRow>
+          <>
+            <TableRow>
+              <TableCell>{`${row.zone_id}-${row.spot_id}`}</TableCell>
+              <TableCell>{row.buyer}</TableCell>
+              <TableCell>{row.seller}</TableCell>
+              <TableCell>{convertMilitaryTimeToNormal(row.start_time)}</TableCell>
+              <TableCell>{convertMilitaryTimeToNormal(row.end_time)}</TableCell>
+              <TableCell>{row.quantity}</TableCell>
+            </TableRow>
+          </>
         ))}
       </TableBody>
     </>
@@ -370,6 +372,8 @@ const TransactionHistory = ({ userSocket, socket, classes }) => {
           updateNumEntriesPerPage
         );
       }
+
+      console.log(respbody.data);
 
       updateListOfTransactions(respbody.data);
     } else {
