@@ -69,7 +69,7 @@ let AccountPage = ({ classes, history, socket, ...props }) => {
         first_name: rbody.first_name,
         last_name: rbody.last_name,
         email: rbody.email,
-        balance: rbody.balance
+        balance: Number(rbody.balance).toFixed(3)
       });
       setLoading(false);
     } else {
