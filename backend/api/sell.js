@@ -50,7 +50,7 @@ router.post('/', requireLogin, (req,res) => {
 
                             socketAPI.broadcastZoneInfo(
                                 socket,
-                                spotPurchasedInfo.zone_id,
+                                req.body.spot.zone_id,
                                 zonePageData
                             );
                         }
