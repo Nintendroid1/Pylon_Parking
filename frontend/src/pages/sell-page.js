@@ -497,6 +497,8 @@ const SellPage = ({
         e.end_time = convertEpochToMilitary(e.end_time);
       });
 
+      console.log("here");
+
       updateSpotsOwned(respbody.parkingSpotsInfo);
       updateMessage(null);
     } else {
@@ -561,7 +563,34 @@ const SellPage = ({
     });
 
     if (response.status === 200) {
-      
+      let newList = [];
+      let curr = null;
+      respbody.body.rows.forEach(e => {
+        if (curr === null) {
+          curr = e;
+          curr.start_time = Number(curr.time_code);
+          curr.end_time = curr.start_time + 15 * 60;
+        } else {
+          if (curr.end_time === Number(e.time_code)) {
+            curr.end_time += 15 * 60;
+          } else {
+            curr.start_time = convertEpochToMilitary(curr.start_time);
+            curr.end_time = convertEpochToMilitary(curr.end_time);
+            newList.append(curr);
+            curr = null;
+          }
+        }
+      });
+
+      // Remove old stuff from the list.
+      spotsOwned.splice(sellInfo.idx, 1);
+
+      // Adding new stuff to the list.
+      newList.forEach((e, idx) => {
+        spotsOwned.splice(sellInfo.idx + idx, 0, e);
+      });
+
+      updateSpotsOwned(spotsOwned);
 
       updateMessageDialogField({
         dialogTitle: 'Success',
