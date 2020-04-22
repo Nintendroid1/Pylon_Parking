@@ -18,20 +18,20 @@ private:
 
   using balance_table = eosio::multi_index<"balance"_n, balance>;
 
-  uint32_t now() {
+  uint64_t now() {
     return current_time_point().sec_since_epoch();
   }
 
   //Time to expire is now() + 1 hour
-  uint32_t start = now();
-  const uint32_t trans_expire = start + 3600;
+  uint64_t start = now();
+  const uint64_t trans_expire = start + 3600;
 
   //Parking spot to store the info
   struct [[eosio::table]] pspot {
     uint64_t id;
-    uint64_t spot_id;
-    uint64_t zone_id;
-    uint32_t  timeclock; //Time information in 15 min intervals
+    uint16_t spot_id;
+    uint16_t zone_id;
+    uint64_t  timeclock; //Time information in 15 min intervals
     bool available;
     name owner;
 
@@ -82,7 +82,7 @@ public:
 
   //Inserts new parking spot
   [[eosio::action]] //Needed for ABI generation
-  void insert(name user, uint64_t spot_id, uint64_t zone_id, uint32_t time_code, name owner) {
+  void insert(name user, uint16_t spot_id, uint16_t zone_id, uint64_t time_code, name owner) {
       //Ensures the account executing transaction has proper permissions
       require_auth(user);
 
@@ -122,7 +122,7 @@ public:
 
   //Erases parking spot 
   [[eosio::action]]
-  void erase(name user, uint64_t spot_id, uint32_t time_code, uint64_t zone_id) {
+  void erase(name user, uint16_t spot_id, uint16_t zone_id, uint64_t time_code) {
     require_auth(user);
 
     park_index parkdeck(get_self(), get_first_receiver().value);
@@ -151,13 +151,13 @@ public:
   //Updates parking spot available
   [[eosio::action]]
   // [[eosio::on_notify("eosio.token::transfer")]]
-  void modavail(name user, eosio::asset quantity, uint64_t spot_id, uint64_t zone_id, uint32_t time_code, name buyer) {
+  void modavail(name buyer, eosio::asset quantity, uint16_t spot_id, uint16_t zone_id, uint64_t time_code) {
     //Ensure not transferring to self
     // if (owner == get_self() || user != get_self()) {
     //   return;
     // }
       //Ensures the account executing transaction has proper permissions
-      require_auth(user);
+      require_auth(buyer);
 
       //The transaction didn't take an hour
       check(now() < trans_expire, "Transfer time expired");
@@ -191,9 +191,9 @@ public:
             print("DOES NOT EXIST! Parking Spot: ", spot_id, " in Zone: ", zone_id);
       }
       else {
-        secparkdeck.modify(iterator, user, [&](auto& row) {
-          //require_auth(row.owner);
-          //end_summary(row.owner, " transferring ownership");
+        secparkdeck.modify(iterator, buyer, [&](auto& row) {
+          require_auth(row.owner);
+
           action transferSeller = action(
             permission_level{buyer,"active"_n},
             "eosio.token"_n,
@@ -206,7 +206,7 @@ public:
       });
 
           print("Parking Spot: ", spot_id, " in Zone: ", zone_id, " is owned by ", buyer, " for: ", time_code, ". Transaction on ", current_time_point().sec_since_epoch());
-          send_summary(user, " successfully changed parking spot availability");
+          send_summary(buyer, " successfully changed parking spot availability");
       }
   }
 };
