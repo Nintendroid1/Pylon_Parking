@@ -97,7 +97,7 @@ const SellingMessageContent = (
   });
 
   const today = new Date();
-  const isToday = true;
+  let isToday = true;
 
   if (today.getFullYear() !== sellInfo.date.getUTCFullYear() ||
       today.getMonth() !== sellInfo.date.getUTCMonth() ||
