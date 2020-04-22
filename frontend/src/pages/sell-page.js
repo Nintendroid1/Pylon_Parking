@@ -1,32 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { makeAPICall } from '../api';
-import PropTypes from 'prop-types';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
 import TableHead from '@material-ui/core/TableHead';
-import Dialog from '@material-ui/core/Dialog';
 import CustomSnackbar from '../ui/snackbars';
-import DialogActions from '@material-ui/core/DialogActions';
-import DialogContent from '@material-ui/core/DialogContent';
-import DialogTitle from '@material-ui/core/DialogTitle';
-import TableFooter from '@material-ui/core/TableFooter';
 import TableRow from '@material-ui/core/TableRow';
-import TablePagination from '@material-ui/core/TablePagination';
-import Check from '@material-ui/icons/Check';
-import NavigateLeftIcon from '@material-ui/icons/NavigateBefore';
-import NavigateRightIcon from '@material-ui/icons/NavigateNext';
 import { Typography, TextField } from '@material-ui/core';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import RequireAuthentication from '../RequireAuthentication';
-import queryString from 'query-string';
-import IconButton from '@material-ui/core/IconButton';
-import EditIcon from '@material-ui/icons/Edit';
-import Grid from '@material-ui/core/Grid';
-import history from '../history';
-import { Link } from 'react-router-dom';
 import apiprefix from './apiprefix';
-import { TimePicker, LoadingDialog, MessageDialog, ConfirmationDialogFieldButton, ConfirmationDialogWithPassword } from './forms/parking-spot-components';
+import {
+  TimePicker,
+  LoadingDialog,
+  MessageDialog,
+  ConfirmationDialogFieldButton,
+  ConfirmationDialogWithPassword
+} from './forms/parking-spot-components';
 import {
   compareMilitaryTime,
   convertMilitaryToEpoch,
@@ -34,18 +24,12 @@ import {
   convertMilitaryTimeToNormal,
   isTimeMultipleOf15,
   roundUpToNearest15,
-  militaryTimeDifference
+  militaryTimeDifference,
+  minusOneSecMT
 } from './forms/time-filter';
-import Box from '@material-ui/core/Box';
-import {
-  withStyles,
-  makeStyles,
-  withTheme,
-  MuiThemeProvider,
-  createMuiTheme
-} from '@material-ui/core/styles';
+import { withStyles, makeStyles } from '@material-ui/core/styles';
 
-const styles = theme => ({
+const styles = () => ({
   root: {
     display: 'flex',
     flexGrow: 1
@@ -57,29 +41,14 @@ const styles = theme => ({
 
 const priceStyles = makeStyles({
   underline: {
-    "&&&:before": {
-      borderBottom: "none"
+    '&&&:before': {
+      borderBottom: 'none'
     },
-    "&&:after": {
-      borderBottom: "none"
+    '&&:after': {
+      borderBottom: 'none'
     }
   }
 });
-
-const tempParkingSpots = [
-  {
-    id: '1',
-    start_time: '13:00',
-    end_time: '15:00',
-    cost: 3
-  },
-  {
-    id: '2',
-    start_time: '4:00',
-    end_time: '5:00',
-    cost: 3
-  }
-];
 
 const SellingMessageContent = (
   parkingSpotStartTime,
@@ -101,10 +70,11 @@ const SellingMessageContent = (
   const today = new Date();
   let isToday = true;
 
-  if (today.getFullYear() !== sellInfo.date.getUTCFullYear() ||
-      today.getMonth() !== sellInfo.date.getUTCMonth() ||
-      today.getDate() !== sellInfo.date.getUTCDate()) {
-
+  if (
+    today.getFullYear() !== sellInfo.date.getUTCFullYear() ||
+    today.getMonth() !== sellInfo.date.getUTCMonth() ||
+    today.getDate() !== sellInfo.date.getUTCDate()
+  ) {
     isToday = false;
   }
 
@@ -128,13 +98,18 @@ const SellingMessageContent = (
       value = roundUpToNearest15(value);
     }
 
+    // Make the end time one second less in the time.
+    if (name === 'end_time') {
+      value = minusOneSecMT(value);
+    }
+
     updateSellInfo({ ...sellInfo, [name]: value });
 
-    // chosen start time is before parking spot start time or before current time if 
+    // chosen start time is before parking spot start time or before current time if
     // spot purchased for today.
     if (
       (name === 'start_time' &&
-      compareMilitaryTime(value, parkingSpotStartTime) < 0) ||
+        compareMilitaryTime(value, parkingSpotStartTime) < 0) ||
       (isToday && compareMilitaryTime(value, currTime) < 0)
     ) {
       updateValidTime({
@@ -146,18 +121,21 @@ const SellingMessageContent = (
 
     // chosen end time is after parking spot end time.
     else if (
-      (name === 'end_time' &&
-      compareMilitaryTime(value, parkingSpotEndTime) > 0)
+      name === 'end_time' &&
+      compareMilitaryTime(value, parkingSpotEndTime) > 0
     ) {
       updateValidTime({
         ...validTime,
         end_timeHasError: true,
         end_timeErrorMessage: 'End Time Cannot Be After Purchased Time.'
       });
-    } 
-    
+    }
+
     // Chosen end time is before the chosen start time.
-    else if (name === 'end_time' && compareMilitaryTime(sellInfo.start_time, value) > 0) {
+    else if (
+      name === 'end_time' &&
+      compareMilitaryTime(sellInfo.start_time, value) > 0
+    ) {
       updateValidTime({
         ...validTime,
         end_timeHasError: true,
@@ -165,11 +143,12 @@ const SellingMessageContent = (
       });
     } else {
       updateValidTime({
-        start_timeErrorMessage: '*Your Time Will Be Rounded Up To The Nearest 15 Minutes',
+        start_timeErrorMessage:
+          '*Your Time Will Be Rounded Up To The Nearest 15 Minutes',
         start_timeHasError: false,
         end_timeHasError: false,
-        end_timeErrorMessage: '*Your Time Will Be Rounded Up To The Nearest 15 Minutes'
-      })
+        end_timeErrorMessage: ''
+      });
     }
   };
 
@@ -183,6 +162,11 @@ const SellingMessageContent = (
       });
     } else {
       updateSellInfo({ ...sellInfo, cost: Number(cost) });
+      // Remove error message if there are none.
+      updateValidCost({
+        hasError: false,
+        errorMessage: ''
+      });
       // update the total cost.
       if (
         !validCost.hasError &&
@@ -237,7 +221,7 @@ const SellingMessageContent = (
               <TextField
                 required
                 error={validCost.hasError}
-                type='number'
+                type="number"
                 label={'Cost Per 15 minutes'}
                 value={sellInfo.cost}
                 helperText={validCost.errorMessage}
@@ -248,7 +232,11 @@ const SellingMessageContent = (
           <TableRow>
             <TableCell>Total Price:</TableCell>
             <TableCell>
-              <TextField disabled value={totalCost} InputProps={{ priceClasses }} />
+              <TextField
+                disabled
+                value={totalCost}
+                InputProps={{ priceClasses }}
+              />
             </TableCell>
           </TableRow>
         </TableBody>
@@ -293,9 +281,11 @@ const SellingParkingSpotTableBody = props => {
   const [sellInfoList, updateSellInfoList] = useState([]);
   const [validTime, updateValidTime] = useState({
     start_timeHasError: false,
-    start_timeErrorMessage: '*Your Time Will Be Rounded Up To The Nearest 15 Minutes',
+    start_timeErrorMessage:
+      '*Your Time Will Be Rounded Up To The Nearest 15 Minutes',
     end_timeHasError: false,
-    end_timeErrorMessage: '*Your Time Will Be Rounded Up To The Nearest 15 Minutes'
+    end_timeErrorMessage:
+      '*Your Time Will Be Rounded Up To The Nearest 15 Minutes'
   });
 
   const handleOnConfirm = privateKey => {
@@ -303,7 +293,6 @@ const SellingParkingSpotTableBody = props => {
   };
 
   const handleSellInfo = spotInfo => () => {
-
     if (validTime.start_timeHasError || validTime.end_timeHasError) {
       return;
     }
@@ -322,22 +311,20 @@ const SellingParkingSpotTableBody = props => {
     });
 
     // info to be used when making the confirmation dialog.
-    updateSellInfoList(
-      [
-        { name: 'Zone ID', value: spotInfo.zone_id },
-        { name: 'Spot ID', value: spotInfo.spot_id },
-        { name: 'Date', value: parkingSpotsInfo[index].date.toDateString() },
-        {
-          name: 'Start Time',
-          value: convertMilitaryTimeToNormal(sellInfo.start_time)
-        },
-        {
-          name: 'End Time',
-          value: convertMilitaryTimeToNormal(sellInfo.end_time)
-        },
-        { name: 'Price per 15 To Sell For', value: sellInfo.cost }
-      ]
-    );
+    updateSellInfoList([
+      { name: 'Zone ID', value: spotInfo.zone_id },
+      { name: 'Spot ID', value: spotInfo.spot_id },
+      { name: 'Date', value: parkingSpotsInfo[index].date.toDateString() },
+      {
+        name: 'Start Time',
+        value: convertMilitaryTimeToNormal(sellInfo.start_time)
+      },
+      {
+        name: 'End Time',
+        value: convertMilitaryTimeToNormal(sellInfo.end_time)
+      },
+      { name: 'Price per 15 To Sell For', value: sellInfo.cost }
+    ]);
 
     // Opens the confirmation dialog screen.
     setOpenConfirm(true);
@@ -345,7 +332,7 @@ const SellingParkingSpotTableBody = props => {
 
   return (
     <>
-      <ConfirmationDialogWithPassword 
+      <ConfirmationDialogWithPassword
         open={openConfirm}
         setOpen={setOpenConfirm}
         buttonMessage="Confirm"
@@ -356,7 +343,7 @@ const SellingParkingSpotTableBody = props => {
         buttonColor="secondary"
       />
       <TableBody>
-        {parkingSpotsInfo.map((parkingSpot, i) => {
+        {parkingSpotsInfo.map(parkingSpot => {
           console.log(parkingSpot);
           return (
             <>
@@ -433,13 +420,7 @@ const SellingParkingSpotTable = props => {
   );
 };
 
-const SellPage = ({ 
-  socket, 
-  isLoggedIn, 
-  classes,
-  ...props 
-}) => {
-
+const SellPage = ({ socket, isLoggedIn, classes }) => {
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [snackbarOptions, updateSnackbarOptions] = useState({
     verticalPos: 'top',
@@ -510,13 +491,15 @@ const SellPage = ({
   const handleSellRequest = async (sellInfo, privatekey) => {
     updateLoadingDialogField({
       open: true,
-      message: "Our Professional Team Of Robbers Is Escorting Your Request To Headquarters. Don't Worry, They Are Professionals..."
+      message:
+        "Our Professional Team Of Robbers Is Escorting Your Request To Headquarters. Don't Worry, They Are Professionals..."
     });
     updateSnackbarOptions({
       ...snackbarOptions,
-      message: 'Our Professional Team Of Robbers Is Escorting Your Request To Headquarters',
+      message:
+        'Our Professional Team Of Robbers Is Escorting Your Request To Headquarters',
       severity: 'success'
-    })
+    });
     setOpenSnackbar(true);
 
     // Make sure that the date field is correct.
@@ -594,7 +577,8 @@ const SellPage = ({
 
       updateMessageDialogField({
         dialogTitle: 'Success',
-        message: 'Congrats, Your Request Has Been Granted! Mind Sharing Some Of That Wealth With Us? Please?'
+        message:
+          'Congrats, Your Request Has Been Granted! Mind Sharing Some Of That Wealth With Us? Please?'
       });
       updateOpenMessageDialog(true);
     } else {
@@ -605,9 +589,10 @@ const SellPage = ({
       updateOpenMessageDialog(true);
       updateSnackbarOptions({
         ...snackbarOptions,
-        message: 'Oh no, the robbers found out you lied to them. Quick, fix the error before they find your credit card info.',
+        message:
+          'Oh no, the robbers found out you lied to them. Quick, fix the error before they find your credit card info.',
         severity: 'error'
-      })
+      });
     }
 
     setOpenSnackbar(true);
@@ -623,31 +608,30 @@ const SellPage = ({
     //  zone_id
     //  spot_id
     // }
-    socket.on(`sell-${localStorage.olivia_pid}`, data => {
+    socket.on(`sell-${localStorage.olivia_pid}`, () => {
       setOpenSnackbar(false);
 
       // Make it so that the data variable stores the message.
       updateSnackbarOptions({
         ...snackbarOptions,
-        message: 'You Got Rich! Go To Account To See How Much Disposable Income You Have.',
+        message:
+          'You Got Rich! Go To Account To See How Much Disposable Income You Have.',
         severity: 'info'
-      })
+      });
     });
 
     socket.on(`user-${localStorage.olivia_pid}`, data => {
-      const index = spotsOwned.findIndex(
-        e => {
-          const tempStartTime = convertMilitaryToEpoch(e.date, e.start_time);
-          const tempEndTime = convertMilitaryToEpoch(e.date, e.end_time);
+      const index = spotsOwned.findIndex(e => {
+        const tempStartTime = convertMilitaryToEpoch(e.date, e.start_time);
+        const tempEndTime = convertMilitaryToEpoch(e.date, e.end_time);
 
-          return (
-            Number(e.zone_id) === Number(data.zone_id) &&
-            Number(e.spot_id) === Number(data.spot_id) &&
-            tempStartTime <= Number(data.start_time) &&
-            tempEndTime >= Number(data.start_time)
-          );
-        }
-      );
+        return (
+          Number(e.zone_id) === Number(data.zone_id) &&
+          Number(e.spot_id) === Number(data.spot_id) &&
+          tempStartTime <= Number(data.start_time) &&
+          tempEndTime >= Number(data.start_time)
+        );
+      });
 
       spotsOwned = spotsOwned.splice(index, 1);
       updateSpotsOwned(spotsOwned);
@@ -666,13 +650,13 @@ const SellPage = ({
           message={snackbarOptions.message}
           severity={snackbarOptions.severity}
         />
-        <MessageDialog 
+        <MessageDialog
           message={messageDialogField.message}
           dialogTitle={messageDialogField.dialogTitle}
           open={openMessageDialog}
           setOpen={updateOpenMessageDialog}
         />
-        <LoadingDialog 
+        <LoadingDialog
           message={loadingDialogField.message}
           open={loadingDialogField.open}
         />

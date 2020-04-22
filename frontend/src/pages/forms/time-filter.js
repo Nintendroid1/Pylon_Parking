@@ -75,6 +75,19 @@ const roundUpToNearest15 = time => {
   return newTime;
 };
 
+const minusOneSecMT = time => {
+  let [hour, minute] = time.split(':').map(e => Number(e));
+
+  if (minute === 0) {
+    minute = 59;
+    hour = hour === 0 ? 23 : hour - 1;
+  } else {
+    minute--;
+  }
+
+  return hour + ':' + minute;
+};
+
 /*
   Converts the military time to standard US time in AM/PM.
 */
@@ -138,7 +151,7 @@ const compareMilitaryTime = (time1, time2) => {
   Converts the given epoch time to military time.
   If the time zone is not specified, then defaults to UTC.
 */
-const convertEpochToMilitary = (epoch) => {
+const convertEpochToMilitary = epoch => {
   const option = {
     timeZone: 'UTC',
     hour12: false,
@@ -165,8 +178,8 @@ const timeDiffInEpoch15 = (startTime, endTime) => {
 */
 const getCurrentTimeInUTC = () => {
   // Date.now() returns UTC time.
-  return new Date(Date.now() + (4 * 60 * 60 * 1000));
-}
+  return new Date(Date.now() + 4 * 60 * 60 * 1000);
+};
 
 // Expects military time.
 /*
@@ -249,14 +262,16 @@ const TimeFilter = ({
   updateCurrentTimeFilter,
   ...props
 }) => {
-
   const [checkBoxes, updateCheckBoxes] = useState({
     startTimeBox: false,
     endTimeBox: false
   });
 
-  const handleChangeCheckBox = (event) => {
-    updateCheckBoxes({ ...checkBoxes, [event.target.name]: event.target.checked });
+  const handleChangeCheckBox = event => {
+    updateCheckBoxes({
+      ...checkBoxes,
+      [event.target.name]: event.target.checked
+    });
   };
 
   // Handles the filtering.
@@ -343,7 +358,7 @@ const TimeFilter = ({
               label="Exact Time"
             />
           </Grid>
-            {/*<KeyboardTimePicker
+          {/*<KeyboardTimePicker
               color="secondary"
               handleTimeChange={handleTimeChange}
               time={currentTimeFilter.endTime}
@@ -447,5 +462,6 @@ export {
   convertMilitaryToEpoch,
   getCurrentTimeInUTC,
   DateFilter,
-  timeDiffInEpoch15
+  timeDiffInEpoch15,
+  minusOneSecMT
 };
