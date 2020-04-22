@@ -293,10 +293,26 @@ const SellingParkingSpotTableBody = props => {
       e => e.spot_id === spotInfo.spot_id && e.zone_id === spotInfo.zone_id
     );
 
+    // Set the start time to be the current time if the date is today, that start time otherwise.
+    let tempStartTime = parkingSpotsInfo[index].start_time;
+    const currSpot = parkingSpotsInfo[index];
+    const currDate = new Date();
+
+    if (
+      currSpot.date.getUTCFullYear() === currDate.getFullYear() &&
+      currSpot.date.getUTCMonth() === currDate.getMonth() &&
+      currSpot.date.getUTCDate() === currDate.getDate()
+    ) {
+      // Adding one minute to the current time so that it would always be a valid time.
+      tempStartTime = roundUpToNearest15(
+        convertEpochToMilitary(Date.now() / 1000 + 60)
+      );
+    }
+
     updateSellInfo({
       ...sellInfo,
       idx: index,
-      start_time: parkingSpotsInfo[index].start_time,
+      start_time: tempStartTime,
       end_time: parkingSpotsInfo[index].end_time,
       date: parkingSpotsInfo[index].date,
       spot_id: spotInfo.spot_id,
