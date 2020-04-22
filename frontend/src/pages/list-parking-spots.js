@@ -148,7 +148,7 @@ function TableData({ classes, ...props }) {
           </TableCell>
           <TableCell>{parkingSpot.spot_id}</TableCell>
           <TableCell>
-            {parkingSpot.price}
+            {Number(parkingSpot.price).toFixed(3)}
             <HokieKoinIcon isInverted={true} className={classes.hokieKoin} />
           </TableCell>
           <TableCell>
@@ -550,7 +550,7 @@ const Zone = ({
       resbody.parkingInfo.forEach(e => {
         e.start_time = convertEpochToMilitary(e.start_time);
         e.end_time = convertEpochToMilitary(e.end_time);
-        e.price = Number(e.price).toFixed(3);
+        e.price = Number(e.price);
       });
       updateParkingSpotsInfo(resbody.parkingInfo);
       updateMessage(null);
