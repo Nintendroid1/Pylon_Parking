@@ -21,7 +21,7 @@ router.post('/', requireLogin, (req,res) => {
                     }
                 }
                 if(isValidReq) {
-                    db.query("UPDATE parking_times SET price = $5, availability = true WHERE spot_id = $1 AND zone_id = $2 AND seller_key = $6 time_code BETWEEN $3 AND $4 RETURNING *",
+                    db.query("UPDATE parking_times SET price = $5, availability = true WHERE spot_id = $1 AND zone_id = $2 AND seller_key = $6 AND time_code BETWEEN $3 AND $4 RETURNING *",
                     [req.body.spot.spot_id, req.body.spot.zone_id, req.body.spot.start_time, req.body.spot.end_time-1, req.body.spot.price, req.body.key], (err, response) => {
                         if(err) {
                             console.log(err);
