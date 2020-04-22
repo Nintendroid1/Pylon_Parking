@@ -552,14 +552,18 @@ const SellPage = ({ socket, isLoggedIn, classes }) => {
         if (curr === null) {
           curr = e;
           curr.start_time = Number(curr.time_code);
-          curr.end_time = curr.start_time + 15 * 60;
+          curr.end_time = curr.start_time + 15 * 60; // epoch time in seconds, not ms
         } else {
           if (curr.end_time === Number(e.time_code)) {
             curr.end_time += 15 * 60;
           } else {
-            curr.start_time = convertEpochToMilitary(curr.start_time);
-            curr.end_time = convertEpochToMilitary(curr.end_time);
-            newList.append(curr);
+            // Is the end time greater than the current time, if so, then it is still
+            // rented by the current user, otherwise, not so no need to list it.
+            if (curr.end_time > Date.now()) {
+              curr.start_time = convertEpochToMilitary(curr.start_time);
+              curr.end_time = convertEpochToMilitary(curr.end_time);
+              newList.append(curr);
+            }
             curr = null;
           }
         }
