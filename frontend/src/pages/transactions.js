@@ -27,6 +27,7 @@ import {
   convertEpochToMilitary,
   convertMilitaryTimeToNormal
 } from './forms/time-filter';
+import { MessageDialog } from './forms/parking-spot-components';
 
 const styles = theme => ({
   root: {
@@ -324,6 +325,11 @@ const TransactionHistory = ({ userSocket, socket, classes }) => {
   const [listOfTransactions, updateListOfTransactions] = useState([]);
   const [page, updatePage] = useState(0);
   const [numEntriesPerPage, updateNumEntriesPerPage] = useState(10);
+  const [openMessageDialog, updateOpenMessageDialog] = useState(false);
+  const [messageDialogField, updateMessageDialogField] = useState({
+    message: '',
+    dialogTitle: ''
+  });
 
   // Table header. Also the order to display headers in.
   const tableHeaders = [
@@ -397,7 +403,11 @@ const TransactionHistory = ({ userSocket, socket, classes }) => {
       updateListOfTransactions(respbody.data);
       updateMessage(null);
     } else {
-      updateMessage('Error has occurred');
+      updateMessageDialogField({
+        dialogTitle: 'Error',
+        message: respbody.message
+      });
+      updateOpenMessageDialog(true);
     }
   };
 
@@ -472,6 +482,12 @@ const TransactionHistory = ({ userSocket, socket, classes }) => {
           horizontalPos={snackbarOptions.horizontalPos}
           message={snackbarOptions.message}
           severity={snackbarOptions.severity}
+        />
+        <MessageDialog
+          message={messageDialogField.message}
+          dialogTitle={messageDialogField.dialogTitle}
+          open={openMessageDialog}
+          setOpen={updateOpenMessageDialog}
         />
         {message ? (
           <Typography align="center">{message}</Typography>

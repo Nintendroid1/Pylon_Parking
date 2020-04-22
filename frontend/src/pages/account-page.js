@@ -16,6 +16,7 @@ import Paper from '@material-ui/core/Paper';
 import Container from '@material-ui/core/Container';
 import ImageForm from './forms/image-form';
 import { PNG } from 'pngjs';
+import { MessageDialog } from './forms/parking-spot-components';
 
 const styles = theme => ({
   table: {
@@ -56,6 +57,11 @@ let AccountPage = ({ classes, history, socket, ...props }) => {
   });
   const [hasCalled, updateCall] = useState(false);
   const [isLoading, setLoading] = useState(false);
+  const [openMessageDialog, updateOpenMessageDialog] = useState(false);
+  const [messageDialogField, updateMessageDialogField] = useState({
+    message: '',
+    dialogTitle: ''
+  });
 
   let loadUser = async () => {
     const url = `${apiprefix}/users/${localStorage.olivia_pid}`;
@@ -74,6 +80,11 @@ let AccountPage = ({ classes, history, socket, ...props }) => {
       setLoading(false);
     } else {
       setLoading(false);
+      updateMessageDialogField({
+        dialogTitle: 'Error',
+        message: rbody.message
+      });
+      updateOpenMessageDialog(true);
     }
   };
 
@@ -106,6 +117,12 @@ let AccountPage = ({ classes, history, socket, ...props }) => {
   return (
     <>
       <div className={classes.root}>
+        <MessageDialog
+          message={messageDialogField.message}
+          dialogTitle={messageDialogField.dialogTitle}
+          open={openMessageDialog}
+          setOpen={updateOpenMessageDialog}
+        />
         <Container maxWidth="lg" className={classes.container}>
           <Grid container spacing={3}>
             <Grid item xs={12} md={8} lg={9}>

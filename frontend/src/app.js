@@ -236,10 +236,7 @@ const App = ({ classes, ...props }) => {
                   reqLogin={true}
                   hidden={false}
                   render={() => (
-                    <SellPage
-                      isLoggedIn={isLoggedIn} 
-                      socket={userSocket} 
-                    />
+                    <SellPage isLoggedIn={isLoggedIn} socket={userSocket} />
                   )}
                 />
                 <Route
@@ -269,27 +266,20 @@ const App = ({ classes, ...props }) => {
                   reqAdmin={false}
                   reqLogin={true}
                   render={() => (
-                    <ProfilePage
-                      socket={userSocket}
-                      isLoggedIn={isLoggedIn}
-                    />
+                    <ProfilePage socket={userSocket} isLoggedIn={isLoggedIn} />
                   )}
                 />
               </div>
               <Route
                 exact
                 path="/bounty"
-                label="Go To Class"
+                label="Report"
                 key="/bounty"
                 icon={<ReportIcon />}
                 hidden={false}
                 reqAdmin={false}
                 reqLogin={false}
-                render={() => (
-                  <BountySystem
-                    userSocket={userSocket}
-                  />
-                )}
+                render={() => <BountySystem userSocket={userSocket} />}
               />
               {/*render={() => <UserInfo isLoggedIn={isLoggedIn} socket={userSocket} />}*/}
               <Route
@@ -300,11 +290,7 @@ const App = ({ classes, ...props }) => {
                 hidden={true}
                 reqAdmin={false}
                 reqLogin={true}
-                render={() => (
-                  <UpdateUserInfo
-                    isLoggedIn={isLoggedIn}
-                  />
-                )}
+                render={() => <UpdateUserInfo isLoggedIn={isLoggedIn} />}
               />
               <Route
                 path="/zones/:zone_id/spot/:spot_id"
@@ -313,12 +299,12 @@ const App = ({ classes, ...props }) => {
                 label="Spot Page"
                 reqAdmin={false}
                 reqLogin={false}
-                render={() => 
+                render={() => (
                   <ParkingSpot
                     userSocket={userSocket}
                     socket={parkingSpotSocket}
                   />
-                }
+                )}
               />
               <Route
                 path="/zones/:zone_id"
@@ -327,12 +313,9 @@ const App = ({ classes, ...props }) => {
                 hidden={true}
                 reqAdmin={false}
                 reqLogin={false}
-                render={() => 
-                  <Zone 
-                    userSocket={userSocket}
-                    socket={parkingLotSocket}
-                  />
-                }
+                render={() => (
+                  <Zone userSocket={userSocket} socket={parkingLotSocket} />
+                )}
               />
             </TabChooser>
           </Router>

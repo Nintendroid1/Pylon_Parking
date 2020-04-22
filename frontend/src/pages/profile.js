@@ -1,5 +1,5 @@
 /**
- * The component that shows the user profile, which includes the 
+ * The component that shows the user profile, which includes the
  * user's pid, total number of tokens, etc.
  */
 
@@ -17,6 +17,7 @@ import Grid from '@material-ui/core/Grid';
 import apiprefix from './apiprefix';
 import Paper from '@material-ui/core/Paper';
 import Container from '@material-ui/core/Container';
+import { MessageDialog } from './forms/parking-spot-components';
 
 const styles = theme => ({
   table: {
@@ -49,8 +50,8 @@ const styles = theme => ({
 
 /**
  * The component that is exported. Shows the user's profile in a table.
- * 
- * @param {Object} param0 
+ *
+ * @param {Object} param0
  */
 let ProfilePage = ({ classes, socket }) => {
   const [openSnackbar, setOpenSnackbar] = useState(false);
@@ -59,6 +60,11 @@ let ProfilePage = ({ classes, socket }) => {
     horizontalPos: 'center',
     message: '',
     severity: 'info'
+  });
+  const [openMessageDialog, updateOpenMessageDialog] = useState(false);
+  const [messageDialogField, updateMessageDialogField] = useState({
+    message: '',
+    dialogTitle: ''
   });
   const [user, updateUser] = useState({
     pid: '',
@@ -87,6 +93,11 @@ let ProfilePage = ({ classes, socket }) => {
       setLoading(false);
     } else {
       setLoading(false);
+      updateMessageDialogField({
+        message: rbody.message,
+        dialogTitle: 'Error'
+      });
+      updateOpenMessageDialog(true);
     }
   };
 
@@ -103,9 +114,10 @@ let ProfilePage = ({ classes, socket }) => {
       // Make it so that the data variable stores the message.
       updateSnackbarOptions({
         ...snackbarOptions,
-        message: 'You Got Rich! Go To Account To See How Much Disposable Income You Have.',
+        message:
+          'You Got Rich! Go To Account To See How Much Disposable Income You Have.',
         severity: 'info'
-      })
+      });
     });
 
     // data = money earned
@@ -123,6 +135,12 @@ let ProfilePage = ({ classes, socket }) => {
           horizontalPos={snackbarOptions.horizontalPos}
           message={snackbarOptions.message}
           severity={snackbarOptions.severity}
+        />
+        <MessageDialog
+          message={messageDialogField.message}
+          dialogTitle={messageDialogField.dialogTitle}
+          open={openMessageDialog}
+          setOpen={updateOpenMessageDialog}
         />
         <Container maxWidth="lg" className={classes.container}>
           <Grid container spacing={3}>

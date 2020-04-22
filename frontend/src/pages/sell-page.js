@@ -152,7 +152,7 @@ const SellingMessageContent = (
         errorMessage: 'Cost must be at least 0'
       });
     } else {
-      updateSellInfo({ ...sellInfo, cost: Number(cost) });
+      updateSellInfo({ ...sellInfo, cost: cost });
       // Remove error message if there are none.
       updateValidCost({
         hasError: false,
@@ -492,7 +492,12 @@ const SellPage = ({ socket, isLoggedIn, classes }) => {
       updateSpotsOwned(respbody.parkingSpotsInfo);
       updateMessage(null);
     } else {
-      updateMessage(<div>Failed to get user.</div>);
+      // Error message for when an error occurs.
+      updateMessageDialogField({
+        message: respbody.message,
+        dialogTitle: 'Error'
+      });
+      updateOpenMessageDialog(true);
       console.log(respbody);
     }
   };
@@ -503,13 +508,6 @@ const SellPage = ({ socket, isLoggedIn, classes }) => {
       message:
         "Our Professional Team Of Robbers Is Escorting Your Request To Headquarters. Don't Worry, They Are Professionals..."
     });
-    updateSnackbarOptions({
-      ...snackbarOptions,
-      message:
-        'Our Professional Team Of Robbers Is Escorting Your Request To Headquarters',
-      severity: 'success'
-    });
-    setOpenSnackbar(true);
 
     // Make sure that the date field is correct.
     console.log(sellInfo.date);
@@ -542,13 +540,12 @@ const SellPage = ({ socket, isLoggedIn, classes }) => {
         zone_id: sellInfo.zone_id,
         start_time: startUTCEpoch,
         end_time: endUTCEpoch,
-        price: sellInfo.cost // price is per 15.
+        price: Number(sellInfo.cost) // price is per 15.
       }
     };
 
     const response = await makeAPICall('POST', url, json);
     const respbody = await response.json();
-    setOpenSnackbar(false);
     updateLoadingDialogField({
       open: false,
       message: ''
@@ -600,15 +597,15 @@ const SellPage = ({ socket, isLoggedIn, classes }) => {
         message: respbody.message
       });
       updateOpenMessageDialog(true);
+      /*
+      updateOpenMessageDialog(true);
       updateSnackbarOptions({
         ...snackbarOptions,
         message:
           'Oh no, the robbers found out you lied to them. Quick, fix the error before they find your credit card info.',
         severity: 'error'
-      });
+      });*/
     }
-
-    setOpenSnackbar(true);
   };
 
   // Need another socket event for when parking spot is sold.
