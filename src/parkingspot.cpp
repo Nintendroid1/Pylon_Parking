@@ -2,7 +2,6 @@
 #include <eosio/print.hpp>
 #include <eosio/system.hpp>
 #include <eosio/asset.hpp>
-#include <vector>
 
 using namespace eosio;
 
@@ -40,9 +39,11 @@ private:
       return id;
     }
     
-    uint64_t secondary_key() const {
-      std::string key = std::to_string(spot_id) + std::to_string(timeclock) + std::to_string(zone_id) ;
-      return std::stoi(key);
+    uint128_t  secondary_key() const {
+      std::string key = std::to_string(spot_id) + std::to_string(timeclock) + std::to_string(zone_id) +char('\0');
+      uint128_t  key_int = std::stoul (key,nullptr,0); 
+
+      return key_int;
     }
   };
 
@@ -65,7 +66,7 @@ private:
   * takes in a pspot value
   */
   typedef eosio::multi_index<"pspots"_n, pspot,  
-      indexed_by<"seckey"_n, const_mem_fun<pspot, uint64_t, &pspot::secondary_key>>> park_index;
+      indexed_by<"seckey"_n, const_mem_fun<pspot, uint128_t, &pspot::secondary_key>>> park_index;
 
 public:
  //"code" param is the account the contract is deployed to
@@ -95,12 +96,15 @@ public:
       park_index parkdeck(get_self(), get_first_receiver().value);
 
       //Iterator for parking spots using spot_id as key
-      std::string key = std::to_string(spot_id) + std::to_string(time_code) + std::to_string(zone_id) ;
+      std::string key = std::to_string(spot_id) + std::to_string(time_code) + std::to_string(zone_id) + char('\0');
       print("Query:", key);
+      uint128_t  key_int = std::stoul (key,nullptr,0); 
+      print("Conversion done");
       //Iterate with secondary key
       auto secparkdeck = parkdeck.get_index<name("seckey")>();
-      auto iterator = secparkdeck.find(std::stoi(key));
       print("Made it after secparkdeck creation");
+      auto iterator = secparkdeck.find(key_int);
+      print("Made it after query");
       if( iterator == secparkdeck.end()) {
             //The parking spot isn't in the table
             parkdeck.emplace(user, [&](auto& row) {
@@ -128,11 +132,12 @@ public:
     park_index parkdeck(get_self(), get_first_receiver().value);
 
     //Iterator for parking spots using spot_id as key
-    std::string key = std::to_string(spot_id) + std::to_string(time_code) + std::to_string(zone_id) ;
+    std::string key = std::to_string(spot_id) + std::to_string(time_code) + std::to_string(zone_id) + char('\0');
+    uint128_t key_int = std::stoul (key,nullptr,0); 
 
     //Iterate with secondary key
     auto secparkdeck = parkdeck.get_index<name("seckey")>();
-    auto iterator = secparkdeck.find(std::stoi(key));
+    auto iterator = secparkdeck.find(key_int);
 
     if( iterator == secparkdeck.end() ) {
           //The parking spot isn't in the table
@@ -145,6 +150,19 @@ public:
           send_summary(user, " successfully removed parking spot");
 
       }
+    
+  }
+
+    //Erases parking spot 
+  [[eosio::action]]
+  void clear(name user) {
+    require_auth(user);
+
+    park_index parkdeck(get_self(), get_first_receiver().value);
+    auto it = parkdeck.begin();
+    while (it != parkdeck.end()) {
+        it = parkdeck.erase(it);
+    }
     
   }
 
@@ -179,11 +197,13 @@ public:
       park_index parkdeck(get_self(), get_first_receiver().value);
 
       //Iterator for parking spots using spot_id as key
-      std::string key = std::to_string(spot_id) + std::to_string(time_code) + std::to_string(zone_id) ;
+      std::string key = std::to_string(spot_id) + std::to_string(time_code) + std::to_string(zone_id) + char('\0');
+      uint128_t key_int = std::stoul (key,nullptr,0); 
+ 
 
       //Iterate with secondary key
       auto secparkdeck = parkdeck.get_index<name("seckey")>();
-      auto iterator = secparkdeck.find(std::stoi(key));
+      auto iterator = secparkdeck.find(key_int);
 
       if( iterator == secparkdeck.end() ) {
             //The parking spot isn't in the table
