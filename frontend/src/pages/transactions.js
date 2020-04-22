@@ -208,20 +208,26 @@ const TransactionTable = ({
   return (
     <>
       <div>
-        <FilterSelectField
-          listOfFilterOptions={listOfFilterOptions}
-          filterOption={filterOption}
-          updateFilterOption={updateFilterOption}
-        />
-        <TextField
-          disabled={textFieldValue.isDisabled}
-          label={`Enter a ${filterOption}`}
-          value={textFieldValue.value}
-          onChange={handleTextFieldChange}
-        />
-        <Button variant="contained" color="primary" onClick={handleClickFilter}>
-          Filter!
-        </Button>
+        <Grid>
+          <FilterSelectField
+            listOfFilterOptions={listOfFilterOptions}
+            filterOption={filterOption}
+            updateFilterOption={updateFilterOption}
+          />
+        </Grid>
+        <Grid>
+          <TextField
+            disabled={textFieldValue.isDisabled}
+            label={`Enter a ${filterOption}`}
+            value={textFieldValue.value}
+            onChange={handleTextFieldChange}
+          />
+        </Grid>
+        <Grid>
+          <Button variant="contained" color="primary" onClick={handleClickFilter}>
+            Filter!
+          </Button>
+        </Grid>
       </div>
       <Table stickyHeader>
         <TransactionTableHeader tableHeaders={tableHeaders} />
