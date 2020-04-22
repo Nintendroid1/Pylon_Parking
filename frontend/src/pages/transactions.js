@@ -376,6 +376,7 @@ const TransactionHistory = ({ userSocket, socket, classes }) => {
       console.log(respbody.data);
 
       updateListOfTransactions(respbody.data);
+      updateMessage(null);
     } else {
       updateMessage('Error has occurred');
     }
