@@ -638,10 +638,9 @@ const Zone = ({
     } else {
       updateMessageDialogField({
         dialogTitle: 'Error',
-        message: 'We Do Not Recognize That Time As Being Real.'
+        message: resbody.message
       });
       updateOpenMessageDialog(true);
-      updateMessage(<div>Fail</div>);
     }
   };
 
@@ -662,13 +661,6 @@ const Zone = ({
       message:
         'Your Request Is Currently Being Processed By Our Elite Team Of Trained Monkeys'
     });
-    updateSnackbarOptions({
-      ...snackbarOptions,
-      message:
-        'Your Request Is Currently Being Processed By Our Elite Team Of Trained Monkeys',
-      severity: 'info'
-    });
-    setOpenSnackbar(true);
 
     // The date is in local time, but function expects utc, so need to convert.
     const UTCDate = new Date(parkingInfo.date.getTime() - 4 * 60 * 60 * 1000);
@@ -693,18 +685,13 @@ const Zone = ({
 
     const response = await makeAPICall('POST', url, json);
     const respbody = await response.json();
-    setOpenSnackbar(false);
-    updateOpenMessageDialog(false);
-    updateMessageDialogField({
-      dialogTitle: '',
-      message: ''
-    });
     updateLoadingDialogField({
       open: false,
       message: ''
     });
 
     if (response.status === 200) {
+      /*
       updateMessageDialogField({
         dialogTitle: 'Error',
         message:
@@ -712,6 +699,7 @@ const Zone = ({
       });
       updateOpenMessageDialog(true);
       console.log('Successfully purchased spot!');
+      */
 
       // Displays the invoice instead of the tables.
       // updateMessage(<Invoice spotInfo={json} />);
@@ -720,22 +708,13 @@ const Zone = ({
       history.push('/');
       window.location.href = `${process.env.PUBLIC_URL}/`;
     } else {
+      // Letting the user know that an error has occurred and what the error is.
       updateMessageDialogField({
         dialogTitle: 'Error',
-        message:
-          'Squatters Were Spotted At Your Desired Spot. What Would You Like To Do?'
+        message: respbody.message
       });
       updateOpenMessageDialog(true);
-      updateSnackbarOptions({
-        ...snackbarOptions,
-        message:
-          'Our Team Of Monkeys Was So Traumatized By Your Request That We Were Forced To Reject Your Request',
-        severity: 'error'
-      });
-      updateMessage(<div>{respbody.message}</div>);
     }
-
-    setOpenSnackbar(true);
   };
 
   // Calls the function after the first render.

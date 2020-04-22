@@ -21,11 +21,12 @@ import queryStrings from 'query-string';
 import TextField from '@material-ui/core/TextField';
 import MenuItem from '@material-ui/core/MenuItem';
 import Button from '@material-ui/core/Button';
-import {
-  withStyles,
-  withTheme} from '@material-ui/core/styles';
+import { withStyles, withTheme } from '@material-ui/core/styles';
 import CircularProgress from '@material-ui/core/CircularProgress';
-import { convertEpochToMilitary, convertMilitaryTimeToNormal } from './forms/time-filter';
+import {
+  convertEpochToMilitary,
+  convertMilitaryTimeToNormal
+} from './forms/time-filter';
 
 const styles = theme => ({
   root: {
@@ -83,25 +84,23 @@ const getEntriesForPage = (page, numEntriesPerPage, listOfTransactions) => {
 
 /**
  * Returns the components used for the header of the table.
- * 
- * @param {Object} props 
+ *
+ * @param {Object} props
  */
 const TransactionTableHeader = props => {
   const { tableHeaders } = props;
- 
+
   return (
     <>
       <TableHead>
         <TableRow>
-          {
-            tableHeaders.map(e => {
-              return (
-                <>
-                  <TableCell>{e}</TableCell>
-                </>
-              );
-            })
-          }
+          {tableHeaders.map(e => {
+            return (
+              <>
+                <TableCell>{e}</TableCell>
+              </>
+            );
+          })}
         </TableRow>
       </TableHead>
     </>
@@ -110,15 +109,16 @@ const TransactionTableHeader = props => {
 
 /**
  * Returns the components used in the body of the table.
- * 
- * @param {Object} param0 
+ *
+ * @param {Object} param0
  */
 const TransactionsTableBody = ({
   page,
   numEntriesPerPage,
-  listOfTransactions}) => {
+  listOfTransactions
+}) => {
   const rows = getEntriesForPage(page, numEntriesPerPage, listOfTransactions);
-  
+
   return (
     <>
       <TableBody>
@@ -128,7 +128,9 @@ const TransactionsTableBody = ({
               <TableCell>{`${row.zone_id}-${row.spot_id}`}</TableCell>
               <TableCell>{row.buyer}</TableCell>
               <TableCell>{row.seller}</TableCell>
-              <TableCell>{convertMilitaryTimeToNormal(row.start_time)}</TableCell>
+              <TableCell>
+                {convertMilitaryTimeToNormal(row.start_time)}
+              </TableCell>
               <TableCell>{convertMilitaryTimeToNormal(row.end_time)}</TableCell>
               <TableCell>{row.quantity}</TableCell>
             </TableRow>
@@ -141,8 +143,8 @@ const TransactionsTableBody = ({
 
 /**
  * Makes the transaction history table.
- * 
- * @param {Object} param0 
+ *
+ * @param {Object} param0
  */
 const TransactionTable = ({
   userId,
@@ -176,13 +178,17 @@ const TransactionTable = ({
 
   const handleChangePage = (event, newPage) => {
     updatePage(newPage);
-    history.push(`/transaction_history?page=${newPage}&numEntries=${numEntriesPerPage}`);
+    history.push(
+      `/transaction_history?page=${newPage}&numEntries=${numEntriesPerPage}`
+    );
   };
 
   const handleChangeNumEntriesPerPage = event => {
     updateNumEntriesPerPage(parseInt(event.target.value, 10));
     updatePage(0);
-    history.push(`/transaction_history?page=${0}&numEntries=${event.target.value}`);
+    history.push(
+      `/transaction_history?page=${0}&numEntries=${event.target.value}`
+    );
   };
 
   const handleTextFieldChange = event => {
@@ -225,7 +231,11 @@ const TransactionTable = ({
           />
         </Grid>
         <Grid>
-          <Button variant="contained" color="primary" onClick={handleClickFilter}>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleClickFilter}
+          >
             Filter!
           </Button>
         </Grid>
@@ -297,8 +307,8 @@ const updateNumEntryInfo = (
 /**
  * The component that is exported. It creates the transaction history page.
  * The default setting is personal history only.
- * 
- * @param {Object} param0 
+ *
+ * @param {Object} param0
  */
 const TransactionHistory = ({ userSocket, socket, classes }) => {
   const [openSnackbar, setOpenSnackbar] = useState(false);
@@ -322,7 +332,7 @@ const TransactionHistory = ({ userSocket, socket, classes }) => {
     'Seller PID',
     'Start Time',
     'End Time',
-    'Total Price',
+    'Total Price'
   ];
 
   const url = `${apiprefix}/history`;
@@ -330,10 +340,7 @@ const TransactionHistory = ({ userSocket, socket, classes }) => {
   // GET request for a specific user's personal history.
   const getUserTransactionHistory = async () => {
     // testing purposes.
-    const response = await makeAPICall(
-      'GET',
-      `${url}`
-    );
+    const response = await makeAPICall('GET', `${url}`);
     /*
     const response = await makeAPICall(
       'GET',
@@ -369,8 +376,13 @@ const TransactionHistory = ({ userSocket, socket, classes }) => {
       const queryParams = queryStrings.parse(window.location.search);
 
       // Updates the url based on the page and number of entries.
-      if (typeof queryParams.page === 'undefined' || typeof queryParams.numEntries === 'undefined') {
-        history.push(`/transaction_history?page=${page}&numEntries=${numEntriesPerPage}`);
+      if (
+        typeof queryParams.page === 'undefined' ||
+        typeof queryParams.numEntries === 'undefined'
+      ) {
+        history.push(
+          `/transaction_history?page=${page}&numEntries=${numEntriesPerPage}`
+        );
       } else {
         updatePageInfo(queryParams.page, page, updatePage);
         updateNumEntryInfo(
@@ -404,8 +416,13 @@ const TransactionHistory = ({ userSocket, socket, classes }) => {
         e.end_time = convertEpochToMilitary(e.time_code + 15 * 60 * 1000);
       });
 
-      if (typeof queryParams.page === 'undefined' || typeof queryParams.numEntries === 'undefined') {
-        history.push(`/transaction_history?page=${page}&numEntries=${numEntriesPerPage}`);
+      if (
+        typeof queryParams.page === 'undefined' ||
+        typeof queryParams.numEntries === 'undefined'
+      ) {
+        history.push(
+          `/transaction_history?page=${page}&numEntries=${numEntriesPerPage}`
+        );
       } else {
         updatePageInfo(queryParams.page, page, updatePage);
         updateNumEntryInfo(
@@ -434,9 +451,10 @@ const TransactionHistory = ({ userSocket, socket, classes }) => {
       // Make it so that the data variable stores the message.
       updateSnackbarOptions({
         ...snackbarOptions,
-        message: 'You Got Rich! Go To Account To See How Much Disposable Income You Have.',
+        message:
+          'You Got Rich! Go To Account To See How Much Disposable Income You Have.',
         severity: 'info'
-      })
+      });
     });
 
     socket.on('transactionHistory', data =>
