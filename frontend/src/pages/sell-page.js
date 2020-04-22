@@ -557,7 +557,7 @@ const SellPage = ({ socket, isLoggedIn, classes }) => {
     if (response.status === 200) {
       let newList = [];
       let curr = null;
-      respbody.body.rows.forEach(e => {
+      respbody.rows.forEach(e => {
         if (curr === null) {
           curr = e;
           curr.start_time = Number(curr.time_code);
