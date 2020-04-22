@@ -138,10 +138,10 @@ const App = ({ classes, ...props }) => {
   // Base url.
   const endpoint = 'http://localhost:3001';
 
-  const parkingLotSocket = io(`/zones`); //{ path: `${endpoint}/zones` });
-  const parkingSpotSocket = io(`/parking_spot`); //{ path: `${endpoint}/parkingSpot` });
-  const transactionHistorySocket = io(`/transactionHistory`);
-  const userSocket = io(`/user`);
+  const parkingLotSocket = io(`${endpoint}/zones`); //{ path: `${endpoint}/zones` });
+  const parkingSpotSocket = io(`${endpoint}/parking_spot`); //{ path: `${endpoint}/parkingSpot` });
+  const transactionHistorySocket = io(`${endpoint}/transactionHistory`);
+  const userSocket = io(`${endpoint}/user`);
 
   //console.log(localStorage.olivia_id);
   //localStorage.lastTab = "/";
