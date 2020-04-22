@@ -48,7 +48,7 @@ const militaryTimeDifference = (startTime, endTime) => {
   startTimeMinute = 0;
   startTimeHour += 1;
 
-  timeDiff += endTimeHour - startTimeHour + (endTimeMinute - startTimeMinute);
+  timeDiff += (endTimeHour - startTimeHour) * 60 + endTimeMinute;
 
   return timeDiff;
 };

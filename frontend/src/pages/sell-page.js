@@ -191,7 +191,7 @@ const SellingMessageContent = (
           sellInfo.start_time,
           sellInfo.end_time
         );
-        const totalCost = (Number(cost) * timeDiff) / 15;
+        const totalCost = Number(cost) * (timeDiff / 15);
         UpdateTotalCost(totalCost);
       }
     }
