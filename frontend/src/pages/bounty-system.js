@@ -1,9 +1,9 @@
 /**
  * Exports the component that handles the Bounty System.
- * 
+ *
  * The Bounty System uses a third-party service: https://platerecognizer.com/#introduction
  * This link is to their api: http://docs.platerecognizer.com/#introduction
- * 
+ *
  * The Bounty System also uses a QR reader and expects the user to take
  * a single picture containing both the QR code and the license plate.
  */
@@ -29,9 +29,7 @@ import { PNG } from 'pngjs';
 import 'react-html5-camera-photo/build/css/index.css';
 import jsQR from 'jsqr';
 import { MessageDialog } from './forms/parking-spot-components';
-import {
-  withStyles,
-  withTheme} from '@material-ui/core/styles';
+import { withStyles, withTheme } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 const styles = theme => ({
   root: {
@@ -100,14 +98,20 @@ const popUpContent = info => {
   then expects user to retake the photo.
 */
 const ReportField = props => {
-  const { handleReport, setOpenSnackbar, snackbarOptions, updateSnackbarOptions, updateLoadingDialogField } = props;
+  const {
+    handleReport,
+    setOpenSnackbar,
+    snackbarOptions,
+    updateSnackbarOptions,
+    updateLoadingDialogField
+  } = props;
 
   // Used to open the dialog for confirming info.
   const [open, setOpen] = useState(false);
 
   // Used to open the dialog for displaying error info.
   const [openErrorDialog, setOpenErrorDialog] = useState(false);
-  
+
   // Used to open the dialog for giving instructions on how to use.
   const [openInstrDialog, setOpenInstrDialog] = useState(true);
 
@@ -130,9 +134,9 @@ const ReportField = props => {
     event.preventDefault();
     updateSnackbarOptions({
       ...snackbarOptions,
-      message: 'Sending Info To Headquarters For Confirmation',
+      message: 'Please wait while we process the information.',
       severity: 'info'
-    })
+    });
     setOpenSnackbar(true);
     setOpen(false);
     handleReport(info);
@@ -144,11 +148,6 @@ const ReportField = props => {
       open: true,
       message: 'Using Alien Technology To Analyze Image. Please Wait.'
     });
-    updateSnackbarOptions({
-      ...snackbarOptions,
-      message: 'Using Alien Technology To Analyze Image',
-      severity: 'info'
-    });
 
     // Attempts to read the QR code in the picture, if it exists.
     const dataUri = imageURI;
@@ -159,10 +158,15 @@ const ReportField = props => {
 
     // Do error checking of code where only make api call if qr code is valid.
     if (code === null) {
+      updateLoadingDialogField({
+        open: false,
+        message: ''
+      });
       // error message.
       console.log('no qr code found');
-      setOpenSnackbar(false);
-      updateErrorMessage('The QR Code was invalid. Please take a better picture you pleb.');
+      updateErrorMessage(
+        'The QR Code was invalid. Please take a better picture you pleb.'
+      );
       setOpenErrorDialog(true);
     } else {
       // the data in the qr code will be of the form zone_id-spot_id.
@@ -174,8 +178,7 @@ const ReportField = props => {
         const url = `${apiprefix}/bounty-system`;
         const response = await makeImageAPICall('POST', url, imageURI);
         const respbody = await response.json();
-        
-        setOpenSnackbar(false);
+
         updateLoadingDialogField({
           open: false,
           message: ''
@@ -184,11 +187,14 @@ const ReportField = props => {
         if (response.status === 200) {
           // Checks if there exists multiple license plates and confidence level of ML model;
           // if there are, then retake the photo.
-          if (respbody.results.length !== 1 || 
-              respbody.results[0].dscore < 0.5 || 
-              respbody.results[0].score < 0.5) {
-
-            updateErrorMessage('Our machine does not understand the language your license plate is in. Please translate it or take another picture.');
+          if (
+            respbody.results.length !== 1 ||
+            respbody.results[0].dscore < 0.5 ||
+            respbody.results[0].score < 0.5
+          ) {
+            updateErrorMessage(
+              'Our machine does not understand the language your license plate is in. Please translate it or take another picture.'
+            );
             setOpenErrorDialog(true);
           } else {
             updateInfo({
@@ -196,14 +202,13 @@ const ReportField = props => {
               spot_id: spot_id,
               license_info: respbody.results[0].plate
             });
-  
-            setOpen(true);
           }
         } else {
-          updateErrorMessage('The license plate was unable to be read. I dare u take another picture, I double dog dare you.')
+          updateErrorMessage(
+            'The license plate was unable to be read. I dare u take another picture, I double dog dare you.'
+          );
           setOpenErrorDialog(true);
         }
-        
       } catch (err) {
         console.log(err.stack);
       }
@@ -213,15 +218,15 @@ const ReportField = props => {
   return (
     <>
       <CaptureImage handleCameraClick={handleOnCameraClick} />
-      <MessageDialog 
-        message='Please take a picture that includes the a single license plate and a single qr code.'
-        dialogTitle='Instructions'
+      <MessageDialog
+        message="Please take a picture that includes the a single license plate and a single qr code."
+        dialogTitle="Instructions"
         open={openInstrDialog}
         setOpen={setOpenInstrDialog}
       />
-      <MessageDialog 
+      <MessageDialog
         message={errorMessage}
-        dialogTitle='Error'
+        dialogTitle="Error"
         open={openErrorDialog}
         setOpen={setOpenErrorDialog}
       />
@@ -277,13 +282,13 @@ const BountySystem = ({ classes, userSocket }) => {
     });
     const url = `${apiprefix}/bounty-system/report`;
     const json = {
+      pid: localStorage.olivia_pid,
       zone_id: info.zone_id,
       spot_id: info.spot_id,
       license_info: info.license_info
     };
 
     const response = await makeAPICall('POST', url, json);
-    setOpenSnackbar(false);
     updateLoadingDialogField({
       open: false,
       message: ''
@@ -291,24 +296,26 @@ const BountySystem = ({ classes, userSocket }) => {
 
     if (response.status === 200) {
       // Let the user know that the backend has received the info.
+      /*
       updateMessage({
         message: 'Thank you for the extra work. We will now check if the driver is illegal',
         dialogTitle: 'Success!!!!'
       });
-      setOpenMessageDialog(true);
+      setOpenMessageDialog(true);*/
       updateSnackbarOptions({
         ...snackbarOptions,
-        message: 'Headquarters Successfully Received Your Report.',
+        message: 'We received your report. Thank you for your help.',
         severity: 'success'
-      })
+      });
       setOpenSnackbar(true);
     } else {
       // Let the user know that an error has occurred.
       updateSnackbarOptions({
         ...snackbarOptions,
-        message: 'Oh no, the dog intercepted the message. Please take another picture',
+        message: 'An error has occurred. Please try again later.',
         severity: 'error'
-      })
+      });
+      setOpenSnackbar(true);
     }
   };
 
@@ -339,18 +346,18 @@ const BountySystem = ({ classes, userSocket }) => {
           message={snackbarOptions.message}
           severity={snackbarOptions.severity}
         />
-        <MessageDialog 
+        <MessageDialog
           open={openMessageDialog}
           setOpen={setOpenMessageDialog}
           message={message.message}
           dialogTitle={message.dialogTitle}
         />
-        <LoadingDialog 
+        <LoadingDialog
           open={loadingDialogField.open}
           message={loadingDialogField.message}
         />
         <Paper>
-          <ReportField 
+          <ReportField
             handleReport={handleReport}
             setOpenSnackbar={setOpenSnackbar}
             snackbarOptions={snackbarOptions}
