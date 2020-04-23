@@ -1,7 +1,12 @@
 import React from 'react';
 import { useState } from 'react';
 import clsx from 'clsx';
-import { makeStyles, useTheme } from '@material-ui/core/styles';
+import {
+  makeStyles,
+  withTheme,
+  withStyles,
+  useTheme
+} from '@material-ui/core/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Drawer from '@material-ui/core/Drawer';
 import Box from '@material-ui/core/Box';
@@ -22,8 +27,9 @@ import NotificationsIcon from '@material-ui/icons/Notifications';
 import { mainListItems, secondaryListItems } from './listItems';
 import Chart from './Chart';
 import SimpleChart from './SimpleChart';
-import Deposits from './Deposits';
+import RecentSpots from './RecentSpots.js';
 import Orders from './Orders';
+import TransactionHistory from '../pages/transactions';
 
 function Copyright() {
   return (
@@ -40,7 +46,7 @@ function Copyright() {
 
 const drawerWidth = 240;
 
-const useStyles = makeStyles(theme => ({
+const styles = theme => ({
   root: {
     display: 'flex'
   },
@@ -117,10 +123,9 @@ const useStyles = makeStyles(theme => ({
   fixedHeight: {
     height: 300
   }
-}));
+});
 
-export default function Dashboard() {
-  const classes = useStyles();
+const Dashboard = ({ classes, userSocket, transactionHistorySocket }) => {
   const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
   let [series, updateSeries] = useState([
     {
@@ -128,6 +133,11 @@ export default function Dashboard() {
       data: [30, 40, 45, 50, 49, 40, 30, 20]
     }
   ]);
+  let options = {
+    xaxis: {
+      categories: []
+    }
+  };
 
   return (
     <div className={classes.root}>
@@ -137,26 +147,29 @@ export default function Dashboard() {
           {/* Chart */}
           <Grid item xs={12} md={8} lg={9}>
             <Paper className={fixedHeightPaper}>
-              <SimpleChart series={series} />
+              <SimpleChart series={series} options={options}/>
             </Paper>
           </Grid>
           {/* Recent Deposits */}
           <Grid item xs={12} md={4} lg={3}>
             <Paper className={fixedHeightPaper}>
-              <Deposits />
+              <RecentSpots />
             </Paper>
           </Grid>
           {/* Recent Orders */}
           <Grid item xs={12}>
             <Paper className={classes.paper}>
-              <Orders />
+              <TransactionHistory
+                classes={classes}
+                userSocket={userSocket}
+                socket={transactionHistorySocket}
+              />
             </Paper>
           </Grid>
         </Grid>
-        <Box pt={4}>
-          <Copyright />
-        </Box>
       </Container>
     </div>
   );
-}
+};
+
+export default withTheme(withStyles(styles)(Dashboard));

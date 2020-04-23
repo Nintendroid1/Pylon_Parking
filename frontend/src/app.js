@@ -136,8 +136,8 @@ const App = ({ classes, ...props }) => {
 
   // Endpoint for the websocket.
   // Base url.
-  // const endpoint = 'http://localhost:3001';
-  const endpoint = window.location.host;
+  const endpoint = 'http://localhost:3001';
+  // const endpoint = window.location.host;
 
   const parkingLotSocket = io(`${endpoint}/zones`); //{ path: `${endpoint}/zones` });
   const parkingSpotSocket = io(`${endpoint}/parking_spot`); //{ path: `${endpoint}/parkingSpot` });
@@ -210,7 +210,12 @@ const App = ({ classes, ...props }) => {
                   reqAdmin={false}
                   reqLogin={false}
                   hidden={false}
-                  render={() => <Dashboard userSocket={userSocket} />}
+                  render={() => (
+                    <Dashboard
+                      transactionHistorySocket={transactionHistorySocket}
+                      userSocket={userSocket}
+                    />
+                  )}
                 />
                 <Route
                   path="/transaction_history"
