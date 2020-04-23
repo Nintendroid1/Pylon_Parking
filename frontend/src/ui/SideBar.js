@@ -208,7 +208,7 @@ let SideBar = ({
                               pathname: group_tab.props.path,
                               key: `${index}-${gr_index}`,
                               state: {
-                                from: history.location
+                                from: history.location.pathname
                               }
                             }}
                             key={`${index}-${gr_index}`}
@@ -270,7 +270,7 @@ let SideBar = ({
                     pathname: tab.props.path,
                     key: index,
                     state: {
-                      from: history.location
+                      from: history.location.pathname
                     }
                   }}
                   key={index}

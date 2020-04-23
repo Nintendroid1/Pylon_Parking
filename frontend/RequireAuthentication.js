@@ -12,7 +12,7 @@ export default function RequireAuthentication(Component) {
           to={{
             pathname: `/login`,
             state: {
-              from: history.location
+              from: history.location.pathname
             }
           }}
         />

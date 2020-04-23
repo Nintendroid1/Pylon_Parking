@@ -285,7 +285,7 @@ function TabChooser({
             to={{
               pathname: '/login',
               state: {
-                from: history.location
+                from: history.location.pathname
               }
             }}
             key={'login'}
