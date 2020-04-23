@@ -1,5 +1,5 @@
 /**
- * The exported component allows the user to register for 
+ * The exported component allows the user to register for
  * an account.
  */
 
@@ -7,11 +7,13 @@ import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { makeAPICall } from '../api';
 import UserForm from './forms/registerform';
-import { Typography, LinearProgress } from '@material-ui/core';
+import { Typography, LinearProgress, Table, Dialog, DialogContentText } from '@material-ui/core';
 import { Redirect } from 'react-router';
 import apiprefix from './apiprefix';
-import {
-  withStyles} from '@material-ui/core/styles';
+import { withStyles } from '@material-ui/core/styles';
+import { MessageDialog } from './forms/parking-spot-components';
+import history from '../history';
+import Table from '@material-ui/core/Table';
 
 const styles = theme => ({
   main: {
@@ -45,15 +47,19 @@ const styles = theme => ({
 
 /**
  * Handles the components and API call used for registering a new user.
- * 
- * @param {Object} param0 
+ *
+ * @param {Object} param0
  */
 const RegisterTab = ({ isDark, updateLogin, updateUser, updateAdmin }) => {
   // an user message to be displayed, if any
   const [mess, updateMessage] = useState(null);
   const [isLoad, setLoading] = useState(false);
   const [messageColor, setMsgColor] = useState(isDark ? '#FFFFFF' : '#000000');
-  const [isOk, updateOk] = useState(false);
+  const [openMessageDialog, updateOpenMessageDialog] = useState(false);
+  const [messageDialogField, updateMessageDialogField] = useState({
+    message: '',
+    dialogTitle: ''
+  });
 
   // handle user registeration
   const addNewUser = async values => {
@@ -67,7 +73,6 @@ const RegisterTab = ({ isDark, updateLogin, updateUser, updateAdmin }) => {
     // Successful registration.
     if (res.status === 200) {
       setMsgColor(isDark ? '#FFFFFF' : '#000000');
-      updateOk(true);
       localStorage.olivia_token = body.token;
       console.log(body);
       updateUser({
@@ -78,18 +83,34 @@ const RegisterTab = ({ isDark, updateLogin, updateUser, updateAdmin }) => {
       updateAdmin(body.user.admin);
 
       updateLogin(true);
+      updateMessageDialogField({
+        message: (
+          <>
+            <DialogContentText>
+              The following is your private key. Please save it.
+            </DialogContentText>
+            <DialogContentText>
+              {body.privateKey}
+            </DialogContentText>
+          </>
+        ),
+        dialogTitle: 'Important Info'
+      });
+      updateOpenMessageDialog(true);
     } else {
-      updateOk(false);
       setMsgColor('#fc3c3c');
     }
   };
 
-  if (isOk) {
-    return <Redirect to={'/'} />;
-  }
-
   return (
     <>
+      <MessageDialog
+        redirectTo={'/'}
+        message={messageDialogField.message}
+        dialogTitle={messageDialogField.dialogTitle}
+        open={openMessageDialog}
+        setOpen={updateOpenMessageDialog}
+      />
       <Typography align="center" variant="h5" gutterBottom>
         Register a New User
       </Typography>
