@@ -41,6 +41,124 @@ router.use(express.json());
 
 router.get("/", (req, res) => {
   res.send("This should be login api");
+  // let keys = ["5KY2ydXyvyrYSAZrgNXYTyrWST75ABF33VccrGen42RBdwMKcNt","5JLDNMsHS61J623WFB9TYJvmDasMVrk5iYfijZqehccQPqiJKTM"]
+
+  // const signatureProvider = new JsSignatureProvider(keys);
+  // const rpc = new JsonRpc('http://127.0.0.1:8888', { fetch });
+  // const api = new Api({ rpc, signatureProvider, textDecoder: new TextDecoder(), textEncoder: new TextEncoder() });
+
+  //Get Accounts Associated with private key
+  // let {PrivateKey, PublicKey, Signature, Aes, key_utils, config} = require('eosjs-ecc');
+  // let pubkey = PrivateKey.fromString(keys[1]).toPublic().toString();
+  // rpc.history_get_key_accounts(pubkey).then(result => console.log(result)).catch(err => console.log(err));
+
+  //Transfer Tokens
+  // api.transact({
+  //   actions: [{
+  //     account: 'eosio.token',
+  //     name: 'transfer',
+  //     authorization: [{
+  //       actor: 'alice',
+  //       permission: 'active'
+  //     }],
+  //     data: {
+  //       from: 'alice',
+  //       to: 'admin',
+  //       quantity: '5000.0242 VTP',
+  //       memo: 'I give up'
+  //     }
+  //   }]
+  // },
+  // {
+  //   blocksBehind: 3,
+  //   expireSeconds: 30,
+  // })
+  // .then(result => console.log(result))
+  // .catch(err => console.log(err));
+
+  // Insert parking spot into table
+  // api.transact({
+  //   actions: [{
+  //     account: 'park.vt',
+  //     name: 'insert',
+  //     authorization: [{
+  //       actor: 'park.vt',
+  //       permission: 'active'
+  //     }],
+  //     data: {
+  //       user: 'park.vt',
+  //       spot_id: '1',
+  //       zone_id: '1',
+  //       time_code: '1587585953',
+  //       owner: 'admin'
+  //     }
+  //   }]
+  // },
+  // {
+  //   blocksBehind: 3,
+  //   expireSeconds: 30,
+  // })
+  // .then(result => console.log(result))
+  // .catch(err => console.log(err));
+
+  //Get Currency Balance
+  //rpc.get_currency_balance('eosio.token', 'greg', 'VTP').then((balance) => console.log(parseFloat(balance))).catch(err => console.log(err));
+
+  //Issue Tokens
+  // api.transact({
+  //   actions: [{
+  //     account: 'eosio.token',
+  //     name: 'issue',
+  //     authorization: [{
+  //       actor: 'alice',
+  //       permission: 'active'
+  //     }],
+  //     data: {
+  //       to: 'alice',
+  //       quantity: '5000.0000 VTP',
+  //       memo: 'Chet You Betcha',
+  //     }
+  //   }]
+  // },
+  // {
+  //   blocksBehind: 3,
+  //   expireSeconds: 30,
+  // })
+  // .then(result => console.log(result))
+  // .catch(err => console.log(err));
+
+  //Modavail
+  // api.transact({
+  //   actions: [{
+  //     account: 'park.vt',
+  //     name: 'modavail',
+  //     authorization: [{
+  //       actor: 'greg',
+  //       permission: 'active'
+  //     },{
+  //       actor: 'alice',
+  //       permission: 'active'
+  //     },
+  //     {
+  //       actor: 'park.vt',
+  //       permission: 'active'
+  //     }],
+  //     data: {
+  //       buyer: 'greg',
+  //       quantity: '0.5000 VTP',
+  //       spot_id: '1',
+  //       zone_id: '1',
+  //       time_code: '5'
+  //     }
+  //   }]
+  // },
+  // {
+  //   blocksBehind: 3,
+  //   expireSeconds: 30,
+  // })
+  // .then(result => console.log(result))
+  // .catch(err => console.log(err));
+
 });
 
 router.get("/:pid/spots", requireLogin, function(req, res) {
@@ -147,7 +265,17 @@ router.get("/:pid", requireLogin, function(req, res) {
           balance: 0
         };
       }
-      res.status(200).json({ ...userInfo });
+      const rpc = new JsonRpc('http://127.0.0.1:8888', { fetch });
+      rpc.get_currency_balance('eosio.token', 'greg', 'VTP')
+      .then((balance) => {
+        userInfo.balance = parseFloat(balance);
+        res.status(200).json({ ...userInfo });
+      })
+      .catch(err => {
+        console.log(err)
+        res.status(500).json({message: "Internal Server Error"});
+      });
+      
     }
   );
 });
@@ -187,7 +315,11 @@ router.post("/login", async function(req, res) {
 
 router.post("/register", async function(req, res) {
   try {
-    //Check database for duplicate username/email
+    const letters = /^[1-5a-z]+$/;
+    if(!req.body.user.pid.match(letters) || !req.body.user.pid.length<=12) {
+      res.status(400).json({message: "pid should only contain letters a-z and numbers 1-5"})
+      return;
+    }
     db.query(
       "SELECT PID FROM users WHERE PID = $1 OR email = $2",
       [req.body.user.pid, req.body.user.email],
