@@ -41,12 +41,12 @@ router.use(express.json());
 
 router.get("/", (req, res) => {
   res.send("This should be login api");
-  //let keys = ["5KY2ydXyvyrYSAZrgNXYTyrWST75ABF33VccrGen42RBdwMKcNt","5JLDNMsHS61J623WFB9TYJvmDasMVrk5iYfijZqehccQPqiJKTM"]
-  let keys = ['5KUdsBDPC3UxVA3ht4LGCGhBr6ppbKmMNdJ5oNgawRKMjQwMXwe',conf.parkVTKey,conf.adminKey];
+  // let keys = ["5KY2ydXyvyrYSAZrgNXYTyrWST75ABF33VccrGen42RBdwMKcNt","5JLDNMsHS61J623WFB9TYJvmDasMVrk5iYfijZqehccQPqiJKTM"]
+  // let keys = ['5KUdsBDPC3UxVA3ht4LGCGhBr6ppbKmMNdJ5oNgawRKMjQwMXwe',conf.parkVTKey,conf.adminKey];
 
-  const signatureProvider = new JsSignatureProvider(keys);
-  const rpc = new JsonRpc('http://127.0.0.1:8888', { fetch });
-  const api = new Api({ rpc, signatureProvider, textDecoder: new TextDecoder(), textEncoder: new TextEncoder() });
+  // const signatureProvider = new JsSignatureProvider(keys);
+  // const rpc = new JsonRpc('http://127.0.0.1:8888', { fetch });
+  // const api = new Api({ rpc, signatureProvider, textDecoder: new TextDecoder(), textEncoder: new TextEncoder() });
 
   // api.transact({
   //   actions: [{
@@ -88,28 +88,28 @@ router.get("/", (req, res) => {
   // }).catch(err => console.log(err));
 
   //Transfer Tokens
-  api.transact({
-    actions: [{
-      account: 'eosio.token',
-      name: 'transfer',
-      authorization: [{
-        actor: 'testpid1',
-        permission: 'active'
-      }],
-      data: {
-        from: 'testpid1',
-        to: 'admin',
-        quantity: '5.0000 VTP',
-        memo: 'I give up'
-      }
-    }]
-  },
-  {
-    blocksBehind: 3,
-    expireSeconds: 30,
-  })
-  .then(result => console.log(result))
-  .catch(err => console.log(err));
+  // api.transact({
+  //   actions: [{
+  //     account: 'eosio.token',
+  //     name: 'transfer',
+  //     authorization: [{
+  //       actor: 'testpid1',
+  //       permission: 'active'
+  //     }],
+  //     data: {
+  //       from: 'testpid1',
+  //       to: 'admin',
+  //       quantity: '5.0000 VTP',
+  //       memo: 'I give up'
+  //     }
+  //   }]
+  // },
+  // {
+  //   blocksBehind: 3,
+  //   expireSeconds: 30,
+  // })
+  // .then(result => console.log(result))
+  // .catch(err => console.log(err));
 
   // Insert parking spot into table
   // api.transact({
@@ -351,8 +351,7 @@ router.post("/login", async function(req, res) {
 router.post("/register", async function(req, res) {
   try {
     const letters = /^[a-z1-5]+$/;
-    console.log(req.body.user.pid.toLowerCase());
-    if(!req.body.user.pid.toLowerCase().match(letters) || !(req.body.user.pid.length<=12)) {
+    if(!req.body.user.pid.match(letters) || !(req.body.user.pid.length<=12)) {
       res.status(400).json({message: "pid should only contain letters a-z and numbers 1-5"})
       return;
     }
