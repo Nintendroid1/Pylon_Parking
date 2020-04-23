@@ -339,6 +339,19 @@ function TabChooser({
     };
 
     function drawAccountIcon() {
+      let accountMessage = (
+        <>
+          <img
+            className={classes.circular}
+            alt="userIcon"
+            src={`${localStorage.avatar}`}
+            onError={() => {
+              localStorage.avatar = null;
+            }}
+          />
+        </>
+      );
+
       if (localStorage.getItem('avatar') === null) {
         return (
           <>
@@ -375,7 +388,13 @@ function TabChooser({
             aria-haspopup="true"
             onClick={handleClick}
           >
-            {drawAccountIcon()}
+            {localStorage.avatar != null ? (
+              drawAccountIcon()
+            ) : (
+              <>
+                <AccountCircle className={classes.avatar} />
+              </>
+            )}
             <Typography
               variant="button"
               style={{ color: '#FFFFFF', fontSize: 14 }}
@@ -390,8 +409,10 @@ function TabChooser({
             open={Boolean(anchorEl)}
             onClose={handleClose}
           >
-            <MenuItem onClick={() => handleClose('/profile')}>Profile</MenuItem>
-            <MenuItem onClick={() => handleClose('/account')}>My account</MenuItem>
+            <MenuItem onClick={() => handleClose('/Profile')}>Profile</MenuItem>
+            <MenuItem onClick={() => handleClose('/account')}>
+              My account
+            </MenuItem>
             <MenuItem onClick={() => handleClose('/my_spots')}>
               My Spots
             </MenuItem>
