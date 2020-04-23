@@ -348,13 +348,10 @@ const TransactionHistory = ({ userSocket, socket, classes }) => {
 
   // GET request for a specific user's personal history.
   const getUserTransactionHistory = async () => {
-    // testing purposes.
-    const response = await makeAPICall('GET', `${url}`);
-    /*
     const response = await makeAPICall(
       'GET',
       `${url}/${localStorage.olivia_pid}`
-    );*/
+    );
     const respbody = await response.json();
 
     if (response.status === 200) {
