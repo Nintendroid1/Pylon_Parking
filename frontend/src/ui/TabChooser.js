@@ -435,7 +435,7 @@ function TabChooser({
             to={{
               pathname: `/`,
               state: {
-                from: history.location
+                from: history.location.pathname
               }
             }}
           >

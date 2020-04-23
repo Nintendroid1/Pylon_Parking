@@ -110,7 +110,7 @@ const MainMap = ({ classes, userSocket, ...props }) => {
         to={{
           pathname: `zones/${z.zone_id}`,
           state: {
-            from: history.location
+            from: history.location.pathname
           }
         }}
       >

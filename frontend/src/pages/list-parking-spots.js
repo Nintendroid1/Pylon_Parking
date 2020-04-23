@@ -167,7 +167,7 @@ function TableData({ classes, ...props }) {
               to={{
                 pathname: `/zones/${parkingSpot.zone_id}/spot/${parkingSpot.spot_id}`,
                 state: {
-                  from: history.location
+                  from: history.location.pathname
                 }
               }}
             >
