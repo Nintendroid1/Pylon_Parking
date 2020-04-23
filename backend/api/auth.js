@@ -58,5 +58,6 @@ module.exports = {
     test: user => user.admin === 1 || user.admin,
     message: 'needs admin permissions'
   }),
-  requireLogin: requireAuthenticationWithPredicate({test: () => true})
+  requireLogin: requireAuthenticationWithPredicate({test: () => true}),
+  getTokenFromHeader: ExtractJwt.fromAuthHeaderAsBearerToken()
 }
