@@ -8,8 +8,9 @@ const usersRouter = require("./api/users");
 const zonesRouter = require("./api/zones");
 const purchaseRouter = require("./api/purchase");
 const sellRouter = require("./api/sell");
-const historyRouter = require("./api/history")
-const bountyRouter = require("./api/bounty-system")
+const historyRouter = require("./api/history");
+const bountyRouter = require("./api/bounty-system");
+const initRouter = require("./api/init");
 
 // Initializing socket and passing it to each app.
 const server = require("http").Server(app);
@@ -67,6 +68,7 @@ app.use("/api/purchase", purchaseRouter);
 app.use("/api/sell", sellRouter);
 app.use("/api/history", historyRouter);
 app.use("/api/bounty-system", bountyRouter);
+app.use("/api/init", initRouter);
 app.use('/media', express.static(__dirname + '/public/'));
 app.use(express.json());
 

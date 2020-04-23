@@ -41,6 +41,159 @@ router.use(express.json());
 
 router.get("/", (req, res) => {
   res.send("This should be login api");
+  //let keys = ["5KY2ydXyvyrYSAZrgNXYTyrWST75ABF33VccrGen42RBdwMKcNt","5JLDNMsHS61J623WFB9TYJvmDasMVrk5iYfijZqehccQPqiJKTM"]
+  let keys = ['5KUdsBDPC3UxVA3ht4LGCGhBr6ppbKmMNdJ5oNgawRKMjQwMXwe',conf.parkVTKey,conf.adminKey];
+
+  const signatureProvider = new JsSignatureProvider(keys);
+  const rpc = new JsonRpc('http://127.0.0.1:8888', { fetch });
+  const api = new Api({ rpc, signatureProvider, textDecoder: new TextDecoder(), textEncoder: new TextEncoder() });
+
+  // api.transact({
+  //   actions: [{
+  //     account: 'eosio',
+  //     name: 'updateauth',
+  //     authorization: [{
+  //       actor: 'testpid1',
+  //       permission: 'active'
+  //     }],
+  //     data: {
+  //       account: 'testpid1',
+  //       permission: 'active',
+  //       parent: 'owner',
+  //       auth: {
+  //         threshold: 1,
+  //         keys:[{"key":"EOS8PHGniEVDSzPUpWbWndRvEsSLY9ECwAK5H3EpyHYHn8a7vV3Uu", "weight":1}], 
+  //         accounts:[{"permission":{"actor":"park.vt","permission":"eosio.code"},"weight":1}], 
+  //         waits:[]
+  //       }
+  //     }
+  //   }]
+  // },
+  // {
+  //   blocksBehind: 3,
+  //   expireSeconds: 30,
+  // })
+  // .then(result => {
+  //   console.log(result);
+  // })
+  // .catch(err => console.log(err));
+
+  //Get Accounts Associated with private key
+  // let {PrivateKey, PublicKey, Signature, Aes, key_utils, config} = require('eosjs-ecc');
+  // let pubkey = PrivateKey.fromString(keys[1]).toPublic().toString();
+  // rpc.history_get_key_accounts(pubkey).then(result => {
+  //   if(result.account_names.includes('greg')) {
+  //     console.log("true");
+  //   }
+  // }).catch(err => console.log(err));
+
+  //Transfer Tokens
+  api.transact({
+    actions: [{
+      account: 'eosio.token',
+      name: 'transfer',
+      authorization: [{
+        actor: 'testpid1',
+        permission: 'active'
+      }],
+      data: {
+        from: 'testpid1',
+        to: 'admin',
+        quantity: '5.0000 VTP',
+        memo: 'I give up'
+      }
+    }]
+  },
+  {
+    blocksBehind: 3,
+    expireSeconds: 30,
+  })
+  .then(result => console.log(result))
+  .catch(err => console.log(err));
+
+  // Insert parking spot into table
+  // api.transact({
+  //   actions: [{
+  //     account: 'park.vt',
+  //     name: 'insert',
+  //     authorization: [{
+  //       actor: 'park.vt',
+  //       permission: 'active'
+  //     }],
+  //     data: {
+  //       user: 'park.vt',
+  //       spot_id: '1',
+  //       zone_id: '1',
+  //       time_code: '1587585953',
+  //       owner: 'admin'
+  //     }
+  //   }]
+  // },
+  // {
+  //   blocksBehind: 3,
+  //   expireSeconds: 30,
+  // })
+  // .then(result => console.log(result))
+  // .catch(err => console.log(err));
+
+  //Get Currency Balance
+  //rpc.get_currency_balance('eosio.token', 'greg', 'VTP').then((balance) => console.log(parseFloat(balance))).catch(err => console.log(err));
+
+  //Issue Tokens
+  // api.transact({
+  //   actions: [{
+  //     account: 'eosio.token',
+  //     name: 'issue',
+  //     authorization: [{
+  //       actor: 'alice',
+  //       permission: 'active'
+  //     }],
+  //     data: {
+  //       to: 'alice',
+  //       quantity: '5000.0000 VTP',
+  //       memo: 'Chet You Betcha',
+  //     }
+  //   }]
+  // },
+  // {
+  //   blocksBehind: 3,
+  //   expireSeconds: 30,
+  // })
+  // .then(result => console.log(result))
+  // .catch(err => console.log(err));
+
+  // Modavail
+  // api.transact({
+  //   actions: [{
+  //     account: 'park.vt',
+  //     name: 'modavail',
+  //     authorization: [{
+  //       actor: 'testpid1',
+  //       permission: 'active'
+  //     },{
+  //       actor: 'admin',
+  //       permission: 'active'
+  //     },
+  //     {
+  //       actor: 'park.vt',
+  //       permission: 'active'
+  //     }],
+  //     data: {
+  //       buyer: 'testpid1',
+  //       quantity: '2.5000 VTP',
+  //       spot_id: '1',
+  //       zone_id: '1',
+  //       time_code: '1587607200'
+  //     }
+  //   }]
+  // },
+  // {
+  //   blocksBehind: 3,
+  //   expireSeconds: 30,
+  // })
+  // .then(result => console.log(result))
+  // .catch(err => console.log(err));
+
 });
 
 router.get("/:pid/spots", requireLogin, function(req, res) {
@@ -147,7 +300,17 @@ router.get("/:pid", requireLogin, function(req, res) {
           balance: 0
         };
       }
-      res.status(200).json({ ...userInfo });
+      const rpc = new JsonRpc('http://127.0.0.1:8888', { fetch });
+      rpc.get_currency_balance('eosio.token', req.params.pid.toLocaleLowerCase(), 'VTP')
+      .then((balance) => {
+        userInfo.balance = parseFloat(balance);
+        res.status(200).json({ ...userInfo });
+      })
+      .catch(err => {
+        console.log(err)
+        res.status(500).json({message: "Internal Server Error"});
+      });
+      
     }
   );
 });
@@ -187,7 +350,12 @@ router.post("/login", async function(req, res) {
 
 router.post("/register", async function(req, res) {
   try {
-    //Check database for duplicate username/email
+    const letters = /^[a-z1-5]+$/;
+    console.log(req.body.user.pid.toLowerCase());
+    if(!req.body.user.pid.toLowerCase().match(letters) || !(req.body.user.pid.length<=12)) {
+      res.status(400).json({message: "pid should only contain letters a-z and numbers 1-5"})
+      return;
+    }
     db.query(
       "SELECT PID FROM users WHERE PID = $1 OR email = $2",
       [req.body.user.pid, req.body.user.email],
@@ -220,16 +388,17 @@ router.post("/register", async function(req, res) {
                 res.status(500).json({ message: "Internal server error" });
               } else {
                 console.log(dbres.rows[0]);
-                //Add to chain
-                const signatureProvider = new JsSignatureProvider([conf.adminKey]);
-                const rpc = new JsonRpc('http://127.0.0.1:8888', { fetch });
-                const api = new Api({ rpc, signatureProvider, textDecoder: new TextDecoder(), textEncoder: new TextEncoder() });
 
+                //Add to chain
                 let {PrivateKey, PublicKey, Signature, Aes, key_utils, config} = require('eosjs-ecc');
                 let privateWif;
                 PrivateKey.randomKey().then(privateKey => {
                   privateWif = privateKey.toWif();
                   let pubkey = PrivateKey.fromString(privateWif).toPublic().toString();
+
+                  const signatureProvider = new JsSignatureProvider([conf.adminKey,privateWif]);
+                  const rpc = new JsonRpc('http://127.0.0.1:8888', { fetch });
+                  const api = new Api({ rpc, signatureProvider, textDecoder: new TextDecoder(), textEncoder: new TextEncoder() });
                   api.transact({
                     actions: [{
                       account: 'eosio',
@@ -264,6 +433,51 @@ router.post("/register", async function(req, res) {
                   }, {
                     blocksBehind: 3,
                     expireSeconds: 30,
+                  })
+                  .then(blockRes => {
+                    console.log(blockRes);
+                    api.transact({
+                      actions: [{
+                        account: 'eosio',
+                        name: 'updateauth',
+                        authorization: [{
+                          actor: req.body.user.pid.toLowerCase(),
+                          permission: 'active'
+                        }],
+                        data: {
+                          account: req.body.user.pid.toLowerCase(),
+                          permission: 'active',
+                          parent: 'owner',
+                          auth: {
+                            threshold: 1,
+                            keys:[{"key":pubkey, "weight":1}], 
+                            accounts:[{"permission":{"actor":"park.vt","permission":"eosio.code"},"weight":1}], 
+                            waits:[]
+                          }
+                        }
+                      },{
+                        account: 'eosio.token',
+                        name: 'transfer',
+                        authorization: [{
+                          actor: 'admin',
+                          permission: 'active'
+                        }],
+                        data: {
+                          from: 'admin',
+                          to: req.body.user.pid.toLowerCase(),
+                          quantity: '30.0000 VTP',
+                          memo: 'Initial Tokens'
+                        }
+                      }]
+                    },
+                    {
+                      blocksBehind: 3,
+                      expireSeconds: 30,
+                    })
+                    .then(result => {
+                      console.log(result);
+                    })
+                    .catch(err => console.log(err));
                   })
                   .then(blockRes => {
                     console.log(blockRes);
