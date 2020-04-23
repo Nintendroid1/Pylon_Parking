@@ -5,7 +5,7 @@ module.exports = {
         session: false
     },
     expire: (60 * 60 * 24 * 7),
-    adminKey: "5Jo2U83td6MGcLWvCAshKhrcrKmrXcnsiqD8x7M3batEhWapzow",
-    parkVTKey: "5KY2ydXyvyrYSAZrgNXYTyrWST75ABF33VccrGen42RBdwMKcNt"
+    adminKey: "5KSt9jU3Bu5MWsLAJXFzQWEsBf7Fvupfedk9MP8vuKD2sEMfvGR",
+    parkVTKey: "5KSt9jU3Bu5MWsLAJXFzQWEsBf7Fvupfedk9MP8vuKD2sEMfvGR"
 
 };
