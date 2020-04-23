@@ -12,8 +12,28 @@ const { JsSignatureProvider } = require('eosjs/dist/eosjs-jssig');      // devel
 const fetch = require('node-fetch');                                    // node only; not needed in browsers
 const { TextEncoder, TextDecoder } = require('util');                   // node only; native TextEncoder/Decoder
 
-router.post("/", requireLogin, (req, res) => {
+router.post("/", requireLogin, async function(req, res){
     //Talk to the blockchain here
+    const rpc = new JsonRpc('http://127.0.0.1:8888', { fetch });
+    let stopBool = false;
+    try {
+      let {PrivateKey, PublicKey, Signature, Aes, key_utils, config} = require('eosjs-ecc');
+      let pubkey = PrivateKey.fromString(req.body.key).toPublic().toString();
+      await rpc.history_get_key_accounts(pubkey).then(result => {
+        if(!result.account_names.includes(req.body.pid.toLowerCase())) {
+          res.status(401).json({message: "Bad Key"});
+          stopBool = true;
+        }
+      });
+    } catch (err) {
+      console.log(err);
+      res.status(400).json({message: "Bad Key"});
+      stopBool = true;
+    }
+
+    if(stopBool) {
+      return;
+    }
 
     console.log(req.body.spot);
     db.query(
@@ -59,9 +79,6 @@ router.post("/", requireLogin, (req, res) => {
         }
         if (isValidReq) {
           //talk to the blockchain here
-
-          const rpc = new JsonRpc('http://127.0.0.1:8888', { fetch });
-
           rpc.get_currency_balance('eosio.token', req.body.pid.toLowerCase(), 'VTP')
           .then(async function(balance) {
             if(balance < totalPrice) {
