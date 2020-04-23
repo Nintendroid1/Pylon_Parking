@@ -7,13 +7,14 @@ import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { makeAPICall } from '../api';
 import UserForm from './forms/registerform';
-import { Typography, LinearProgress, Table, Dialog, DialogContentText } from '@material-ui/core';
-import { Redirect } from 'react-router';
+import {
+  Typography,
+  LinearProgress,
+  DialogContentText
+} from '@material-ui/core';
 import apiprefix from './apiprefix';
 import { withStyles } from '@material-ui/core/styles';
 import { MessageDialog } from './forms/parking-spot-components';
-import history from '../history';
-import Table from '@material-ui/core/Table';
 
 const styles = theme => ({
   main: {
@@ -89,9 +90,7 @@ const RegisterTab = ({ isDark, updateLogin, updateUser, updateAdmin }) => {
             <DialogContentText>
               The following is your private key. Please save it.
             </DialogContentText>
-            <DialogContentText>
-              {body.privateKey}
-            </DialogContentText>
+            <DialogContentText>{body.privateKey}</DialogContentText>
           </>
         ),
         dialogTitle: 'Important Info'
