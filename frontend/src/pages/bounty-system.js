@@ -320,7 +320,8 @@ const BountySystem = ({ classes, userSocket }) => {
       // Make it so that the data variable stores the message.
       updateSnackbarOptions({
         ...snackbarOptions,
-        message: 'You Got Rich! Go To Account To See How Much Disposable Income You Have.',
+        message:
+          'You Got Rich! Go To Account To See How Much Disposable Income You Have.',
         severity: 'info'
       });
       setOpenSnackbar(true);

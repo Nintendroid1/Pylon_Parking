@@ -129,8 +129,7 @@ let AccountPage = ({ classes, history, socket, ...props }) => {
       // Make it so that the data variable stores the message.
       updateSnackbarOptions({
         ...snackbarOptions,
-        message:
-          'You Got Rich! Go To Account To See How Much Disposable Income You Have.',
+        message: 'Congratulations! One Of Your Parking Spots Got Sold.',
         severity: 'info'
       });
       setOpenSnackbar(true);

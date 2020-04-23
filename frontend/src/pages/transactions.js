@@ -188,7 +188,10 @@ const TransactionTable = ({
     updateNumEntriesPerPage(parseInt(event.target.value, 10));
     updatePage(0);
     history.push(
-      `/transaction_history?page=${0}&numEntries=${event.target.value}`
+      `/transaction_history?page=${0}&numEntries=${parseInt(
+        event.target.value,
+        10
+      )}`
     );
   };
 
