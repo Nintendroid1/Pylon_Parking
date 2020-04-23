@@ -650,7 +650,7 @@ const SellPage = ({ socket, isLoggedIn, classes }) => {
       spotsOwned = spotsOwned.splice(index, 1);
       updateSpotsOwned(spotsOwned);
       */
-    });
+    // });
   }, []);
 
   // Change to something more meaningful.
