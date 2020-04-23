@@ -764,10 +764,12 @@ const SellPage = ({ socket, isLoggedIn, classes }) => {
           <Typography>{message}</Typography>
         ) : (
           <>
+            <Typography>Spots Currently Owned</Typography>
             <SellingParkingSpotTable
               parkingSpotsInfo={spotsOwned}
               handleSellRequest={handleSellRequest}
             />
+            <Typography>Spots Currently Being Sold</Typography>
             <SpotsSoldTable spots={spotsSold} />
           </>
         )}
