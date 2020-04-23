@@ -15,8 +15,10 @@ import { TimePicker } from './parking-spot-components.js';
 import Button from '@material-ui/core/Button';
 import {
   withStyles,
+  useStyles,
   MuiThemeProvider,
-  createMuiTheme
+  createMuiTheme,
+  withTheme
 } from '@material-ui/core/styles';
 import { KeyboardTimePicker } from '@material-ui/pickers';
 import Checkbox from '@material-ui/core/Checkbox';
@@ -230,7 +232,12 @@ const DateFilter = ({ time, handleDateFilter, updateTime, ...props }) => {
   return (
     <>
       <CustomDatePicker time={time} updateTime={updateTime} />
-      <Button variant="contained" color="primary" onClick={handleOnClick}>
+      <Button
+        styles={{ margin: '5px' }}
+        variant="contained"
+        color="primary"
+        onClick={handleOnClick}
+      >
         Filter!
       </Button>
     </>
@@ -332,49 +339,51 @@ const TimeFilter = ({
               handleDateChange={handleDateChange}
             />
           </Grid>
-          <Grid>
-            <TimePicker
-              color="secondary"
-              handleTimeChange={handleTimeChange}
-              time={currentTimeFilter.startTime}
-              name={'startTime'}
-              label={'Start Time'}
-              variant="inline"
-            />
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={checkBoxes.startTimeBox}
-                  onChange={handleChangeCheckBox}
-                  name="startTimeBox"
-                  color="primary"
+          <Grid container spacing={2}>
+            <Grid item xs={12}>
+              <Grid>
+                <TimePicker
+                  color="secondary"
+                  handleTimeChange={handleTimeChange}
+                  time={currentTimeFilter.startTime}
+                  name={'startTime'}
+                  label={'Start Time'}
+                  variant="inline"
                 />
-              }
-              label="Exact Time"
-            />
-          </Grid>
-          <Grid>
-            <TimePicker
-              color="secondary"
-              handleTimeChange={handleTimeChange}
-              time={currentTimeFilter.endTime}
-              name={'endTime'}
-              label={'End Time'}
-              variant="inline"
-            />
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={checkBoxes.endTimeBox}
-                  onChange={handleChangeCheckBox}
-                  name="endTimeBox"
-                  color="primary"
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={checkBoxes.startTimeBox}
+                      onChange={handleChangeCheckBox}
+                      name="startTimeBox"
+                      color="primary"
+                    />
+                  }
+                  label="Exact Time"
                 />
-              }
-              label="Exact Time"
-            />
-          </Grid>
-          {/*<KeyboardTimePicker
+              </Grid>
+              <Grid>
+                <TimePicker
+                  color="secondary"
+                  handleTimeChange={handleTimeChange}
+                  time={currentTimeFilter.endTime}
+                  name={'endTime'}
+                  label={'End Time'}
+                  variant="inline"
+                />
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={checkBoxes.endTimeBox}
+                      onChange={handleChangeCheckBox}
+                      name="endTimeBox"
+                      color="primary"
+                    />
+                  }
+                  label="Exact Time"
+                />
+              </Grid>
+              {/*<KeyboardTimePicker
               color="secondary"
               handleTimeChange={handleTimeChange}
               time={currentTimeFilter.endTime}
@@ -384,10 +393,17 @@ const TimeFilter = ({
               minutesStep={15}
               placeholder="05:00 AM"
             />*/}
-          <Grid>
-            <Button variant="contained" color="primary" onClick={handleSubmit}>
-              Filter!
-            </Button>
+            </Grid>
+            <Grid xs item>
+              <Button
+                styles={{ margin: '10px' }}
+                variant="contained"
+                color="primary"
+                onClick={handleSubmit}
+              >
+                Filter!
+              </Button>
+            </Grid>
           </Grid>
         </form>
       </MuiPickersUtilsProvider>
