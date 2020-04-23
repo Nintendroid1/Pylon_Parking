@@ -77,20 +77,23 @@ const SpotsSoldTableBody = props => {
   return (
     <>
       <TableBody>
-        <TableRow>
-          {spots.map(e => {
-            return (
-              <>
+        {spots.map(e => {
+          return (
+            <>
+              <TableRow>
+                <TableCell>
+                  <span />
+                </TableCell>
                 <TableCell>{`${e.zone_id}-${e.spot_id}`}</TableCell>
                 <TableCell>{`${e.zone_name}`}</TableCell>
                 <TableCell>{`${e.date}`}</TableCell>
                 <TableCell>{`${e.start_time}`}</TableCell>
                 <TableCell>{`${e.end_time}`}</TableCell>
                 <TableCell>{`${e.price}`}</TableCell>
-              </>
-            );
-          })}
-        </TableRow>
+              </TableRow>
+            </>
+          );
+        })}
       </TableBody>
     </>
   );
@@ -614,6 +617,7 @@ const SellPage = ({ socket, isLoggedIn, classes }) => {
     };
 
     const response = await makeAPICall('POST', url, json);
+    // Returns the updated info for the spot sold.
     const respbody = await response.json();
     updateLoadingDialogField({
       open: false,
@@ -628,7 +632,13 @@ const SellPage = ({ socket, isLoggedIn, classes }) => {
       // Coagulating neighboring spots.
       respbody.rows.forEach(e => {
         if (curr === null) {
-          curr = e;
+          curr = {
+            zone_name: e.zone_name,
+            spot_id: e.spot_id,
+            zone_id: e.zone_id,
+            price: e.price,
+            time_code: e.time_code
+          };
           curr.start_time = Number(curr.time_code);
           curr.end_time = curr.start_time + 15 * 60; // epoch time in seconds, not ms
         } else {
@@ -637,7 +647,7 @@ const SellPage = ({ socket, isLoggedIn, classes }) => {
           } else {
             // Is the end time greater than the current time, if so, then it is still
             // rented by the current user, otherwise, not so no need to list it.
-            if (curr.end_time > Date.now()) {
+            if (curr.end_time > Date.now() / 1000) {
               curr.start_time = convertEpochToMilitary(curr.start_time);
               curr.end_time = convertEpochToMilitary(curr.end_time);
               newList.append(curr);
@@ -648,7 +658,7 @@ const SellPage = ({ socket, isLoggedIn, classes }) => {
       });
 
       // Remove old stuff from the list.
-      //spotsOwned.splice(sellInfo.idx, 1);
+      const tempSpotSold = spotsOwned.splice(sellInfo.idx, 1);
 
       // Adding new stuff to the list.
       newList.forEach((e, idx) => {
@@ -656,9 +666,10 @@ const SellPage = ({ socket, isLoggedIn, classes }) => {
       });
 
       updateSpotsOwned(spotsOwned);
-      spotsSold.push(newList);
-      
+
+      spotsSold.push(tempSpotSold);
       updateSpotsSold(spotsSold);
+
       updateMessageDialogField({
         dialogTitle: 'Success',
         message:
