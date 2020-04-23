@@ -60,6 +60,8 @@ router.post('/', requireLogin, (req,res) => {
                                     }
                                 }
 
+                                socketAPI.broadcastSellPageInfo(socket, req.body.pid, 'Wooh sockets works!!!!!');
+
                                 socketAPI.broadcastZoneInfo(
                                     socket,
                                     req.body.spot.zone_id,
