@@ -5,6 +5,11 @@ const db = require('../db');
 const { requireLogin } = require("./auth.js");
 const socketAPI = require("../realtime/socket-broadcaster");
 
+const { Api, JsonRpc, RpcError } = require('eosjs');
+const { JsSignatureProvider } = require('eosjs/dist/eosjs-jssig');      // development only
+const fetch = require('node-fetch');                                    // node only; not needed in browsers
+const { TextEncoder, TextDecoder } = require('util');                   // node only; native TextEncoder/Decoder
+
 router.use(express.json());
 
 router.post('/', requireLogin, (req,res) => {
@@ -15,7 +20,7 @@ router.post('/', requireLogin, (req,res) => {
         const rpc = new JsonRpc('http://127.0.0.1:8888', { fetch });
 
         let {PrivateKey, PublicKey, Signature, Aes, key_utils, config} = require('eosjs-ecc');
-        let pubkey = PrivateKey.fromString(keys[1]).toPublic().toString();
+        let pubkey = PrivateKey.fromString(keys[0]).toPublic().toString();
         rpc.history_get_key_accounts(pubkey).then(result => {
             if(result.account_names.includes(req.body.pid.toLowerCase())) {
                 let isValidReq = true;

@@ -1,8 +1,8 @@
 {
     "user": {
-        "pid": "testPID",
+        "pid": "testPID5",
         "password": "testPass",
-        "email": "testEmail",
+        "email": "testEmail5",
         "first_name": "testFirst",
         "last_name": "testLast"
     } 

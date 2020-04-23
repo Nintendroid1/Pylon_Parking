@@ -1,10 +1,10 @@
 {
-    "pid": "ebunstonec",
-    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE1ODc2NzM1MTIsInBpZCI6ImVidW5zdG9uZWMiLCJhZG1pbiI6MCwiaWF0IjoxNTg3MDY4NzEyfQ.mhpCHDeEBDmHR6oqHYVDSzj7_OXhLOZhfjnr-Om8jfw",
+    "pid": "admin",
+    "key": "5Jo2U83td6MGcLWvCAshKhrcrKmrXcnsiqD8x7M3batEhWapzow",
     "spot": {
         "spot_id": "1",
         "zone_id": "1",
-        "start_time": "1583040600",
-        "end_time": "1583048700"
+        "start_time": "1587611700",
+        "end_time": "1587617100"
     }
 }
