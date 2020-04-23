@@ -761,6 +761,7 @@ const Zone = ({
         dialogTitle: 'Success',
         redirectTo: '/'
       });
+      updateOpenMessageDialog(true);
     } else {
       // Letting the user know that an error has occurred and what the error is.
       updateMessageDialogField({
