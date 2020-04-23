@@ -210,6 +210,10 @@ const ReportField = props => {
           setOpenErrorDialog(true);
         }
       } catch (err) {
+        updateLoadingDialogField({
+          open: false,
+          message: ''
+        });
         console.log(err.stack);
       }
     }
