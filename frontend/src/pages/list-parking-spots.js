@@ -537,7 +537,8 @@ const Zone = ({
   const [openMessageDialog, updateOpenMessageDialog] = useState(false);
   const [messageDialogField, updateMessageDialogField] = useState({
     message: '',
-    dialogTitle: ''
+    dialogTitle: '',
+    redirectTo: null
   });
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [snackbarOptions, updateSnackbarOptions] = useState({
@@ -755,8 +756,11 @@ const Zone = ({
       // updateMessage(<Invoice spotInfo={json} />);
 
       // Page redirect to the homepage.
-      history.push('/');
-      window.location.href = `${process.env.PUBLIC_URL}/`;
+      updateMessageDialogField({
+        message: 'You successfully bought this spot.',
+        dialogTitle: 'Success',
+        redirectTo: '/'
+      });
     } else {
       // Letting the user know that an error has occurred and what the error is.
       updateMessageDialogField({
@@ -821,6 +825,7 @@ const Zone = ({
             severity={snackbarOptions.severity}
           />
           <MessageDialog
+            redirectTo={messageDialogField.redirectTo}
             message={messageDialogField.message}
             dialogTitle={messageDialogField.dialogTitle}
             open={openMessageDialog}

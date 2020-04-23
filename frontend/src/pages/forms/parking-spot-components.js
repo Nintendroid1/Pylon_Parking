@@ -157,7 +157,7 @@ const MessageDialog = (props) => {
   
   const handleClose = () => {
     setOpen(false);
-    if (typeof redirectTo !== 'undefined') {
+    if (typeof redirectTo !== 'undefined' && redirectTo !== null) {
       history.push(redirectTo);
       window.location.href = `${process.env.PUBLIC_URL}${redirectTo}`;
     }
