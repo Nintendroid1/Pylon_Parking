@@ -71,7 +71,7 @@ const SellingMessageContent = (
   }
 
   const [hour, minutes] = today.toTimeString().split(':');
-  const currTime = hour + minutes;
+  const currTime = hour + ':' + minutes;
 
   const [validCost, updateValidCost] = useState({
     hasError: false,
@@ -184,6 +184,8 @@ const SellingMessageContent = (
             <TableCell>
               <TimePicker
                 isRequired={true}
+                hasError={validTime.start_timeHasError}
+                errorMessage={validTime.start_timeErrorMessage}
                 handleTimeChange={handleTimeChange}
                 time={sellInfo.start_time}
                 name={'start_time'}
@@ -196,6 +198,8 @@ const SellingMessageContent = (
             <TableCell>
               <TimePicker
                 isRequired={true}
+                hasError={validTime.end_timeHasError}
+                errorMessage={validTime.end_timeErrorMessage}
                 handleTimeChange={handleTimeChange}
                 time={sellInfo.end_time}
                 name={'end_time'}
@@ -209,6 +213,7 @@ const SellingMessageContent = (
               <TextField
                 required
                 type="number"
+                error={validCost.hasError}
                 label={'Cost Per 15 minutes'}
                 value={sellInfo.cost}
                 helperText={validCost.errorMessage}
@@ -271,8 +276,7 @@ const SellingParkingSpotTableBody = props => {
     start_timeErrorMessage:
       '*Your Time Will Be Rounded Up To The Nearest 15 Minutes',
     end_timeHasError: false,
-    end_timeErrorMessage:
-      '*Your Time Will Be Rounded Up To The Nearest 15 Minutes'
+    end_timeErrorMessage: ''
   });
 
   const handleOnConfirm = privateKey => {
