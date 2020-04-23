@@ -38,6 +38,9 @@ import {
 } from './forms/time-filter';
 import queryString from 'query-string';
 import Invoice from './forms/invoice';
+import Paper from '@material-ui/core/Paper';
+import Container from '@material-ui/core/Container';
+import Grid from '@material-ui/core/Grid';
 import { withStyles, withTheme } from '@material-ui/core/styles';
 import HokieKoinIcon from '../images/hokie_coin.js';
 
@@ -57,6 +60,19 @@ const styles = theme => ({
     height: 'auto',
     marginLeft: '5px',
     fill: 'black'
+  },
+  container: {
+    paddingTop: theme.spacing(1),
+    paddingBottom: theme.spacing(1)
+  },
+  paper: {
+    padding: theme.spacing(2),
+    display: 'flex',
+    overflow: 'auto',
+    flexDirection: 'column'
+  },
+  fixedHeight: {
+    height: 300
   }
 });
 
@@ -196,44 +212,49 @@ function MakeTable({
   date
 }) {
   return (
-    <Table stickyHeader>
-      <TableHead>
-        <TableRow>
-          <TableCell>{`Date: ${date.toDateString()}`}</TableCell>
-        </TableRow>
-        <TableRow>
-          <TableCell>
-            <span />
-          </TableCell>
-          {headerCells.map(headerCell => (
+    <Paper className={classes.paper}>
+      <Table stickyHeader>
+        <TableHead>
+          <TableRow>
             <TableCell
-              sortDirection={columnToSort === headerCell.id ? order : false}
-            >
-              <TableSortLabel
-                active={columnToSort === headerCell.id}
-                direction={columnToSort === headerCell.id ? order : 'asc'}
-                onClick={() => onSortClick(headerCell.id)}
-              >
-                {headerCell.label}
-              </TableSortLabel>
+              colspan={6}
+              align="center"
+            >{`Date: ${date.toDateString()}`}</TableCell>
+          </TableRow>
+          <TableRow>
+            <TableCell>
+              <span />
             </TableCell>
-          ))}
-        </TableRow>
-      </TableHead>
-      <TableBody>
-        <TableData
-          classes={classes}
-          handleBuyRequest={handleBuyRequest}
-          zoneId={zoneId}
-          date={date}
-          parkingInfo={
-            columnToSort === 'start_time' || columnToSort === 'end_time'
-              ? sortByMilitaryTime(parkingInfo, order, columnToSort)
-              : orderBy(parkingInfo, columnToSort, order)
-          }
-        />
-      </TableBody>
-    </Table>
+            {headerCells.map(headerCell => (
+              <TableCell
+                sortDirection={columnToSort === headerCell.id ? order : false}
+              >
+                <TableSortLabel
+                  active={columnToSort === headerCell.id}
+                  direction={columnToSort === headerCell.id ? order : 'asc'}
+                  onClick={() => onSortClick(headerCell.id)}
+                >
+                  {headerCell.label}
+                </TableSortLabel>
+              </TableCell>
+            ))}
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          <TableData
+            classes={classes}
+            handleBuyRequest={handleBuyRequest}
+            zoneId={zoneId}
+            date={date}
+            parkingInfo={
+              columnToSort === 'start_time' || columnToSort === 'end_time'
+                ? sortByMilitaryTime(parkingInfo, order, columnToSort)
+                : orderBy(parkingInfo, columnToSort, order)
+            }
+          />
+        </TableBody>
+      </Table>
+    </Paper>
   );
 }
 
@@ -812,23 +833,31 @@ const Zone = ({
           {message ? (
             <div>{message}</div>
           ) : (
-            <div>
-              <TimeFilter
-                onSubmit={handleFiltering}
-                currentTimeFilter={currentTimeFilter}
-                updateCurrentTimeFilter={updateCurrentTimeFilter}
-              />
-              <MakeTable
-                parkingInfo={parkingSpotsInfo}
-                date={currentTimeFilter.date}
-                zoneId={zoneId}
-                onSortClick={handleSortRequest}
-                handleBuyRequest={handleBuyRequest}
-                columnToSort={columnToSort}
-                order={order}
-                classes={classes}
-              />
-            </div>
+            <Container className={classes.container}>
+              <Grid container alignContent="center" spacing={2}>
+                <Grid item xs={12}>
+                  <Paper className={classes.paper}>
+                    <TimeFilter
+                      onSubmit={handleFiltering}
+                      currentTimeFilter={currentTimeFilter}
+                      updateCurrentTimeFilter={updateCurrentTimeFilter}
+                    />
+                  </Paper>
+                </Grid>
+                <Grid item xs={12}>
+                  <MakeTable
+                    parkingInfo={parkingSpotsInfo}
+                    date={currentTimeFilter.date}
+                    zoneId={zoneId}
+                    onSortClick={handleSortRequest}
+                    handleBuyRequest={handleBuyRequest}
+                    columnToSort={columnToSort}
+                    order={order}
+                    classes={classes}
+                  />
+                </Grid>
+              </Grid>
+            </Container>
           )}
         </Typography>
       </div>
