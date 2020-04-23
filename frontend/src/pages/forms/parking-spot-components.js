@@ -26,6 +26,7 @@ import {
   MuiThemeProvider,
   createMuiTheme
 } from '@material-ui/core/styles';
+import history from '../../history';
 
 const styles = theme => ({
   root: {
@@ -152,10 +153,14 @@ const TimePicker = ({
   dialog title in a Dialog component.
 */
 const MessageDialog = (props) => {
-  const { message, dialogTitle, open, setOpen } = props;
+  const { message, dialogTitle, open, setOpen, redirectTo } = props;
   
   const handleClose = () => {
     setOpen(false);
+    if (typeof redirectTo !== 'undefined') {
+      history.push(redirectTo);
+      window.location.href = `${process.env.PUBLIC_URL}${redirectTo}`;
+    }
   };
 
   return (
