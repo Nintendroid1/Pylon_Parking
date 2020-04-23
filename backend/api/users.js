@@ -464,7 +464,7 @@ router.post("/register", async function(req, res) {
                         data: {
                           from: 'admin',
                           to: req.body.user.pid.toLowerCase(),
-                          quantity: '30.0000 VTP',
+                          quantity: '300.0000 VTP',
                           memo: 'Initial Tokens'
                         }
                       }]
