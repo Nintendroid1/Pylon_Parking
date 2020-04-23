@@ -351,8 +351,7 @@ router.post("/login", async function(req, res) {
 router.post("/register", async function(req, res) {
   try {
     const letters = /^[a-z1-5]+$/;
-    console.log(req.body.user.pid.toLowerCase());
-    if(!req.body.user.pid.toLowerCase().match(letters) || !(req.body.user.pid.length<=12)) {
+    if(!req.body.user.pid.match(letters) || !(req.body.user.pid.length<=12)) {
       res.status(400).json({message: "pid should only contain letters a-z and numbers 1-5"})
       return;
     }
