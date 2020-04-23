@@ -75,7 +75,7 @@ const roundUpToNearest15 = time => {
   return newTime;
 };
 
-const minusOneSecMT = time => {
+const minusOneMinMT = time => {
   let [hour, minute] = time.split(':').map(e => Number(e));
 
   if (minute === 0) {
@@ -166,10 +166,26 @@ const convertEpochToMilitary = epoch => {
 
 /*
   Finds the number of 15 minutes intervals between the 
-  given start and end time, which are Epochs.
+  given start and end time, which are Epoch seconds.
 */
 const timeDiffInEpoch15 = (startTime, endTime) => {
   return (endTime - startTime) / (1000 * 60 * 15);
+};
+
+/*
+  Increases the minute of given time in military time by one
+  minute.
+*/
+const increaseMTimeBy1Min = time => {
+  let [hour, minute] = time.split(':').map(e => Number(e));
+
+  minute++;
+  if (minute === 60) {
+    minute = 0;
+    hour = hour + 1 === 24 ? 0 : hour + 1;
+  }
+
+  return hour + ':' + minute;
 };
 
 /*
@@ -463,5 +479,6 @@ export {
   getCurrentTimeInUTC,
   DateFilter,
   timeDiffInEpoch15,
-  minusOneSecMT
+  minusOneMinMT,
+  increaseMTimeBy1Min
 };

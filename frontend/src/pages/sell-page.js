@@ -25,7 +25,7 @@ import {
   isTimeMultipleOf15,
   roundUpToNearest15,
   militaryTimeDifference,
-  minusOneSecMT
+  minusOneMinMT
 } from './forms/time-filter';
 import { withStyles, makeStyles } from '@material-ui/core/styles';
 
@@ -91,7 +91,7 @@ const SellingMessageContent = (
 
     // Make the end time one second less in the time.
     if (name === 'end_time') {
-      value = minusOneSecMT(value);
+      value = minusOneMinMT(value);
     }
 
     updateSellInfo({ ...sellInfo, [name]: value });
@@ -628,6 +628,7 @@ const SellPage = ({ socket, isLoggedIn, classes }) => {
           'You Got Rich! Go To Account To See How Much Disposable Income You Have.',
         severity: 'info'
       });
+      setOpenSnackbar(true);
     });
 
     /*

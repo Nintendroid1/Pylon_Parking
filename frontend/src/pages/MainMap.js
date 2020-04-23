@@ -10,6 +10,7 @@ import { withStyles, withTheme } from '@material-ui/core/styles';
 import { makeAPICall } from '../api';
 import apiprefix from './apiprefix';
 import history from '../history';
+import CustomSnackbar from '../ui/snackbars';
 // import './MainMap.css';
 
 const styles = theme => ({
@@ -49,10 +50,10 @@ const styles = theme => ({
 /**
  * The component that is exported. Displays the map and the links to
  * the different zones.
- * 
- * @param {Object} param0 
+ *
+ * @param {Object} param0
  */
-const MainMap = ({ classes, ...props }) => {
+const MainMap = ({ classes, userSocket, ...props }) => {
   // Make api request to get list of available zones
   // todo
 
@@ -65,6 +66,13 @@ const MainMap = ({ classes, ...props }) => {
   //   { name: 'Lower Stanger Lot', id: 5 }
   // ];
   const [zones, updateZones] = useState([]);
+  const [openSnackbar, setOpenSnackbar] = useState(false);
+  const [snackbarOptions, updateSnackbarOptions] = useState({
+    verticalPos: 'top',
+    horizontalPos: 'center',
+    message: '',
+    severity: 'info'
+  });
 
   const get_zones = async () => {
     const url = `${apiprefix}/zones/all`;
@@ -74,11 +82,26 @@ const MainMap = ({ classes, ...props }) => {
     console.log(res_body);
     updateZones(res_body.zones);
   };
-  
 
   useEffect(() => {
     get_zones();
   }, []);
+
+  useEffect(() => {
+    // Socket for handling user personal info.
+    userSocket.on(`sell-${localStorage.olivia_pid}`, () => {
+      setOpenSnackbar(false);
+
+      // Make it so that the data variable stores the message.
+      updateSnackbarOptions({
+        ...snackbarOptions,
+        message:
+          'You Got Rich! Go To Account To See How Much Disposable Income You Have.',
+        severity: 'info'
+      });
+      setOpenSnackbar(true);
+    });
+  });
 
   var zoneList = zones.map((z, idx) => (
     <li style={{ listStyleType: 'none' }}>
@@ -97,6 +120,14 @@ const MainMap = ({ classes, ...props }) => {
   ));
   return (
     <>
+      <CustomSnackbar
+        isOpen={openSnackbar}
+        updateIsOpen={setOpenSnackbar}
+        verticalPos={snackbarOptions.verticalPos}
+        horizontalPos={snackbarOptions.horizontalPos}
+        message={snackbarOptions.message}
+        severity={snackbarOptions.severity}
+      />
       <Typography align="center" variant="h5" gutterBottom>
         Parking Map
       </Typography>

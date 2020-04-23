@@ -322,7 +322,8 @@ const BountySystem = ({ classes, userSocket }) => {
         ...snackbarOptions,
         message: 'You Got Rich! Go To Account To See How Much Disposable Income You Have.',
         severity: 'info'
-      })
+      });
+      setOpenSnackbar(true);
     });
   });
 

@@ -176,7 +176,9 @@ const App = ({ classes, ...props }) => {
                 hidden={false}
                 reqAdmin={false}
                 reqLogin={false}
-                component={WelcomeTab}
+                render={() => (
+                  <WelcomeTab classes={classes} userSocket={userSocket} />
+                )}
               />
               <Route
                 exact
@@ -187,7 +189,7 @@ const App = ({ classes, ...props }) => {
                 hidden={false}
                 reqAdmin={false}
                 reqLogin={false}
-                component={MainMap}
+                render={() => <MainMap userSocket={userSocket} />}
               />
               <div
                 id="group"
@@ -208,7 +210,7 @@ const App = ({ classes, ...props }) => {
                   reqAdmin={false}
                   reqLogin={false}
                   hidden={false}
-                  component={Dashboard}
+                  render={() => <Dashboard userSocket={userSocket} />}
                 />
                 <Route
                   path="/transaction_history"

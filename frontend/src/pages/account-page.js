@@ -17,6 +17,7 @@ import Container from '@material-ui/core/Container';
 import ImageForm from './forms/image-form';
 import { PNG } from 'pngjs';
 import { MessageDialog } from './forms/parking-spot-components';
+import CustomSnackbar from '../ui/snackbars';
 
 const styles = theme => ({
   table: {
@@ -61,6 +62,13 @@ let AccountPage = ({ classes, history, socket, ...props }) => {
   const [messageDialogField, updateMessageDialogField] = useState({
     message: '',
     dialogTitle: ''
+  });
+  const [openSnackbar, setOpenSnackbar] = useState(false);
+  const [snackbarOptions, updateSnackbarOptions] = useState({
+    verticalPos: 'top',
+    horizontalPos: 'center',
+    message: '',
+    severity: 'info'
   });
 
   let loadUser = async () => {
@@ -111,7 +119,21 @@ let AccountPage = ({ classes, history, socket, ...props }) => {
     //  money: # hokie tokens in wallet now.
     // }
     socket.on(`user-${localStorage.olivia_pid}`, data => {
-      updateUser({ ...user, money: data.money });
+      updateUser({ ...user, money: user.money + Number(data) });
+    });
+
+    // Socket for handling user personal info.
+    socket.on(`sell-${localStorage.olivia_pid}`, () => {
+      setOpenSnackbar(false);
+
+      // Make it so that the data variable stores the message.
+      updateSnackbarOptions({
+        ...snackbarOptions,
+        message:
+          'You Got Rich! Go To Account To See How Much Disposable Income You Have.',
+        severity: 'info'
+      });
+      setOpenSnackbar(true);
     });
   }, []);
   return (
@@ -122,6 +144,14 @@ let AccountPage = ({ classes, history, socket, ...props }) => {
           dialogTitle={messageDialogField.dialogTitle}
           open={openMessageDialog}
           setOpen={updateOpenMessageDialog}
+        />
+        <CustomSnackbar
+          isOpen={openSnackbar}
+          updateIsOpen={setOpenSnackbar}
+          verticalPos={snackbarOptions.verticalPos}
+          horizontalPos={snackbarOptions.horizontalPos}
+          message={snackbarOptions.message}
+          severity={snackbarOptions.severity}
         />
         <Container maxWidth="lg" className={classes.container}>
           <Grid container spacing={3}>

@@ -32,7 +32,9 @@ import {
   convertMilitaryTimeToNormal,
   sortByMilitaryTime,
   compareMilitaryTime,
-  timeDiffInEpoch15
+  timeDiffInEpoch15,
+  increaseMTimeBy1Min,
+  minusOneMinMT
 } from './forms/time-filter';
 import queryString from 'query-string';
 import Invoice from './forms/invoice';
@@ -236,7 +238,7 @@ function MakeTable({
 }
 
 /**
- * Called by socket when spot is made available.
+ * Called by socket when spot is made available and needs to add spot to list.
  *
  * @param {list} parkingSpotsInfo current list of parking spots.
  * @param {function} updateParkingSpotsInfo update current list of spots.
@@ -250,18 +252,20 @@ const handleParkingSpotAvailable = (
   currentTimeFilter
 ) => {
   // Convert the time to epoch time for usage later.
-  const year = currentTimeFilter.date.getUTCFullYear();
-  const month = currentTimeFilter.date.getUTCMonth();
-  const day = currentTimeFilter.date.getUTCDate();
+  const year = currentTimeFilter.date.getFullYear();
+  const month = currentTimeFilter.date.getMonth();
+  const day = currentTimeFilter.date.getDate();
   const [startTimeHour, startTimeMin] = currentTimeFilter.startTime.split(':');
   const [endTimeHour, endTimeMin] = currentTimeFilter.endTime.split(':');
 
-  const timeFilterStartTimeEpoch = new Date(
-    Date.UTC(year, month, day, startTimeHour, startTimeMin)
-  );
-  const timeFilterEndTimeEpoch = new Date(
-    Date.UTC(year, month, day, endTimeHour, endTimeMin)
-  );
+  // All times stored are in second epoch, not ms.
+  const timeFilterStartTimeEpoch =
+    Date.UTC(year, month, day, startTimeHour, startTimeMin) / 1000;
+  const timeFilterEndTimeEpoch =
+    Date.UTC(year, month, day, endTimeHour, endTimeMin) / 1000;
+
+  // Need to add one because it is one second off of the actual time: 3:59:59, instead of 4:00:00.
+  parkingInfo.end_time++;
 
   // Ensures that updated parking spot info is within the filtering options the client wants.
   if (
@@ -277,24 +281,25 @@ const handleParkingSpotAvailable = (
     // For start time, if new data start time is after filter start time,
     // then keep it, otherwise, use filter time.
     if (timeFilterStartTimeEpoch >= parkingInfo.start_time) {
-      parkingInfo.start_time = timeFilterStartTimeEpoch;
       parkingInfo.price -=
         timeDiffInEpoch15(parkingInfo.start_time, timeFilterStartTimeEpoch) *
         spotPricePer15;
+      parkingInfo.start_time = timeFilterStartTimeEpoch;
     }
 
     // For end time, if new data end time is before filter end time, then
     // keep it, otherwise, use filter time.
     if (parkingInfo.end_time >= timeFilterEndTimeEpoch) {
-      parkingInfo.end_time = timeFilterEndTimeEpoch;
       parkingInfo.price -=
         timeDiffInEpoch15(timeFilterEndTimeEpoch, parkingInfo.end_time) *
         spotPricePer15;
+      parkingInfo.end_time = timeFilterEndTimeEpoch;
     }
 
     // check if spot is in the list.
     let i = parkingSpotsInfo.length;
     let listedSpots = [];
+    // If it is in the list, then remove it from the list.
     while (i--) {
       if (Number(parkingInfo.spot_id) === Number(parkingSpotsInfo[i].spot_id)) {
         listedSpots.push(parkingSpotsInfo.splice(i, 1));
@@ -302,25 +307,33 @@ const handleParkingSpotAvailable = (
     }
 
     parkingInfo.start_time = convertEpochToMilitary(parkingInfo.start_time);
-    parkingInfo.end_time = convertEpochToMilitary(parkingInfo.end_time);
+    // Subtract 1 second to conform to rest of data in list.
+    parkingInfo.end_time = convertEpochToMilitary(parkingInfo.end_time - 1);
 
-    // the parking spot is in the list, concatentate if possible.
-    listedSpots.forEach((e, i) => {
+    // the parking spot is in the list, concatentate if possible
+    // return a new list of spots not concatentated.
+    listedSpots = listedSpots.filter(e => {
+      const tempNewET = increaseMTimeBy1Min(parkingInfo.end_time);
+      const tempOldET = increaseMTimeBy1Min(e.end_time);
+      let retVal = true;
+
       // For start time, if new data start time equals end time, then
       // new start time is old start time and new end time is new end time.
-      if (compareMilitaryTime(parkingInfo.start_time, e.end_time) === 0) {
+      if (compareMilitaryTime(parkingInfo.start_time, tempOldET) === 0) {
         parkingInfo.start_time = e.start_time;
         parkingInfo.price += listedSpots.price;
-        listedSpots.splice(i, 1);
+        retVal = false; // Concatentated; therefore, do not include this list.
       }
 
       // For end time, if new data end time equals old start time, then
       // new start time is new start time and new end time is old end time.
-      if (compareMilitaryTime(parkingInfo.end_time, e.start_time) === 0) {
+      if (compareMilitaryTime(tempNewET, e.start_time) === 0) {
         parkingInfo.end_time = e.end_time;
         parkingInfo.price += listedSpots.price;
-        listedSpots.splice(i, 1);
+        retVal = false; // Concatentated; therefore, do not include this list.
       }
+
+      return retVal;
     });
 
     parkingSpotsInfo.push(parkingInfo);
@@ -332,7 +345,7 @@ const handleParkingSpotAvailable = (
 };
 
 /**
- * Called when a parking spot is made unavailable.
+ * Called when a parking spot is made unavailable, so removing this spot.
  *
  * @param {*} parkingSpotsInfo current list of parking spots.
  * @param {*} updateParkingSpotsInfo update current list of spots.
@@ -351,12 +364,14 @@ const handleParkingSpotUnavailable = (
   const [startTimeHour, startTimeMin] = currentTimeFilter.startTime.split(':');
   const [endTimeHour, endTimeMin] = currentTimeFilter.endTime.split(':');
 
-  const timeFilterStartTimeEpoch = new Date(
-    Date.UTC(year, month, day, startTimeHour, startTimeMin)
-  );
-  const timeFilterEndTimeEpoch = new Date(
-    Date.UTC(year, month, day, endTimeHour, endTimeMin)
-  );
+  // All times stored are in second epoch, not ms.
+  const timeFilterStartTimeEpoch =
+    Date.UTC(year, month, day, startTimeHour, startTimeMin) / 1000;
+  const timeFilterEndTimeEpoch =
+    Date.UTC(year, month, day, endTimeHour, endTimeMin) / 1000;
+
+  // Need to add one because it is one second off of the actual time: 3:59:59, instead of 4:00:00.
+  parkingInfo.end_time++;
 
   // Ensures that updated parking spot info is within the filtering options the client wants.
   if (
@@ -364,20 +379,22 @@ const handleParkingSpotUnavailable = (
     !(timeFilterEndTimeEpoch <= parkingInfo.start_time)
   ) {
     parkingInfo.start_time = convertEpochToMilitary(parkingInfo.start_time);
-    parkingInfo.end_time = convertEpochToMilitary(parkingInfo.end_time);
+    parkingInfo.end_time = convertEpochToMilitary(parkingInfo.end_time - 1);
 
     // check if spot is in the list.
     let i = parkingSpotsInfo.length;
     let listedSpots = [];
+
+    // Remove the spot from the list if it is in the list.
     while (i--) {
       if (
         Number(parkingInfo.spot_id) === Number(parkingSpotsInfo[i].spot_id) &&
         compareMilitaryTime(
-          parkingInfo.end_time,
+          increaseMTimeBy1Min(parkingInfo.end_time),
           parkingSpotsInfo[i].start_time
         ) > 0 &&
         compareMilitaryTime(
-          parkingSpotsInfo[i].end_time,
+          increaseMTimeBy1Min(parkingSpotsInfo[i].end_time),
           parkingInfo.start_time
         ) > 0
       ) {
@@ -385,36 +402,31 @@ const handleParkingSpotUnavailable = (
       }
     }
 
-    // the parking spot is in the list, remove times in common and delete if times match.
-    listedSpots.forEach((e, i) => {
+    // To store the additional spots that result from splitting a spot into two.
+    let additionalSpots = [];
+
+    // the parking spot is in the list, return times that are not completely removed.
+    listedSpots = listedSpots.filter(e => {
+      let retval = true;
+      const tempNewET = increaseMTimeBy1Min(parkingInfo.end_time);
+      const tempOldET = increaseMTimeBy1Min(e.end_time);
+
       // For a given spot, if the new spot's start time is at or before the given spot's start time,
       // then, if the new spot has an end time before the given spot's
       // end time, set the given spot's start time to be at the new spot's end time, otherwise,
       // set the given spot's start time to be at given spot's end time.
-      if (
-        compareMilitaryTime(
-          parkingInfo.start_time,
-          listedSpots[i].start_time
-        ) <= 0
-      ) {
-        if (
-          compareMilitaryTime(parkingInfo.end_time, listedSpots[i].end_time) < 0
-        ) {
+      if (compareMilitaryTime(parkingInfo.start_time, e.start_time) <= 0) {
+        if (compareMilitaryTime(tempNewET, tempOldET) < 0) {
           const spotPricePer15 =
-            listedSpots[i].price /
-            timeDiffInEpoch15(
-              listedSpots[i].start_time,
-              listedSpots[i].end_time
-            );
+            e.price / timeDiffInEpoch15(e.start_time, tempOldET);
 
           // Update the price.
-          listedSpots[i].price -=
-            spotPricePer15 *
-            timeDiffInEpoch15(listedSpots[i].start_time, parkingInfo.end_time);
-          listedSpots[i].start_time = parkingInfo.end_time;
+          e.price -=
+            spotPricePer15 * timeDiffInEpoch15(e.start_time, tempNewET);
+          e.start_time = tempNewET;
         } else {
-          listedSpots[i].price = 0;
-          listedSpots[i].start_time = listedSpots[i].end_time;
+          e.price = 0;
+          e.start_time = e.end_time;
         }
       }
 
@@ -422,30 +434,47 @@ const handleParkingSpotUnavailable = (
       // end time, then because the new spot's start time is after the given spot's start time,
       // move given spot's end time to new spot's start time,
       // otherwise, it should have been handled by the first if-statement.
-      else if (
-        compareMilitaryTime(parkingInfo.end_time, listedSpots[i].end_time) >= 0
-      ) {
+      else if (compareMilitaryTime(tempNewET, tempOldET) >= 0) {
         const spotPricePer15 =
-          listedSpots[i].price /
-          timeDiffInEpoch15(listedSpots[i].start_time, listedSpots[i].end_time);
-        listedSpots[i].price -=
+          e.price / timeDiffInEpoch15(e.start_time, tempOldET);
+        e.price -=
+          spotPricePer15 * timeDiffInEpoch15(parkingInfo.start_time, tempOldET);
+        e.end_time = minusOneMinMT(parkingInfo.start_time);
+      }
+
+      // The last option is for the parking spot to be inside this spot; thus,
+      // need to break this spot into two pieces.
+      else {
+        const spotPricePer15 =
+          e.price / timeDiffInEpoch15(e.start_time, tempOldET);
+
+        // New spot splitting at end of this spot.
+        const newSpot = {
+          start_time: increaseMTimeBy1Min(parkingInfo.end_time),
+          end_time: e.end_time,
+          spot_id: e.spot_id,
+          price: spotPricePer15 * timeDiffInEpoch15(tempNewET, tempOldET)
+        };
+
+        additionalSpots.push(newSpot);
+
+        // Old spot splitting at beginning of this spot.
+        e.end_time = minusOneMinMT(parkingInfo.start_time);
+        e.price =
           spotPricePer15 *
-          timeDiffInEpoch15(parkingInfo.start_time, listedSpots[i].end_time);
-        listedSpots[i].end_time = parkingInfo.start_time;
+          timeDiffInEpoch15(e.start_time, parkingInfo.start_time);
       }
 
       // Check if given spot's end time equals start time for it to be removed from the list.
-      if (
-        compareMilitaryTime(
-          listedSpots[i].start_time,
-          listedSpots[i].end_time
-        ) === 0
-      ) {
-        listedSpots.splice(i, 1);
+      if (compareMilitaryTime(e.start_time, e.end_time) === 0) {
+        retval = false;
       }
+
+      return retval;
     });
 
     listedSpots.forEach(e => parkingSpotsInfo.push(e));
+    additionalSpots.forEach(e => parkingSpotsInfo.push(e));
 
     updateParkingSpotsInfo(parkingSpotsInfo);
   }
@@ -735,6 +764,7 @@ const Zone = ({
           'You Got Rich! Go To Account To See How Much Disposable Income You Have.',
         severity: 'info'
       });
+      setOpenSnackbar(true);
     });
 
     // Socket for handling changes to parking spots for this zone.

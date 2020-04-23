@@ -33,6 +33,7 @@ import Paper from '@material-ui/core/Paper';
 import SimpleChart from '../ui/SimpleChart';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Container from '@material-ui/core/Container';
+import CustomSnackbar from '../ui/snackbars';
 
 const styles = theme => ({
   root: {
@@ -149,7 +150,7 @@ const ParkingSpot = ({
     return isNaN(Number(tempQuery.page)) ? 0 : Number(tempQuery.page);
   }*/
 
-  const { socket } = props;
+  const { socket, userSocket } = props;
   const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
 
   let today = new Date();
@@ -158,6 +159,13 @@ const ParkingSpot = ({
   let tempUrl = window.location.pathname.split('/'); // the first index is an empty string.
   let spot_id = Number(tempUrl[4]);
   let zone_id = Number(tempUrl[2]);
+  const [openSnackbar, setOpenSnackbar] = useState(false);
+  const [snackbarOptions, updateSnackbarOptions] = useState({
+    verticalPos: 'top',
+    horizontalPos: 'center',
+    message: '',
+    severity: 'info'
+  });
 
   const [message, updateMessage] = useState('Loading'); // Initial message cannot be null. See useEffect() for reason.
   const [parkingSpotInfo, updateparkingSpotInfo] = useState([]);
@@ -333,6 +341,20 @@ const ParkingSpot = ({
     socket.on(`parkingSpot-${zone_id}-${spot_id}`, data =>
       handleParkingInfoChanges(parkingSpotInfo, updateparkingSpotInfo, data)
     );
+
+    // Socket for handling user personal info.
+    userSocket.on(`sell-${localStorage.olivia_pid}`, () => {
+      setOpenSnackbar(false);
+
+      // Make it so that the data variable stores the message.
+      updateSnackbarOptions({
+        ...snackbarOptions,
+        message:
+          'You Got Rich! Go To Account To See How Much Disposable Income You Have.',
+        severity: 'info'
+      });
+      setOpenSnackbar(true);
+    });
   }, []);
 
   function spotTimeChart() {
