@@ -373,7 +373,7 @@ const TransactionHistory = ({ userSocket, socket, classes }) => {
       */
 
       // Formatting response
-      respbody.data.forEach(e => {
+      respbody.result.forEach(e => {
         e.quantity = e.quantity.split(' ')[0];
         e.start_time = convertEpochToMilitary(e.time_code);
         e.end_time = convertEpochToMilitary(e.time_code + 15 * 60);
@@ -398,9 +398,9 @@ const TransactionHistory = ({ userSocket, socket, classes }) => {
         );
       }
 
-      console.log(respbody.data);
+      console.log(respbody);
 
-      updateListOfTransactions(respbody.data);
+      updateListOfTransactions(respbody.result);
       updateMessage(null);
     } else {
       updateMessageDialogField({
@@ -420,7 +420,7 @@ const TransactionHistory = ({ userSocket, socket, classes }) => {
       const queryParams = queryStrings.parse(window.location.search);
 
       // Formatting response
-      respbody.data.forEach(e => {
+      respbody.result.forEach(e => {
         e.quantity = e.quantity.split(' ')[0];
         e.start_time = convertEpochToMilitary(e.time_code);
         e.end_time = convertEpochToMilitary(e.time_code + 15 * 60 * 1000);
@@ -442,7 +442,7 @@ const TransactionHistory = ({ userSocket, socket, classes }) => {
         );
       }
 
-      updateListOfTransactions(respbody.listOfTransactions);
+      updateListOfTransactions(respbody.result);
     } else {
       updateMessage('Error has occurred');
     }

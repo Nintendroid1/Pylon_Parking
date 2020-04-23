@@ -25,7 +25,8 @@ import {
   isTimeMultipleOf15,
   roundUpToNearest15,
   militaryTimeDifference,
-  minusOneMinMT
+  minusOneMinMT,
+  increaseMTimeBy1Min
 } from './forms/time-filter';
 import { withStyles, makeStyles } from '@material-ui/core/styles';
 
@@ -166,7 +167,7 @@ const SellingMessageContent = (
       ) {
         const timeDiff = militaryTimeDifference(
           sellInfo.start_time,
-          sellInfo.end_time
+          increaseMTimeBy1Min(sellInfo.end_time)
         );
         const totalCost = Number(cost) * (timeDiff / 15);
         UpdateTotalCost(totalCost);
@@ -182,8 +183,6 @@ const SellingMessageContent = (
             <TableCell>Start Time:</TableCell>
             <TableCell>
               <TimePicker
-                hasError={validTime.start_timeHasError}
-                errorMessage={validTime.start_timeErrorMessage}
                 isRequired={true}
                 handleTimeChange={handleTimeChange}
                 time={sellInfo.start_time}
@@ -196,8 +195,6 @@ const SellingMessageContent = (
             <TableCell>End Time:</TableCell>
             <TableCell>
               <TimePicker
-                hasError={validTime.end_timeHasError}
-                errorMessage={validTime.end_timeErrorMessage}
                 isRequired={true}
                 handleTimeChange={handleTimeChange}
                 time={sellInfo.end_time}
@@ -211,7 +208,6 @@ const SellingMessageContent = (
             <TableCell>
               <TextField
                 required
-                error={validCost.hasError}
                 type="number"
                 label={'Cost Per 15 minutes'}
                 value={sellInfo.cost}
@@ -586,15 +582,16 @@ const SellPage = ({ socket, isLoggedIn, classes }) => {
       });
 
       // Remove old stuff from the list.
-      spotsOwned.splice(sellInfo.idx, 1);
+      //spotsOwned.splice(sellInfo.idx, 1);
 
       // Adding new stuff to the list.
+      /*
       newList.forEach((e, idx) => {
         spotsOwned.splice(sellInfo.idx + idx, 0, e);
       });
 
       updateSpotsOwned(spotsOwned);
-
+*/
       updateMessageDialogField({
         dialogTitle: 'Success',
         message:
