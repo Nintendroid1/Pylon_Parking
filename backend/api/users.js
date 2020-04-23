@@ -41,16 +41,20 @@ router.use(express.json());
 
 router.get("/", (req, res) => {
   res.send("This should be login api");
-  // let keys = ["5KY2ydXyvyrYSAZrgNXYTyrWST75ABF33VccrGen42RBdwMKcNt","5JLDNMsHS61J623WFB9TYJvmDasMVrk5iYfijZqehccQPqiJKTM"]
+  let keys = ["5KY2ydXyvyrYSAZrgNXYTyrWST75ABF33VccrGen42RBdwMKcNt","5JLDNMsHS61J623WFB9TYJvmDasMVrk5iYfijZqehccQPqiJKTM"]
 
-  // const signatureProvider = new JsSignatureProvider(keys);
-  // const rpc = new JsonRpc('http://127.0.0.1:8888', { fetch });
-  // const api = new Api({ rpc, signatureProvider, textDecoder: new TextDecoder(), textEncoder: new TextEncoder() });
+  const signatureProvider = new JsSignatureProvider(keys);
+  const rpc = new JsonRpc('http://127.0.0.1:8888', { fetch });
+  const api = new Api({ rpc, signatureProvider, textDecoder: new TextDecoder(), textEncoder: new TextEncoder() });
 
   //Get Accounts Associated with private key
-  // let {PrivateKey, PublicKey, Signature, Aes, key_utils, config} = require('eosjs-ecc');
-  // let pubkey = PrivateKey.fromString(keys[1]).toPublic().toString();
-  // rpc.history_get_key_accounts(pubkey).then(result => console.log(result)).catch(err => console.log(err));
+  let {PrivateKey, PublicKey, Signature, Aes, key_utils, config} = require('eosjs-ecc');
+  let pubkey = PrivateKey.fromString(keys[1]).toPublic().toString();
+  rpc.history_get_key_accounts(pubkey).then(result => {
+    if(result.account_names.includes('greg')) {
+      console.log("true");
+    }
+  }).catch(err => console.log(err));
 
   //Transfer Tokens
   // api.transact({
@@ -266,7 +270,7 @@ router.get("/:pid", requireLogin, function(req, res) {
         };
       }
       const rpc = new JsonRpc('http://127.0.0.1:8888', { fetch });
-      rpc.get_currency_balance('eosio.token', 'greg', 'VTP')
+      rpc.get_currency_balance('eosio.token', req.params.pid.toLocaleLowerCase(), 'VTP')
       .then((balance) => {
         userInfo.balance = parseFloat(balance);
         res.status(200).json({ ...userInfo });
