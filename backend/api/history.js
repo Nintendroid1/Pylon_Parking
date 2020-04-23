@@ -16,7 +16,7 @@ router.get('/', checkForLogin, function(req, res) {
     user_pid = req.user.pid;
   }
   console.log(user_pid);
-    eos.getActions('admin', -1, -100000)
+    eos.getActions(user_pid.toLowerCase(), -1, -100000)
     .then(response => {
         let actionHistory = response.actions.reverse();
         let result = [];
