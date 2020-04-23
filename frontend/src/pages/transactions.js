@@ -373,7 +373,7 @@ const TransactionHistory = ({ userSocket, socket, classes }) => {
       */
 
       // Formatting response
-      respbody.data.forEach(e => {
+      respbody.forEach(e => {
         e.quantity = e.quantity.split(' ')[0];
         e.start_time = convertEpochToMilitary(e.time_code);
         e.end_time = convertEpochToMilitary(e.time_code + 15 * 60);
@@ -420,7 +420,7 @@ const TransactionHistory = ({ userSocket, socket, classes }) => {
       const queryParams = queryStrings.parse(window.location.search);
 
       // Formatting response
-      respbody.data.forEach(e => {
+      respbody.forEach(e => {
         e.quantity = e.quantity.split(' ')[0];
         e.start_time = convertEpochToMilitary(e.time_code);
         e.end_time = convertEpochToMilitary(e.time_code + 15 * 60 * 1000);
@@ -442,7 +442,7 @@ const TransactionHistory = ({ userSocket, socket, classes }) => {
         );
       }
 
-      updateListOfTransactions(respbody.listOfTransactions);
+      updateListOfTransactions(respbody);
     } else {
       updateMessage('Error has occurred');
     }
