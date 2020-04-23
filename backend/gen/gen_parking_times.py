@@ -5,17 +5,20 @@ from dateutil.relativedelta import *
 
 
 today = datetime.today()
-cur_month = datetime.strptime("%d-%02d-01" % (today.year, today.month), "%Y-%m-%d")
-next_month_end = cur_month + relativedelta(days=7)# - timedelta(days=1)
+# cur_month = datetime.strptime("%d-%02d-01" % (today.year, today.month), "%Y-%m-%d")
+# next_month_end = today + relativedelta(days=7)# - timedelta(days=1)
 
-start_datestr = "2020-04-01"
+start_date = datetime.strptime("%4d-%02d-%02d 00:00:00" % (today.year, today.month, today.day), "%Y-%m-%d %H:%M:%S")
+end_date = today + relativedelta(days=7)# - timedelta(days=1)
+
+# start_datestr = "2020-04-01"
+# # end_datestr = "2020-05-31"
 # end_datestr = "2020-05-31"
-end_datestr = "2020-05-31"
-start_date = datetime.strptime(start_datestr, "%Y-%m-%d")
-end_date = datetime.strptime(end_datestr, "%Y-%m-%d")
+# start_date = datetime.strptime(start_datestr, "%Y-%m-%d")
+# end_date = datetime.strptime(end_datestr, "%Y-%m-%d")
 
-START_DATE_EPOCH = int(cur_month.timestamp())
-END_DATE_EPOCH = int(next_month_end.timestamp())
+START_DATE_EPOCH = int(start_date.timestamp())
+END_DATE_EPOCH = int(end_date.timestamp())
 # START_DATE_EPOCH = int(start_date.timestamp())
 # END_DATE_EPOCH = int(end_date.timestamp())
 TIME_SLOT = int(timedelta(minutes=15).total_seconds())
