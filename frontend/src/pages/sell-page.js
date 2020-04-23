@@ -630,6 +630,9 @@ const SellPage = ({ socket, isLoggedIn, classes }) => {
       });
     });
 
+    /*
+    // Not needed because the spot is taken care of once the seller sells,
+       thus, preventing sellers from using the spot and avoids other complications.
     socket.on(`user-${localStorage.olivia_pid}`, data => {
       const index = spotsOwned.findIndex(e => {
         const tempStartTime = convertMilitaryToEpoch(e.date, e.start_time);
@@ -645,6 +648,7 @@ const SellPage = ({ socket, isLoggedIn, classes }) => {
 
       spotsOwned = spotsOwned.splice(index, 1);
       updateSpotsOwned(spotsOwned);
+      */
     });
   }, []);
 
