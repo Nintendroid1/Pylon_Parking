@@ -51,6 +51,64 @@ const priceStyles = makeStyles({
   }
 });
 
+const SpotsSoldTableHeader = () => {
+  return (
+    <>
+      <TableHead>
+        <TableRow>
+          <TableCell>
+            <span />
+          </TableCell>
+          <TableCell>Parking Spot ID</TableCell>
+          <TableCell>Zone Name</TableCell>
+          <TableCell>Date</TableCell>
+          <TableCell>Start Time</TableCell>
+          <TableCell>End Time</TableCell>
+          <TableCell>Price Sold At</TableCell>
+        </TableRow>
+      </TableHead>
+    </>
+  );
+};
+
+const SpotsSoldTableBody = props => {
+  const { spots } = props;
+
+  return (
+    <>
+      <TableBody>
+        <TableRow>
+          {spots.map(e => {
+            return (
+              <>
+                <TableCell>{`${e.zone_id}-${e.spot_id}`}</TableCell>
+                <TableCell>{`${e.zone_name}`}</TableCell>
+                <TableCell>{`${e.date}`}</TableCell>
+                <TableCell>{`${e.start_time}`}</TableCell>
+                <TableCell>{`${e.end_time}`}</TableCell>
+                <TableCell>{`${e.price}`}</TableCell>
+              </>
+            );
+          })}
+        </TableRow>
+      </TableBody>
+    </>
+  );
+};
+
+const SpotsSoldTable = props => {
+  return (
+    <Table>
+      <TableHead>
+        <TableRow>
+          <SpotsSoldTableHeader />
+          <SpotsSoldTableBody spots={props.spots} />
+        </TableRow>
+      </TableHead>
+    </Table>
+  );
+};
+
 const SellingMessageContent = (
   parkingSpotStartTime,
   parkingSpotEndTime,
@@ -465,6 +523,7 @@ const SellPage = ({ socket, isLoggedIn, classes }) => {
     </>
   );
   let [spotsOwned, updateSpotsOwned] = useState([]);
+  const [spotsSold, updateSpotsSold] = useState([]);
 
   let getUserParkingSpots = async () => {
     let url = `${apiprefix}/users/${localStorage.olivia_pid}/spots`;
@@ -562,8 +621,11 @@ const SellPage = ({ socket, isLoggedIn, classes }) => {
     });
 
     if (response.status === 200) {
+      // list storing spots that have been coagulated.
       let newList = [];
       let curr = null;
+
+      // Coagulating neighboring spots.
       respbody.rows.forEach(e => {
         if (curr === null) {
           curr = e;
@@ -596,6 +658,8 @@ const SellPage = ({ socket, isLoggedIn, classes }) => {
 
       updateSpotsOwned(spotsOwned);
 */
+      spotsSold.push(newList);
+      updateSpotsSold(spotsSold);
       updateMessageDialogField({
         dialogTitle: 'Success',
         message:
@@ -694,6 +758,7 @@ const SellPage = ({ socket, isLoggedIn, classes }) => {
               parkingSpotsInfo={spotsOwned}
               handleSellRequest={handleSellRequest}
             />
+            <SpotsSoldTable spots={spotsSold} />
           </>
         )}
       </div>
