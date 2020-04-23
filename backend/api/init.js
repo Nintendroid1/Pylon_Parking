@@ -16,7 +16,7 @@ router.get('/parkingspots', (req,res) => {
 
     db.query("SELECT spot_id, zone_id, time_code FROM parking_times")
     .then( async function(dbres){
-        let i = 691250;
+        let i = 0;
         let actionsArr = [];
         for(; i < dbres.rows.length; i++) {
             if(actionsArr.length < 100) {
