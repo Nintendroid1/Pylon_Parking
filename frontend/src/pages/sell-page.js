@@ -582,15 +582,16 @@ const SellPage = ({ socket, isLoggedIn, classes }) => {
       });
 
       // Remove old stuff from the list.
-      spotsOwned.splice(sellInfo.idx, 1);
+      //spotsOwned.splice(sellInfo.idx, 1);
 
       // Adding new stuff to the list.
+      /*
       newList.forEach((e, idx) => {
         spotsOwned.splice(sellInfo.idx + idx, 0, e);
       });
 
       updateSpotsOwned(spotsOwned);
-
+*/
       updateMessageDialogField({
         dialogTitle: 'Success',
         message:
