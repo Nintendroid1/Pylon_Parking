@@ -398,9 +398,9 @@ const TransactionHistory = ({ userSocket, socket, classes }) => {
         );
       }
 
-      console.log(respbody.data);
+      console.log(respbody);
 
-      updateListOfTransactions(respbody.data);
+      updateListOfTransactions(respbody);
       updateMessage(null);
     } else {
       updateMessageDialogField({
