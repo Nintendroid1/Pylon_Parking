@@ -651,14 +651,13 @@ const SellPage = ({ socket, isLoggedIn, classes }) => {
       //spotsOwned.splice(sellInfo.idx, 1);
 
       // Adding new stuff to the list.
-      /*
       newList.forEach((e, idx) => {
         spotsOwned.splice(sellInfo.idx + idx, 0, e);
       });
 
       updateSpotsOwned(spotsOwned);
-*/
       spotsSold.push(newList);
+      
       updateSpotsSold(spotsSold);
       updateMessageDialogField({
         dialogTitle: 'Success',
