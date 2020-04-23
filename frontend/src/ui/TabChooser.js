@@ -390,8 +390,8 @@ function TabChooser({
             open={Boolean(anchorEl)}
             onClose={handleClose}
           >
-            <MenuItem onClick={() => handleClose('/Profile')}>Profile</MenuItem>
-            <MenuItem onClick={handleClose}>My account</MenuItem>
+            <MenuItem onClick={() => handleClose('/profile')}>Profile</MenuItem>
+            <MenuItem onClick={() => handleClose('/account')}>My account</MenuItem>
             <MenuItem onClick={() => handleClose('/my_spots')}>
               My Spots
             </MenuItem>
