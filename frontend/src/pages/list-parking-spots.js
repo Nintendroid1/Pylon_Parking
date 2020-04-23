@@ -155,41 +155,43 @@ function TableData({ classes, ...props }) {
     };
 
     return (
-      <TableRow>
-        <TableCell>
-          <ConfirmationDialogFieldButton
-            buttonMessage={'Buy'}
-            messageTitle={'Confirmation'}
-            messageContent={popUpContent(infoList)}
-            handleOnConfirm={handleOnConfirm(requestParams)}
-            buttonColor="primary"
-          />
-        </TableCell>
-        <TableCell>{parkingSpot.spot_id}</TableCell>
-        <TableCell>
-          {Number(parkingSpot.price).toFixed(3)}
-          <HokieKoinIcon isInverted={true} className={classes.hokieKoin} />
-        </TableCell>
-        <TableCell>
-          {convertMilitaryTimeToNormal(parkingSpot.start_time)}
-        </TableCell>
-        <TableCell>
-          {convertMilitaryTimeToNormal(parkingSpot.end_time)}
-        </TableCell>
-        <TableCell>
-          <Link
-            className={classes.viewButton}
-            to={{
-              pathname: `/zones/${parkingSpot.zone_id}/spot/${parkingSpot.spot_id}`,
-              state: {
-                from: history.location
-              }
-            }}
-          >
-            <IconButton>{<ExitToAppIcon />}</IconButton>
-          </Link>
-        </TableCell>
-      </TableRow>
+      <>
+        <TableRow>
+          <TableCell>
+            <ConfirmationDialogFieldButton
+              buttonMessage={'Buy'}
+              messageTitle={'Confirmation'}
+              messageContent={popUpContent(infoList)}
+              handleOnConfirm={handleOnConfirm(requestParams)}
+              buttonColor="primary"
+            />
+          </TableCell>
+          <TableCell>{parkingSpot.spot_id}</TableCell>
+          <TableCell>
+            {Number(parkingSpot.price).toFixed(3)}
+            <HokieKoinIcon isInverted={true} className={classes.hokieKoin} />
+          </TableCell>
+          <TableCell>
+            {convertMilitaryTimeToNormal(parkingSpot.start_time)}
+          </TableCell>
+          <TableCell>
+            {convertMilitaryTimeToNormal(parkingSpot.end_time)}
+          </TableCell>
+          <TableCell>
+            <Link
+              className={classes.viewButton}
+              to={{
+                pathname: `/zones/${parkingSpot.zone_id}/spot/${parkingSpot.spot_id}`,
+                state: {
+                  from: history.location.pathname
+                }
+              }}
+            >
+              <IconButton>{<ExitToAppIcon />}</IconButton>
+            </Link>
+          </TableCell>
+        </TableRow>
+      </>
     );
   });
 }

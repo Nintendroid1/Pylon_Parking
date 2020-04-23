@@ -172,7 +172,7 @@ const ParkingSpot = ({
   const [time, updateTime] = useState({
     date: today,
     start_time: currTime,
-    end_time: '24:00'
+    end_time: '23:59'
   });
 
   // Data and options for price graph

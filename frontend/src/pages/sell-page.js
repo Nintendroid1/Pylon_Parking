@@ -312,8 +312,6 @@ const SellingParkingSpotTableBody = props => {
     updateSellInfo({
       ...sellInfo,
       idx: index,
-      start_time: tempStartTime,
-      end_time: parkingSpotsInfo[index].end_time,
       date: parkingSpotsInfo[index].date,
       spot_id: spotInfo.spot_id,
       zone_id: spotInfo.zone_id
@@ -339,6 +337,14 @@ const SellingParkingSpotTableBody = props => {
     setOpenConfirm(true);
   };
 
+  const initSellInfo = (startTime, endTime) => () => {
+    updateSellInfo({
+      ...sellInfo,
+      start_time: startTime,
+      end_time: endTime
+    });
+  };
+
   return (
     <>
       <ConfirmationDialogWithPassword
@@ -362,6 +368,10 @@ const SellingParkingSpotTableBody = props => {
                     buttonMessage="Sell"
                     messageTitle={`Sell Parking Spot ${parkingSpot.zone_id}-${parkingSpot.spot_id}`}
                     requireKey={false}
+                    callOnOpen={initSellInfo(
+                      parkingSpot.start_time,
+                      parkingSpot.end_time
+                    )}
                     messageContent={SellingMessageContent(
                       parkingSpot.start_time,
                       parkingSpot.end_time,

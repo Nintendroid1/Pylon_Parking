@@ -275,11 +275,15 @@ const ConfirmationDialogFieldButton = ({
   handleOnConfirm,
   buttonColor,
   requireKey,
+  callOnOpen,
   ...props
 }) => {
   const [open, setOpen] = useState(false);
 
   const handleClickOpen = () => {
+    if (typeof callOnOpen !== 'undefined') {
+      callOnOpen();
+    }
     setOpen(true);
   };
 

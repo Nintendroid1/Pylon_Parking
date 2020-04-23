@@ -21,10 +21,10 @@ const styles = theme => ({
 });
 
 /**
- * The component that is exported. Handles the form used for 
+ * The component that is exported. Handles the form used for
  * login and handles the API call for user login.
- * 
- * @param {Object} param0 
+ *
+ * @param {Object} param0
  */
 const LoginTab = ({
   isDark,
@@ -42,10 +42,15 @@ const LoginTab = ({
   // Finds the url of the next place to send the user.
   // For example, if the user wanted to view zones, but was not
   // logged in, then after login, redirect back to zones page.
-  const nextLocation =
+  /* const nextLocation =
     history.location.state !== undefined
       ? history.location.state.from
-      : { pathname: '/' };
+      : { pathname: '/' }; */
+  let nextLocation =
+    typeof history.location.state !== 'undefined' &&
+    typeof history.location.state.from !== 'undefined'
+      ? history.location.state.from
+      : '/';
 
   // Loads the avatar used by the user.
   let loadUserImage = async () => {
@@ -55,7 +60,7 @@ const LoginTab = ({
       localStorage.avatar = `/media/images/${localStorage.olivia_pid}_avatar.png`;
     }
   };
-  
+
   // handle user login
   const userLogin = async values => {
     setLoading(true);
@@ -80,13 +85,13 @@ const LoginTab = ({
       updateLogin(true);
 
       //if (prevLocation !== null) {
-      console.log(nextLocation.pathname);
-      if (nextLocation.pathname === '/login') {
-        nextLocation.pathname = '/';
+      console.log(nextLocation);
+      if (nextLocation === '/login') {
+        nextLocation = '/';
       }
 
-      history.replace(nextLocation.pathname);
-      window.location.href = `${process.env.PUBLIC_URL}${nextLocation.pathname}`;
+      history.replace(nextLocation);
+      window.location.href = `${process.env.PUBLIC_URL}${nextLocation}`;
       //history.goForward();
       /*} else {
         history.push('/');
