@@ -715,6 +715,17 @@ const SellPage = ({ socket, isLoggedIn, classes }) => {
       });
       setOpenSnackbar(true);
     });
+    socket.on(`user-${localStorage.olivia_pid}`, data => {
+      setOpenSnackbar(false);
+
+      // Make it so that the data variable stores the message.
+      updateSnackbarOptions({
+        ...snackbarOptions,
+        message: data,
+        severity: 'info'
+      });
+      setOpenSnackbar(true);
+    });
 
     /*
     // Not needed because the spot is taken care of once the seller sells,
