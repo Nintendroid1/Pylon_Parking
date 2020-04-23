@@ -21,7 +21,7 @@ router.post("/", requireLogin, async function(req, res){
       let pubkey = PrivateKey.fromString(req.body.key).toPublic().toString();
       await rpc.history_get_key_accounts(pubkey).then(result => {
         if(!result.account_names.includes(req.body.pid.toLowerCase())) {
-          res.status(401).json({message: "Bad Key"});
+          res.status(400).json({message: "Bad Key"});
           stopBool = true;
         }
       });
