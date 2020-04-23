@@ -136,7 +136,8 @@ const App = ({ classes, ...props }) => {
 
   // Endpoint for the websocket.
   // Base url.
-  const endpoint = 'http://localhost:3001';
+  // const endpoint = 'http://localhost:3001';
+  const endpoint = window.location.host;
 
   const parkingLotSocket = io(`${endpoint}/zones`); //{ path: `${endpoint}/zones` });
   const parkingSpotSocket = io(`${endpoint}/parking_spot`); //{ path: `${endpoint}/parkingSpot` });
