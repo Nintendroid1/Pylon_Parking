@@ -337,7 +337,7 @@ const SellingParkingSpotTableBody = props => {
     setOpenConfirm(true);
   };
 
-  const initSellInfo = (startTime, endTime) => {
+  const initSellInfo = (startTime, endTime) => () => {
     updateSellInfo({
       ...sellInfo,
       start_time: startTime,
