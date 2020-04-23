@@ -1,13 +1,21 @@
 const express = require("express");
 const router = express.Router();
 
+const { checkForLogin } = require("./auth.js");
+
 router.use(express.json());
 
 EosApi = require('eosjs-api') // Or EosApi = require('./src')
 
 eos = EosApi() // // 127.0.0.1:8888
 
-router.get('/', (req, res) => {
+router.get('/', checkForLogin, function(req, res) {
+  let user_pid = "admin";
+  if (typeof req.user != undefined)
+  {
+    user_pid = req.user.pid;
+  }
+  console.log(user_pid);
     eos.getActions('admin', -1, -100000)
     .then(response => {
         let actionHistory = response.actions.reverse();

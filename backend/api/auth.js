@@ -53,11 +53,24 @@ const requireAuthenticationWithPredicate = pred => (req, res, next) => {
   })(req, res, next);
 };
 
+const checkForLogin = pred => (req, res, next) => {
+  passport.authenticate('jwt', { session: false }, function(err, user) {
+    if (user === false) {
+      req.user = undefined;
+    } else if (pred.test(user) === true) {
+      req.user = user;
+      next();
+    } else {
+      req.user = undefined;
+    }
+  })(req, res, next);
+};
+
 module.exports = {
   requireAdmin: requireAuthenticationWithPredicate({
     test: user => user.admin === 1 || user.admin,
     message: 'needs admin permissions'
   }),
   requireLogin: requireAuthenticationWithPredicate({test: () => true}),
-  getTokenFromHeader: ExtractJwt.fromAuthHeaderAsBearerToken()
+  checkForLogin
 }
