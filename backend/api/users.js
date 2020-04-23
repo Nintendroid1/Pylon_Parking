@@ -220,7 +220,7 @@ router.get("/:pid/spots", requireLogin, function(req, res) {
         INNER JOIN zones Z\
         ON P.zone_id = Z.zone_id\
         WHERE P.user_pid = $1 \
-        AND P.start_time >= (SELECT EXTRACT(epoch FROM date_trunc('day', NOW()))) AND P.end_time <= (SELECT EXTRACT(epoch FROM date_trunc('day', NOW() + INTERVAL '1 day')))\
+        AND P.start_time >= (SELECT EXTRACT(epoch FROM date_trunc('day', NOW()))) \
         ORDER BY zone_id, spot_id, start_time",
         [req.params.pid]
       ).then(dbres => {
