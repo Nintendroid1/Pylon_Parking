@@ -213,7 +213,7 @@ const ReportField = props => {
         if (response.status === 200) {
           // Checks if there exists multiple license plates and confidence level of ML model;
           // if there are, then retake the photo.
-          /* if (
+          if (
             respbody.results.length !== 1 ||
             respbody.results[0].dscore < 0.5 ||
             respbody.results[0].score < 0.5
@@ -223,13 +223,13 @@ const ReportField = props => {
             );
             setOpenErrorDialog(true);
           } else {
-            
-          }*/
-          updateInfo({
-            zone_id: zone_id,
-            spot_id: spot_id,
-            license_info: respbody.results[0].plate
-          });
+            updateInfo({
+              zone_id: zone_id,
+              spot_id: spot_id,
+              license_info: respbody.results[0].plate
+            });
+            setOpen(true);
+          }
         } else {
           updateErrorMessage(
             'The license plate was unable to be read. I dare u take another picture, I double dog dare you.'
