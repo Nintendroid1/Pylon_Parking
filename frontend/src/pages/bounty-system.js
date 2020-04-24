@@ -168,6 +168,18 @@ const ReportField = props => {
     handleReport(info);
   };
 
+  const handleError = () => {
+    updateLoadingDialogField({
+      open: false,
+      message: ''
+    });
+    updateSnackbarOptions({
+      ...snackbarOptions,
+      message: 'An Error Occurred While Trying To Process Your Photo. Please Try Again.',
+      severity: 'error'
+    });
+  };
+
   // Handles processing the info from the image.
   const handleOnCameraClick = async imageURI => {
     // Attempts to read the QR code in the picture, if it exists.
@@ -182,7 +194,7 @@ const ReportField = props => {
       // error message.
       console.log('no qr code found');
       updateErrorMessage(
-        'The QR Code was invalid. Please take a better picture you pleb.'
+        'The QR Code was invalid. Please take a better picture.'
       );
       setOpenErrorDialog(true);
     } else {
@@ -195,10 +207,15 @@ const ReportField = props => {
           open: true,
           message: 'Using Alien Technology To Analyze Image. Please Wait.'
         });
+
+        // Wait for about 5 seconds for a response.
+        const tempVar = window.setTimeout(handleError, 5000);
         // Request the backend to read the license plate in the image.
         const url = `${apiprefix}/bounty-system`;
         const response = await makeImageAPICall('POST', url, imageURI);
         const respbody = await response.json();
+
+        window.clearTimeout(tempVar);
 
         updateLoadingDialogField({
           open: false,
@@ -214,7 +231,7 @@ const ReportField = props => {
             respbody.results[0].score < 0.5
           ) {
             updateErrorMessage(
-              'Our machine does not understand the language your license plate is in. Please translate it or take another picture.'
+              'Reading is hard. Please take a better picture.'
             );
             setOpenErrorDialog(true);
           } else {
@@ -227,7 +244,7 @@ const ReportField = props => {
           }
         } else {
           updateErrorMessage(
-            'The license plate was unable to be read. I dare u take another picture, I double dog dare you.'
+            'The license plate number was unable to be read. Please try again.'
           );
           setOpenErrorDialog(true);
         }
