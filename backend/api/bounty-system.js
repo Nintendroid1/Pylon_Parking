@@ -89,7 +89,7 @@ router.post("/report", requireLogin, (req, res) => {
         })
         .then(blockres => {
           console.log(blockres);
-          res.status(200).json({message: "Bounty accepted, added 300 VTP to your account"});
+          res.status(200).json({message: "Congratulations! Bounty Accepted, Added 300 VTP To Your Account. Keep Up The Good Work! P.S. Mind Sharing The Wealth?"});
         })
         .catch(err => {
           console.log(err);
