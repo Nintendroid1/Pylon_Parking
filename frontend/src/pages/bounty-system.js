@@ -47,7 +47,7 @@ const CaptureImage = props => {
 
   const [cameraInfo, updateCameraInfo] = useState({
     facingMode: FACING_MODES.ENVIRONMENT,
-    isMirrorImage: false
+    isMirrorImage: true
   });
 
   const checkIfEnvEnabled = async () => {
@@ -61,7 +61,7 @@ const CaptureImage = props => {
       .catch(() =>
         updateCameraInfo({
           facingMode: FACING_MODES.USER,
-          isMirrorImage: true
+          isMirrorImage: false
         })
       );
   };
