@@ -226,10 +226,10 @@ const SellingMessageContent = ({
         !validTime.start_timeHasError &&
         !validTime.end_timeHasError
       ) {
-        const timeDiff = militaryTimeDifference(
-          sellInfo.start_time,
-          sellInfo.end_time
-        );
+        const timeDiff =
+          increaseMTimeBy1Min(sellInfo.end_time) === '00:00'
+            ? militaryTimeDifference(sellInfo.start_time, '24:00')
+            : militaryTimeDifference(sellInfo.start_time, sellInfo.end_time);
         const totalCost = Number(Number(cost) * (timeDiff / 15)).toFixed(3);
         UpdateTotalCost(totalCost);
       }
