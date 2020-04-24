@@ -668,17 +668,24 @@ const SellPage = ({ socket, isLoggedIn, classes }) => {
       });
 
       // Remove old stuff from the list.
-      const tempSpotSold = spotsOwned.splice(sellInfo.idx, 1);
+      let tempSpotSold = null;
+      const tempSpotsOwned = spotsOwned.filter((e, idx) => {
+        if (idx === sellInfo.idx) {
+          tempSpotSold = e;
+        }
+        return idx !== sellInfo.idx;
+      });
 
       // Adding new stuff to the list.
       newList.forEach((e, idx) => {
-        spotsOwned.splice(sellInfo.idx + idx, 0, e);
+        tempSpotsOwned.splice(sellInfo.idx + idx, 0, e);
       });
 
-      updateSpotsOwned(spotsOwned);
+      updateSpotsOwned(tempSpotsOwned);
 
-      spotsSold.push(tempSpotSold);
-      updateSpotsSold(spotsSold);
+      // spotsSold.push(tempSpotSold);
+      const tempSpotsSold = spotsSold.concat(tempSpotSold);
+      updateSpotsSold(tempSpotsSold);
 
       updateMessageDialogField({
         dialogTitle: 'Success',
