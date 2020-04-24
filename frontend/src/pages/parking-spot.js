@@ -10,7 +10,6 @@ import TableCell from '@material-ui/core/TableCell';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import { Typography } from '@material-ui/core';
-import { StartEndTime } from './forms/parking-spot-components';
 import 'date-fns';
 import DateFnsUtils from '@date-io/date-fns';
 import apiprefix from './apiprefix';
@@ -19,18 +18,16 @@ import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import {
   compareMilitaryTime,
   militaryTimeDifference,
-  convertMilitaryTimeToNormal,
   convertEpochToMilitary,
   convertMilitaryToEpoch,
   CustomDatePicker
 } from './forms/time-filter';
-import { withStyles, withTheme, useTheme } from '@material-ui/core/styles';
+import { withStyles, withTheme } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
 import SimpleChart from '../ui/SimpleChart';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Container from '@material-ui/core/Container';
-import CustomSnackbar from '../ui/snackbars';
 
 const styles = theme => ({
   root: {
@@ -98,7 +95,10 @@ const TableData = props => {
   });
 };
 
-const MakeTable = ({ date, time, updateTime, parkingInfo, ...props }) => {
+/*
+  The component that makes the table containing the parking spots.
+*/
+const MakeTable = ({ date, time, updateTime, parkingInfo }) => {
   return (
     <Table stickyHeader>
       <TableHead>
@@ -124,6 +124,9 @@ const MakeTable = ({ date, time, updateTime, parkingInfo, ...props }) => {
   );
 };
 
+/*
+  Called by the socket to make changes to this page.
+*/
 const handleParkingInfoChanges = (
   parkingSpotInfo,
   updateparkingSpotInfo,
@@ -141,6 +144,10 @@ const handleParkingInfoChanges = (
   updateparkingSpotInfo(parkingSpotInfo);
 };
 
+/*
+  The component that is being exported. Contains the logic for the server
+  api calls and handles the UI for this page.
+*/
 const ParkingSpot = ({
   isDark,
   updateLogin,
@@ -164,9 +171,9 @@ const ParkingSpot = ({
   let timeSplit = today.toTimeString().split(':');
   let currTime = timeSplit[0].concat(':', timeSplit[1]);
   let tempUrl = window.location.pathname.split('/'); // the first index is an empty string.
-  let spot_id = Number(tempUrl[4]);
-  let zone_id = Number(tempUrl[2]);
-  const [openSnackbar, setOpenSnackbar] = useState(false);
+  let spot_id = Number(tempUrl[4]); // Gets the spot id from the url.
+  let zone_id = Number(tempUrl[2]); // Gets the zone id from the url
+  const [, setOpenSnackbar] = useState(false);
   const [snackbarOptions, updateSnackbarOptions] = useState({
     verticalPos: 'top',
     horizontalPos: 'center',
@@ -195,6 +202,9 @@ const ParkingSpot = ({
     }
   };
 
+  /*
+    Handles the api requests to get the parking spot times.
+  */
   const listParkingSpotTimes = async () => {
     const url = `${apiprefix}/zones/${zone_id}/spot/${spot_id}`;
     let response = await makeAPICall('GET', url);
@@ -202,6 +212,7 @@ const ParkingSpot = ({
 
     if (response.status === 200) {
       resbody.parkingInfo.forEach(e => {
+        // Converts epoch to military time.
         e.start_time = convertEpochToMilitary(e.start_time);
         e.end_time = convertEpochToMilitary(e.end_time);
       });
@@ -223,73 +234,12 @@ const ParkingSpot = ({
     }
   };
 
-  const calculatePricePerTimeSlot = (timeSlot, start_time, end_time) => {
-    // If timeSlot's start time is after the start time the client wants, then use
-    // timeSlot's start time, otherwise, the client's start time is taken care of in
-    // this timeSlot, so use client's start time.
-    let timeToStartCalc =
-      compareMilitaryTime(timeSlot.start_time, start_time) > 0
-        ? timeSlot.start_time
-        : start_time;
-
-    // If timeSlot's end time is before the client's end time, then use timeSlot's
-    // end time.
-    let timeToEndCalc =
-      compareMilitaryTime(timeSlot.end_time, end_time) < 0
-        ? timeSlot.end_time
-        : end_time;
-
-    const totalTimeWanted = militaryTimeDifference(
-      timeToStartCalc,
-      timeToEndCalc
-    );
-
-    return (totalTimeWanted / 15) * timeSlot.price;
-  };
-
-  const calculatePrice = (start_time, end_time) => {
-    // Calculate the price for the spot.
-    const listOfTimes = parkingSpotInfo.filter(
-      e =>
-        compareMilitaryTime(start_time, e.start_time) >= 0 &&
-        compareMilitaryTime(end_time, e.start_time) <= 0
-    );
-
-    const totalCost = listOfTimes.reduce(
-      (accumulator, currTimeSlot) =>
-        accumulator +
-        calculatePricePerTimeSlot(currTimeSlot, start_time, end_time),
-      0
-    );
-
-    return totalCost;
-  };
-
-  const handleDateFiltering = async () => {
-    const date = convertMilitaryToEpoch(time.date, '00:00');
-
-    const url = `${apiprefix}/zones/${zone_id}/spot/${spot_id}/?date=${date}`;
-    const response = await makeAPICall('GET', url);
-    const resbody = await response.json();
-
-    if (response.status === 200) {
-      resbody.parkingInfo.forEach(e => {
-        e.start_time = convertEpochToMilitary(e.start_time);
-        e.end_time = convertEpochToMilitary(e.end_time);
-      });
-
-      updateparkingSpotInfo(resbody.parkingInfo);
-      updateMessage(null);
-    } else {
-      updateMessage(<div>{resbody.message}</div>);
-    }
-  };
-
   // Renders after first render.
   useEffect(() => {
     listParkingSpotTimes();
   }, []);
 
+  // Socket logic and stuff.
   useEffect(() => {
     // id should be the unique id for this parking spot, not the id of the parking spot
     // in this particular parking lot.

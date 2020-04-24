@@ -13,27 +13,8 @@ import {
 import { TimePicker } from './parking-spot-components.js';
 // import { TimePicker as TimePicker } from '@material-ui/pickers'
 import Button from '@material-ui/core/Button';
-import {
-  withStyles,
-  useStyles,
-  MuiThemeProvider,
-  createMuiTheme,
-  withTheme
-} from '@material-ui/core/styles';
-import { KeyboardTimePicker } from '@material-ui/pickers';
 import Checkbox from '@material-ui/core/Checkbox';
-import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
-import CheckBoxIcon from '@material-ui/icons/CheckBox';
-import Favorite from '@material-ui/icons/Favorite';
-import FavoriteBorder from '@material-ui/icons/FavoriteBorder';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
-
-const styles = theme => ({
-  root: {
-    display: 'flex',
-    flexGrow: 1
-  }
-});
 
 /*
   Finds the difference in time between the two given military times.
@@ -77,6 +58,10 @@ const roundUpToNearest15 = time => {
   return newTime;
 };
 
+/*
+  Subtracts one minute from the given military time.
+  24:00 becomes 00:00.
+*/
 const minusOneMinMT = time => {
   let [hour, minute] = time.split(':').map(e => Number(e));
 
@@ -223,7 +208,7 @@ const convertEpochToNormal = epoch => {
 /*
   Component used to filter the date.
 */
-const DateFilter = ({ time, handleDateFilter, updateTime, ...props }) => {
+const DateFilter = ({ time, handleDateFilter, updateTime }) => {
   const handleOnClick = event => {
     event.preventDefault();
     handleDateFilter();
@@ -247,7 +232,7 @@ const DateFilter = ({ time, handleDateFilter, updateTime, ...props }) => {
 /*
   A component that displays a date component.
 */
-const CustomDatePicker = ({ time, updateTime, handleDateChange, ...props }) => {
+const CustomDatePicker = ({ time, updateTime, handleDateChange }) => {
   return (
     <>
       <KeyboardDatePicker
@@ -282,8 +267,7 @@ const TimeFilter = ({
   updateAdmin,
   onSubmit,
   currentTimeFilter,
-  updateCurrentTimeFilter,
-  ...props
+  updateCurrentTimeFilter
 }) => {
   const [checkBoxes, updateCheckBoxes] = useState({
     startTimeBox: false,

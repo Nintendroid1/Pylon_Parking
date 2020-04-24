@@ -1,3 +1,9 @@
+/*
+  Exports a default component that shows user profile and allows
+  the user to modify their personal information, such as profile 
+  picture.
+*/
+
 import React, { useState, useEffect } from 'react';
 import { makeAPICall, makeImageAPICall } from '../api';
 import { withStyles } from '@material-ui/core/styles';
@@ -48,6 +54,10 @@ const styles = theme => ({
   }
 });
 
+/*
+  The component that is exported. Displays the user account information
+  and allows users to modify their profile picture.
+*/
 let AccountPage = ({ classes, history, socket, ...props }) => {
   const [user, updateUser] = useState({
     pid: '',
@@ -71,6 +81,9 @@ let AccountPage = ({ classes, history, socket, ...props }) => {
     severity: 'info'
   });
 
+  /*
+    Retrieves the user's information from the database.
+  */
   let loadUser = async () => {
     const url = `${apiprefix}/users/${localStorage.olivia_pid}`;
     setLoading(true);
@@ -96,6 +109,9 @@ let AccountPage = ({ classes, history, socket, ...props }) => {
     }
   };
 
+  /*
+    Handles changing the user profile picture.
+  */
   let changeUserAvatar = async imageURI => {
     try {
       const url = `${apiprefix}/users/${localStorage.olivia_pid}/avatar`;
@@ -113,6 +129,9 @@ let AccountPage = ({ classes, history, socket, ...props }) => {
     loadUser();
   }, []);
 
+  /*
+    stores the sockets.
+  */
   useEffect(() => {
     // data = {
     //  parkingId: parking spot sold off,
@@ -135,6 +154,7 @@ let AccountPage = ({ classes, history, socket, ...props }) => {
       setOpenSnackbar(true);
     });
   }, []);
+  
   return (
     <>
       <div className={classes.root}>

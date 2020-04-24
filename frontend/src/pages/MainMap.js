@@ -64,17 +64,6 @@ const styles = theme => ({
  * @param {Object} param0
  */
 const MainMap = ({ classes, userSocket, ...props }) => {
-  // Make api request to get list of available zones
-  // todo
-
-  // const zones = [
-  //   { name: 'Litton Reaves', id: 0 },
-  //   { name: 'Derring Lot', id: 1 },
-  //   { name: 'Perry Street Lot #1', id: 2 },
-  //   { name: 'Perry Street Lot #2', id: 3 },
-  //   { name: 'Perry Street Lot #3', id: 4 },
-  //   { name: 'Lower Stanger Lot', id: 5 }
-  // ];
   const [zones, updateZones] = useState([]);
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [snackbarOptions, updateSnackbarOptions] = useState({
@@ -84,6 +73,9 @@ const MainMap = ({ classes, userSocket, ...props }) => {
     severity: 'info'
   });
 
+  /*
+    Sends a GET request to the server requesting for the zones.
+  */
   const get_zones = async () => {
     const url = `${apiprefix}/zones/all`;
     let resp = await makeAPICall('GET', url);
@@ -112,22 +104,7 @@ const MainMap = ({ classes, userSocket, ...props }) => {
       setOpenSnackbar(true);
     });
   });
-
-  var zoneList = zones.map((z, idx) => (
-    <li style={{ listStyleType: 'none' }}>
-      <Link
-        className={classes.zoneLink}
-        to={{
-          pathname: `zones/${z.zone_id}`,
-          state: {
-            from: history.location.pathname
-          }
-        }}
-      >
-        {`Zone ${idx + 1}: ${z.zone_name}`}
-      </Link>
-    </li>
-  ));
+  
   return (
     <>
       <CustomSnackbar

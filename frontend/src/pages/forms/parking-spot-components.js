@@ -152,9 +152,9 @@ const TimePicker = ({
   Component that displays the given message with the given
   dialog title in a Dialog component.
 */
-const MessageDialog = (props) => {
+const MessageDialog = props => {
   const { message, dialogTitle, open, setOpen, redirectTo, reload } = props;
-  
+
   const handleClose = () => {
     setOpen(false);
     if (typeof redirectTo !== 'undefined' && redirectTo !== null) {
@@ -187,7 +187,7 @@ const MessageDialog = (props) => {
   icon in a dialog. There is no way for user to close it, coder
   has to manually close it.
 */
-const LoadingDialog = (props) => {
+const LoadingDialog = props => {
   const { message, open } = props;
 
   return (
@@ -202,7 +202,7 @@ const LoadingDialog = (props) => {
       </Dialog>
     </>
   );
-}
+};
 
 /*
   Confirmation dialog with password field.
@@ -218,11 +218,11 @@ const ConfirmationDialogWithPassword = ({
   requireKey,
   ...props
 }) => {
-
   if (typeof requireKey === 'undefined') {
     requireKey = true;
   }
 
+  // Stores the state information for the private key.
   const [privateKey, updatePrivateKey] = useState({
     privateKey: '',
     showPrivateKey: false
@@ -237,6 +237,7 @@ const ConfirmationDialogWithPassword = ({
     });
   };
 
+  // Handles the submission of the information.
   const handleSubmit = event => {
     event.preventDefault();
     setOpen(false);
@@ -299,7 +300,7 @@ const ConfirmationDialogFieldButton = ({
       <Button variant="outlined" color={buttonColor} onClick={handleClickOpen}>
         {buttonMessage}
       </Button>
-      <ConfirmationDialogWithPassword 
+      <ConfirmationDialogWithPassword
         open={open}
         setOpen={setOpen}
         buttonMessage={buttonMessage}
