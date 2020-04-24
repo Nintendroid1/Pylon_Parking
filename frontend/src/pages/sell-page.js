@@ -725,38 +725,6 @@ const SellPage = ({ socket, isLoggedIn, classes }) => {
       });
       setOpenSnackbar(true);
     });
-    socket.on(`user-${localStorage.olivia_pid}`, data => {
-      setOpenSnackbar(false);
-
-      // Make it so that the data variable stores the message.
-      updateSnackbarOptions({
-        ...snackbarOptions,
-        message: data,
-        severity: 'info'
-      });
-      setOpenSnackbar(true);
-    });
-
-    /*
-    // Not needed because the spot is taken care of once the seller sells,
-       thus, preventing sellers from using the spot and avoids other complications.
-    socket.on(`user-${localStorage.olivia_pid}`, data => {
-      const index = spotsOwned.findIndex(e => {
-        const tempStartTime = convertMilitaryToEpoch(e.date, e.start_time);
-        const tempEndTime = convertMilitaryToEpoch(e.date, e.end_time);
-
-        return (
-          Number(e.zone_id) === Number(data.zone_id) &&
-          Number(e.spot_id) === Number(data.spot_id) &&
-          tempStartTime <= Number(data.start_time) &&
-          tempEndTime >= Number(data.start_time)
-        );
-      });
-
-      spotsOwned = spotsOwned.splice(index, 1);
-      updateSpotsOwned(spotsOwned);
-      */
-    // });
   }, []);
 
   // Change to something more meaningful.

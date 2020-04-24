@@ -118,7 +118,7 @@ let AccountPage = ({ classes, history, socket, ...props }) => {
     //  parkingId: parking spot sold off,
     //  money: # hokie tokens in wallet now.
     // }
-    socket.on(`user-${localStorage.olivia_pid}`, data => {
+    socket.on(`userInfo-${localStorage.olivia_pid}`, data => {
       updateUser({ ...user, money: user.money + Number(data) });
     });
 
