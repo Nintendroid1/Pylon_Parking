@@ -234,51 +234,8 @@ router.get("/:pid/spots", requireLogin, function(req, res) {
               date1.getFullYear() == date2.getFullYear()
             );
           };
-<<<<<<< HEAD
-          let mergeTimes = (index, arr) => {
-              let final_res = [];
-            while (index < arr.length) {
-              let temp_res = [arr[index]];
-              let totalCost = Number(temp_res[0].price);
-              let temp_ind = 1;
-              let arr_ind = index + 1;
-              let startDate = new Date(Number(temp_res[0].start_time) * 1000);
-              let curDate = new Date(
-                Number(temp_res[temp_ind - 1].end_time) * 1000
-              );
-              while (
-                arr_ind < arr.length &&
-                temp_res[temp_ind - 1].end_time == arr[arr_ind].start_time &&
-                areOnSameDay(startDate, curDate) &&
-                temp_res[temp_ind - 1].availability ==
-                  arr[arr_ind].availability &&
-                temp_res[temp_ind - 1].zone_id == arr[arr_ind].zone_id &&
-                temp_res[temp_ind - 1].spot_id == arr[arr_ind].spot_id
-              ) {
-                temp_res.push(arr[arr_ind]);
-                totalCost += Number(arr[arr_ind].price);
-                arr_ind++;
-                temp_ind++;
-                curDate = new Date(
-                  Number(temp_res[temp_ind - 1].end_time) * 1000
-                );
-              }
-              // console.log(final_res);
-              final_res.push({
-                  ...temp_res[0],
-                  end_time: Number(temp_res[temp_res.length - 1].end_time) - 1,
-                  price: totalCost
-                }
-              );
-              index = arr_ind;
-              //.concat(mergeTimes(arr_ind, arr));
-            }
-            return final_res;
-          };
-=======
           // Merge data and fill parkingSpotsInfo
           let startDate = new Date(Number(dbres.rows[0].start_time) * 1000);
->>>>>>> b9aa3c418e3bf48d527e29ba36cd909d126b63ed
 
         } else {
           sellInfo.parkingSpotsInfo = [];
