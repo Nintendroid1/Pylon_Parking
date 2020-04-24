@@ -216,7 +216,7 @@ router.get("/:pid/spots", requireLogin, function(req, res) {
     .then(() => {
       db.query(
         "SELECT Z.zone_name, P.*\
-        FROM spot_range P\
+        FROM parking_times P\
         INNER JOIN zones Z\
         ON P.zone_id = Z.zone_id\
         WHERE P.user_pid = $1 \
@@ -224,6 +224,7 @@ router.get("/:pid/spots", requireLogin, function(req, res) {
         ORDER BY zone_id, spot_id, start_time",
         [req.params.pid]
       ).then(dbres => {
+        // If there are spots for the user in the zone etc.
         if (dbres.rows[0]) {
           let info = dbres.rows;
           let areOnSameDay = (date1, date2) => {
@@ -233,6 +234,7 @@ router.get("/:pid/spots", requireLogin, function(req, res) {
               date1.getFullYear() == date2.getFullYear()
             );
           };
+<<<<<<< HEAD
           let mergeTimes = (index, arr) => {
               let final_res = [];
             while (index < arr.length) {
@@ -273,8 +275,11 @@ router.get("/:pid/spots", requireLogin, function(req, res) {
             }
             return final_res;
           };
+=======
+          // Merge data and fill parkingSpotsInfo
+          let startDate = new Date(Number(dbres.rows[0].start_time) * 1000);
+>>>>>>> b9aa3c418e3bf48d527e29ba36cd909d126b63ed
 
-          sellInfo.parkingSpotsInfo = mergeTimes(0, dbres.rows);
         } else {
           sellInfo.parkingSpotsInfo = [];
         }
