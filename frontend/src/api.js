@@ -35,6 +35,7 @@ export async function makeImageAPICall(method, url, body) {
     });
     return req;
   } catch (er) {
+    console.log('error here: ' + er);
     throw er;
   }
 }
