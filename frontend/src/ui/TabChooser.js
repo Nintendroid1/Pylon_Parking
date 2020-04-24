@@ -532,6 +532,7 @@ function TabChooser({
             render={() => {
               localStorage.olivia_pid = '';
               localStorage.removeItem('olivia_token');
+              localStorage.removeItem('avatar');
               updateLogin(false);
               history.replace('/');
               window.location.href = `${process.env.PUBLIC_URL}/`;

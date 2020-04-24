@@ -11,6 +11,16 @@ import { makeAPICall } from '../api';
 import apiprefix from './apiprefix';
 import history from '../history';
 import CustomSnackbar from '../ui/snackbars';
+import Table from '@material-ui/core/Table';
+import TableBody from '@material-ui/core/TableBody';
+import TableCell from '@material-ui/core/TableCell';
+import TableHead from '@material-ui/core/TableHead';
+import TableRow from '@material-ui/core/TableRow';
+import TableContainer from '@material-ui/core/TableContainer';
+import Paper from '@material-ui/core/Paper';
+import Grid from '@material-ui/core/Grid';
+import Title from '../ui/Title';
+import { sizing } from '@material-ui/system';
 // import './MainMap.css';
 
 const styles = theme => ({
@@ -39,9 +49,9 @@ const styles = theme => ({
   centerCol: {
     display: 'flex',
     flexgrow: 1,
-    justifyContent: 'left',
-    textAlign: 'left',
-    width: 1000,
+    justifyContent: 'center',
+    textAlign: 'center',
+    width: 1600,
     margin: '0 auto',
     marginTop: 20
   }
@@ -143,13 +153,50 @@ const MainMap = ({ classes, userSocket, ...props }) => {
           />
         </Card>
       </div>
-      <div className={classes.centerCol}>
-        <Typography color="primary" variant="h4">
-          <div style={{ display: 'flex', justifyContent: 'left' }}>
-            <ul>{zoneList}</ul>
-          </div>
-        </Typography>
-      </div>
+      <Typography color="primary" variant="h6">
+        <div
+          style={{
+            display: 'flex',
+            marginTop: '40px',
+            marginLeft: '20%',
+            marginRight: '20%'
+          }}
+        >
+          <TableContainer
+            align="center"
+            classes={classes.container}
+            component={Paper}
+          >
+            <Title align="center">Parking Zones</Title>
+            <Table size="small" width="50%">
+              <TableBody>
+                <TableHead>
+                  <TableRow></TableRow>
+                </TableHead>
+                {zones.map(z => (
+                  <TableRow key={z.zone_id}>
+                    <TableCell colspan={1}>{z.zone_id}</TableCell>
+                    <TableCell colspan={1}></TableCell>
+                    <TableCell colspan={1}>
+                      <Link
+                        className={classes.zoneLink}
+                        to={{
+                          pathname: `zones/${z.zone_id}`,
+                          state: {
+                            from: history.location.pathname
+                          }
+                        }}
+                      >
+                        {z.zone_name}
+                      </Link>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </div>
+      </Typography>
     </>
   );
 };
