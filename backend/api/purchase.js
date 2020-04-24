@@ -147,30 +147,6 @@ router.post("/", requireLogin, async function(req, res){
                     res.status(500).json({ message: "Internal error" });
                   } else {
     
-                    // Send updated info to clients viewing this parking spot in the zones page.
-                    // TODO
-                    // socketAPI.broadcastZoneInfo(
-                    //   socket,
-                    //   req.body.spot.zone_id,
-                    //   updatedParkingSpotInfoForZone
-                    // );
-    
-                    // socketAPI.broadcastTransactionHistoryInfo(
-                    // TODO
-                    //   socket,
-                    //   parkingSpotInfoForTransactionHistory
-                    // );
-    
-                    // TODO
-                    // If the parking spot sold was owned by another user that is
-                    // not the university, then an object containing the zone_id
-                    // and spot_id of the parking spot sold.
-    
-                    // TODO
-                    // If the parking spot sold was owned by another user that is
-                    // not the university, then an updated value on the amount of
-                    // tokens they have after the parking spot was sold.
-    
                     zone_call = null;
                     db.query(
                       "SELECT * FROM parking_times WHERE spot_ID = $1 AND zone_ID = $2",
@@ -211,14 +187,16 @@ router.post("/", requireLogin, async function(req, res){
                       isAvail: false,
                       parkingInfo: {
                         start_time: responseObject[0].start_time,
-                        end_time: responseObject[respObjLastIndex].end_time,
+                        end_time: responseObject[respObjLastIndex].end_time - 1,
                         zone_id: Number(responseObject[0].zone_id),
                         spot_id: Number(responseObject[0].spot_id)
                       }
                     }
     
+                    // Getting spots sold by other users.
                     const spotsSoldByOtherUser = responseObject.filter(e => e.pid !== "admin");
     
+                    // Getting the socket.
                     const socket = req.app.settings["socket-api"];
     
                     const parkingSpotId = spotPurchasedInfo.zone_id + '-' + spotPurchasedInfo.spot_id;
