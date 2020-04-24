@@ -28,7 +28,7 @@ router.post('/', requireLogin, (req,res) => {
                     [req.body.spot.spot_id, req.body.spot.zone_id, req.body.spot.start_time, req.body.spot.end_time-1])
                 .then(dbres => {
                     for(i in dbres.rows) {
-                        if(dbres.rows[i].user_pid != req.body.pid || dbres.rows[i].time_code < Math.floor(Date.now()/1000)) {
+                        if(dbres.rows[i].user_pid != req.body.pid) {
                             isValidReq = false;
                         }
                     }
