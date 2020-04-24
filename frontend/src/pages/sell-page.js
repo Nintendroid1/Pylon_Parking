@@ -677,9 +677,7 @@ const SellPage = ({ socket, isLoggedIn, classes }) => {
       });
 
       // Adding new stuff to the list.
-      newList.forEach((e, idx) => {
-        tempSpotsOwned.splice(sellInfo.idx + idx, 0, e);
-      });
+      tempSpotsOwned.concat(newList);
 
       updateSpotsOwned(tempSpotsOwned);
 
