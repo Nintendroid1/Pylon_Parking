@@ -126,7 +126,7 @@ const TransactionsTableBody = ({
         {rows.map(row => (
           <>
             <TableRow>
-              <TableCell>{`${row.zone_id}-${row.spot_id}`}</TableCell>
+              <TableCell>{row.parkingId}</TableCell>
               <TableCell>{row.buyer}</TableCell>
               <TableCell>{row.seller}</TableCell>
               <TableCell>
@@ -157,13 +157,12 @@ const TransactionTable = ({
   tableHeaders,
   getEntireHistory
 }) => {
-  const listOfFilterOptions = [
-    'None',
-    'Parking ID',
-    'Buyer ID',
-    'Seller ID',
-    'Time'
-  ];
+  const filterVal = {
+    'Parking ID': 'parkingId',
+    'Buyer ID': 'buyer',
+    'Seller ID': 'seller'
+  };
+  const listOfFilterOptions = ['None', 'Parking ID', 'Buyer ID', 'Seller ID'];
   const [filterOption, updateFilterOption] = useState('Buyer ID');
   const [textFieldValue, updateTextFieldValue] = useState({
     value: userId,
@@ -207,12 +206,11 @@ const TransactionTable = ({
     }
 
     // If no filter option, then display all, otherwise, filter base on filter option.
+    const filterBy = filterVal[filterOption];
     const temp =
       filterOption === 'None'
         ? listOfTransactions
-        : listOfTransactions.filter(
-            e => e[filterOption] === textFieldValue.value
-          );
+        : listOfTransactions.filter(e => e[filterBy] === textFieldValue.value);
     updateDisplayList(temp);
   };
 
@@ -374,6 +372,7 @@ const TransactionHistory = ({ userSocket, socket, classes }) => {
 
       // Formatting response
       respbody.result.forEach(e => {
+        e.parkingId = e.zone_id + '-' + e.spot_id;
         e.quantity = e.quantity.split(' ')[0];
         e.start_time = convertEpochToMilitary(e.time_code);
         e.end_time = convertEpochToMilitary(e.time_code + 15 * 60);
@@ -421,6 +420,7 @@ const TransactionHistory = ({ userSocket, socket, classes }) => {
 
       // Formatting response
       respbody.result.forEach(e => {
+        e.parkingId = e.zone_id + '-' + e.spot_id;
         e.quantity = e.quantity.split(' ')[0];
         e.start_time = convertEpochToMilitary(e.time_code);
         e.end_time = convertEpochToMilitary(e.time_code + 15 * 60 * 1000);
