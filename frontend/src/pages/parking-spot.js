@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 
 import React, { useState, useEffect } from 'react';
@@ -22,12 +22,9 @@ import {
   convertMilitaryTimeToNormal,
   convertEpochToMilitary,
   convertMilitaryToEpoch,
-  DateFilter
+  CustomDatePicker
 } from './forms/time-filter';
-import {
-  withStyles,
-  withTheme,
-  useTheme} from '@material-ui/core/styles';
+import { withStyles, withTheme, useTheme } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
 import SimpleChart from '../ui/SimpleChart';
@@ -92,30 +89,36 @@ const TableData = props => {
     return (
       <>
         <TableRow>
-          <TableCell>{parkingSpot.start_time}</TableCell>
-          <TableCell>{parkingSpot.end_time}</TableCell>
-          <TableCell>{parkingSpot.price}</TableCell>
+          <TableCell align="center">{parkingSpot.start_time}</TableCell>
+          <TableCell align="center">{parkingSpot.end_time}</TableCell>
+          <TableCell align="center">{parkingSpot.price}</TableCell>
         </TableRow>
       </>
     );
   });
 };
 
-const MakeTable = props => {
+const MakeTable = ({ date, time, updateTime, parkingInfo, ...props }) => {
   return (
     <Table stickyHeader>
       <TableHead>
         <TableRow>
-          <TableCell>Start Time</TableCell>
-          <TableCell>End Time</TableCell>
-          <TableCell>Cost/15 minutes</TableCell>
-          <TableCell>
-            <span />
+          <TableCell colspan={3} align="center">
+            <MuiPickersUtilsProvider utils={DateFnsUtils}>
+              <Grid item alignItems="center" xs={12}>
+                <CustomDatePicker time={time} updateTime={updateTime} />
+              </Grid>
+            </MuiPickersUtilsProvider>
           </TableCell>
+        </TableRow>
+        <TableRow>
+          <TableCell align="center">Start Time</TableCell>
+          <TableCell align="center">End Time</TableCell>
+          <TableCell align="center">Cost/15 minutes</TableCell>
         </TableRow>
       </TableHead>
       <TableBody>
-        <TableData parkingInfo={props.parkingInfo} />
+        <TableData parkingInfo={parkingInfo} />
       </TableBody>
     </Table>
   );
@@ -126,9 +129,13 @@ const handleParkingInfoChanges = (
   updateparkingSpotInfo,
   newParkingSpotInfo
 ) => {
-  newParkingSpotInfo.start_time = convertEpochToMilitary(newParkingSpotInfo.start_time);
-  newParkingSpotInfo.end_time = convertEpochToMilitary(newParkingSpotInfo.end_time);
-  
+  newParkingSpotInfo.start_time = convertEpochToMilitary(
+    newParkingSpotInfo.start_time
+  );
+  newParkingSpotInfo.end_time = convertEpochToMilitary(
+    newParkingSpotInfo.end_time
+  );
+
   parkingSpotInfo.splice(1, 0, newParkingSpotInfo);
 
   updateparkingSpotInfo(parkingSpotInfo);
@@ -203,7 +210,7 @@ const ParkingSpot = ({
           name: 'prices',
           // Change the map to limit the prices to only spots within a small time window
           data: resbody.parkingInfo
-            .filter((spot, index) => index % 89 === 0)
+            .filter((spot, index) => index % 1 === 0)
             .map(spot => spot.price)
         }
       ]);
@@ -278,55 +285,6 @@ const ParkingSpot = ({
     }
   };
 
-  // Buying option, confirmation message and so forth.
-  // Make api call to make a transaction.
-  const handleBuyRequest = async privateKey => {
-    const startUTCEpoch = convertMilitaryToEpoch(time.date, time.start_time);
-    const endUTCEpoch = convertMilitaryToEpoch(time.date, time.end_time);
-
-    // Make api call to carry out transaction.
-    const url = `${apiprefix}/purchase`;
-    const json = {
-      pid: localStorage.olivia_pid,
-      spot: {
-        spot_id: spot_id,
-        zone_id: zone_id,
-        start_time: `${Number(startUTCEpoch) / 1000}`,
-        end_time: `${Number(endUTCEpoch) / 1000}`
-      }
-    };
-
-    console.log(url);
-    const response = await makeAPICall('POST', url, json);
-    console.log('WAIT2');
-    const respbody = await response.json();
-    console.log(respbody);
-
-    if (response.status === 200) {
-      // Redirect them to invoice page.
-      console.log('Successfully purchased spot!');
-      // Can have it as a snackbar that appears at the top of the page instead of redirection.
-    } else {
-      updateMessage(<div>{respbody.message}</div>);
-    }
-
-    // For testing purposes.
-    console.log(`
-      Start Time: ${time.start_time} \n
-      End Time: ${time.end_time} \n
-      Private Key: ${privateKey}
-    `);
-    // make smart contract and redirect to invoice.
-    return 1;
-  };
-
-  let popUpMessage = `Are you sure you want to rent parking spot ${zone_id}-${spot_id} from ${convertMilitaryTimeToNormal(
-    time.start_time
-  )} to ${convertMilitaryTimeToNormal(time.end_time)} for ${calculatePrice(
-    time.start_time,
-    time.end_time
-  )} hokie tokens?`;
-
   // Renders after first render.
   useEffect(() => {
     listParkingSpotTimes();
@@ -360,35 +318,24 @@ const ParkingSpot = ({
   function spotTimeChart() {
     return (
       <>
-        <div>
+        {message ? (
+          <div>{message}</div>
+        ) : (
           <Typography>
-            {message ? (
-              <div>{message}</div>
-            ) : (
-              <div>
-                <MuiPickersUtilsProvider utils={DateFnsUtils}>
-                  <DateFilter
-                    updateTime={updateTime}
-                    time={time}
-                    handleDateFilter={handleDateFiltering}
-                    updateTime={updateTime}
-                  />
-                  <StartEndTime
+            <Container className={classes.container}>
+              <Grid container alignContent="center" spacing={2}>
+                <Grid item xs={12}>
+                  <MakeTable
+                    date={time.date}
                     time={time}
                     updateTime={updateTime}
-                    noButton={true}
-                    //buttonName={'Buy!'}
-                    calculateCost={calculatePrice}
-                    handleOnConfirm={handleBuyRequest}
-                    popUpTitle={'Confirmation'}
-                    popUpContent={popUpMessage}
+                    parkingInfo={parkingSpotInfo}
                   />
-                </MuiPickersUtilsProvider>
-                <MakeTable parkingInfo={parkingSpotInfo} />
-              </div>
-            )}
+                </Grid>
+              </Grid>
+            </Container>
           </Typography>
-        </div>
+        )}
       </>
     );
   }
