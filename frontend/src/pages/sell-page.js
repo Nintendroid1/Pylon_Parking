@@ -228,9 +228,9 @@ const SellingMessageContent = (
       ) {
         const timeDiff = militaryTimeDifference(
           sellInfo.start_time,
-          increaseMTimeBy1Min(sellInfo.end_time)
+          sellInfo.end_time
         );
-        const totalCost = Number(cost) * (timeDiff / 15);
+        const totalCost = Number(Number(cost) * (timeDiff / 15)).toFixed(3);
         UpdateTotalCost(totalCost);
       }
     }
@@ -525,8 +525,9 @@ const SellPage = ({ socket, isLoggedIn, classes }) => {
       </Typography>
     </>
   );
-  let [spotsOwned, updateSpotsOwned] = useState([]);
+  const [spotsOwned, updateSpotsOwned] = useState([]);
   const [spotsSold, updateSpotsSold] = useState([]);
+  const [hasUpdate, updateHasUpdate] = useState(false);
 
   let getUserParkingSpots = async () => {
     let url = `${apiprefix}/users/${localStorage.olivia_pid}/spots`;
@@ -636,6 +637,7 @@ const SellPage = ({ socket, isLoggedIn, classes }) => {
 
     if (response.status === 200) {
       // list storing spots that have been coagulated.
+      /*
       let newList = [];
       let curr = null;
 
@@ -679,8 +681,9 @@ const SellPage = ({ socket, isLoggedIn, classes }) => {
         }
         return idx !== sellInfo.idx;
       });
-      updateSpotsOwned(spotsOwned.concat(newList));
-      updateSpotsSold(spotsSold.concat(tempSpotSold));
+      updateSpotsOwned(tempSpotsOwned.concat(newList));
+      updateSpotsSold(spotsSold.concat(tempSpotSold));*/
+      updateHasUpdate(true);
 
       updateMessageDialogField({
         dialogTitle: 'Success',
@@ -708,7 +711,8 @@ const SellPage = ({ socket, isLoggedIn, classes }) => {
   // Need another socket event for when parking spot is sold.
   useEffect(() => {
     getUserParkingSpots();
-  }, []);
+    updateHasUpdate(false);
+  }, [hasUpdate]);
 
   useEffect(() => {
     // data = {
