@@ -632,7 +632,6 @@ const SellPage = ({ socket, isLoggedIn, classes }) => {
 
     if (response.status === 200) {
       // list storing spots that have been coagulated.
-      
       let newList = [];
       let curr = null;
 
@@ -676,7 +675,7 @@ const SellPage = ({ socket, isLoggedIn, classes }) => {
         }
         return idx !== sellInfo.idx;
       });
-      updateSpotsOwned(tempSpotsOwned);
+      updateSpotsOwned(tempSpotsOwned.concat(newList));
       updateSpotsSold(spotsSold.concat(tempSpotSold));
 
       updateMessageDialogField({
