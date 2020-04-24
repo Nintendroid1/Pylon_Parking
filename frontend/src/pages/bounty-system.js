@@ -228,6 +228,7 @@ const ReportField = props => {
               spot_id: spot_id,
               license_info: respbody.results[0].plate
             });
+            setOpen(true);
           }
         } else {
           updateErrorMessage(

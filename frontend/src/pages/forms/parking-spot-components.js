@@ -153,13 +153,15 @@ const TimePicker = ({
   dialog title in a Dialog component.
 */
 const MessageDialog = (props) => {
-  const { message, dialogTitle, open, setOpen, redirectTo } = props;
+  const { message, dialogTitle, open, setOpen, redirectTo, reload } = props;
   
   const handleClose = () => {
     setOpen(false);
     if (typeof redirectTo !== 'undefined' && redirectTo !== null) {
       history.push(redirectTo);
       window.location.href = `${process.env.PUBLIC_URL}${redirectTo}`;
+    } else if (typeof reload !== 'undefined' && reload) {
+      window.location.reload(true);
     }
   };
 

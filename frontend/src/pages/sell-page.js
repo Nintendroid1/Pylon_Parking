@@ -86,7 +86,7 @@ const SpotsSoldTableBody = props => {
                 </TableCell>
                 <TableCell>{`${e.zone_id}-${e.spot_id}`}</TableCell>
                 <TableCell>{`${e.zone_name}`}</TableCell>
-                <TableCell>{`${e.date}`}</TableCell>
+                <TableCell>{`${e.dateString}`}</TableCell>
                 <TableCell>{`${e.start_time}`}</TableCell>
                 <TableCell>{`${e.end_time}`}</TableCell>
                 <TableCell>{`${e.price}`}</TableCell>
@@ -228,9 +228,9 @@ const SellingMessageContent = (
       ) {
         const timeDiff = militaryTimeDifference(
           sellInfo.start_time,
-          increaseMTimeBy1Min(sellInfo.end_time)
+          sellInfo.end_time
         );
-        const totalCost = Number(cost) * (timeDiff / 15);
+        const totalCost = Number(Number(cost) * (timeDiff / 15)).toFixed(3);
         UpdateTotalCost(totalCost);
       }
     }
@@ -525,7 +525,7 @@ const SellPage = ({ socket, isLoggedIn, classes }) => {
       </Typography>
     </>
   );
-  let [spotsOwned, updateSpotsOwned] = useState([]);
+  const [spotsOwned, updateSpotsOwned] = useState([]);
   const [spotsSold, updateSpotsSold] = useState([]);
 
   let getUserParkingSpots = async () => {
@@ -636,6 +636,7 @@ const SellPage = ({ socket, isLoggedIn, classes }) => {
 
     if (response.status === 200) {
       // list storing spots that have been coagulated.
+      /*
       let newList = [];
       let curr = null;
 
@@ -658,6 +659,10 @@ const SellPage = ({ socket, isLoggedIn, classes }) => {
             // Is the end time greater than the current time, if so, then it is still
             // rented by the current user, otherwise, not so no need to list it.
             if (curr.end_time > Date.now() / 1000) {
+              curr.dateString = new Date(
+                Number(curr.start_time) * 1000
+              ).toLocaleDateString('en-US', { timeZone: 'UTC' });
+              curr.date = new Date(Number(curr.start_time) * 1000);
               curr.start_time = convertEpochToMilitary(curr.start_time);
               curr.end_time = convertEpochToMilitary(curr.end_time);
               newList.push(curr);
@@ -675,8 +680,8 @@ const SellPage = ({ socket, isLoggedIn, classes }) => {
         }
         return idx !== sellInfo.idx;
       });
-      updateSpotsOwned(tempSpotsOwned.concat(newList));
-      updateSpotsSold(spotsSold.concat(tempSpotSold));
+      updateSpotsOwned(tempSpotsOwned);
+      updateSpotsSold(spotsSold.concat(tempSpotSold));*/
 
       updateMessageDialogField({
         dialogTitle: 'Success',
@@ -687,7 +692,8 @@ const SellPage = ({ socket, isLoggedIn, classes }) => {
     } else {
       updateMessageDialogField({
         dialogTitle: 'Error',
-        message: respbody.message
+        message: respbody.message,
+        reload: true
       });
       updateOpenMessageDialog(true);
       /*
@@ -772,6 +778,7 @@ const SellPage = ({ socket, isLoggedIn, classes }) => {
         <MessageDialog
           message={messageDialogField.message}
           dialogTitle={messageDialogField.dialogTitle}
+          reload={messageDialogField.reload}
           open={openMessageDialog}
           setOpen={updateOpenMessageDialog}
         />
