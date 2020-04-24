@@ -632,7 +632,7 @@ const SellPage = ({ socket, isLoggedIn, classes }) => {
 
     if (response.status === 200) {
       // list storing spots that have been coagulated.
-      /*
+      
       let newList = [];
       let curr = null;
 
@@ -677,19 +677,19 @@ const SellPage = ({ socket, isLoggedIn, classes }) => {
         return idx !== sellInfo.idx;
       });
       updateSpotsOwned(tempSpotsOwned);
-      updateSpotsSold(spotsSold.concat(tempSpotSold));*/
+      updateSpotsSold(spotsSold.concat(tempSpotSold));
 
       updateMessageDialogField({
         dialogTitle: 'Success',
         message:
-          'Congrats, Your Request Has Been Granted! Mind Sharing Some Of That Wealth With Us? Please?'
+          'Congrats, Your Request Has Been Granted! Mind Sharing Some Of That Wealth With Us? Please?',
+        reload: false
       });
       updateOpenMessageDialog(true);
     } else {
       updateMessageDialogField({
         dialogTitle: 'Error',
-        message: respbody.message,
-        reload: true
+        message: respbody.message
       });
       updateOpenMessageDialog(true);
       /*
