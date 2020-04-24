@@ -675,15 +675,8 @@ const SellPage = ({ socket, isLoggedIn, classes }) => {
         }
         return idx !== sellInfo.idx;
       });
-
-      // Adding new stuff to the list.
-      const tempSO = tempSpotsOwned.concat(newList);
-
-      updateSpotsOwned(tempSO);
-
-      // spotsSold.push(tempSpotSold);
-      const tempSpotsSold = spotsSold.concat(tempSpotSold);
-      updateSpotsSold(tempSpotsSold);
+      updateSpotsOwned(tempSpotsOwned.concat(newList));
+      updateSpotsSold(spotsSold.concat(tempSpotSold));
 
       updateMessageDialogField({
         dialogTitle: 'Success',
