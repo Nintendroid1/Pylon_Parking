@@ -636,7 +636,7 @@ const SellPage = ({ socket, isLoggedIn, classes }) => {
 
     if (response.status === 200) {
       // list storing spots that have been coagulated.
-      
+      /*
       let newList = [];
       let curr = null;
 
@@ -681,7 +681,7 @@ const SellPage = ({ socket, isLoggedIn, classes }) => {
         return idx !== sellInfo.idx;
       });
       updateSpotsOwned(tempSpotsOwned);
-      updateSpotsSold(spotsSold.concat(tempSpotSold));
+      updateSpotsSold(spotsSold.concat(tempSpotSold));*/
 
       updateMessageDialogField({
         dialogTitle: 'Success',
@@ -692,7 +692,8 @@ const SellPage = ({ socket, isLoggedIn, classes }) => {
     } else {
       updateMessageDialogField({
         dialogTitle: 'Error',
-        message: respbody.message
+        message: respbody.message,
+        reload: true
       });
       updateOpenMessageDialog(true);
       /*
@@ -777,6 +778,7 @@ const SellPage = ({ socket, isLoggedIn, classes }) => {
         <MessageDialog
           message={messageDialogField.message}
           dialogTitle={messageDialogField.dialogTitle}
+          reload={messageDialogField.reload}
           open={openMessageDialog}
           setOpen={updateOpenMessageDialog}
         />
