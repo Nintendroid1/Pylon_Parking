@@ -689,7 +689,7 @@ const SellPage = ({ socket, isLoggedIn, classes }) => {
         }
         return idx !== sellInfo.idx;
       });
-      updateSpotsOwned(tempSpotsOwned.concat(newList));
+      //updateSpotsOwned(tempSpotsOwned.concat(newList));
       updateSpotsSold(spotsSold.concat(tempSpotSold));
 
       updateMessageDialogField({
