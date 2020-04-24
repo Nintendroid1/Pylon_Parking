@@ -264,7 +264,7 @@ router.get("/:pid/spots", requireLogin, function(req, res) {
               // console.log(final_res);
               final_res.push({
                   ...temp_res[0],
-                  end_time: (Number(temp_res[temp_res.length - 1].end_time) + 15 * 60) - 1,
+                  end_time: Number(temp_res[temp_res.length - 1].end_time) - 1,
                   price: totalCost
                 }
               );
