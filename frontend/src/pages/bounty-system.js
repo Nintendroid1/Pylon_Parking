@@ -90,7 +90,7 @@ const CaptureImage = props => {
 /*
   The content to be displayed in the confirmation message.
 */
-const popUpContent = info => {
+const PopUpContent = info => {
   const infoList = [
     { name: 'Zone ID', value: `${info.zone_id}` },
     { name: 'Spot ID', value: `${info.spot_id}` },
@@ -170,11 +170,6 @@ const ReportField = props => {
 
   // Handles processing the info from the image.
   const handleOnCameraClick = async imageURI => {
-    updateLoadingDialogField({
-      open: true,
-      message: 'Using Alien Technology To Analyze Image. Please Wait.'
-    });
-
     // Attempts to read the QR code in the picture, if it exists.
     const dataUri = imageURI;
     const png = PNG.sync.read(
@@ -184,10 +179,6 @@ const ReportField = props => {
 
     // Do error checking of code where only make api call if qr code is valid.
     if (code === null) {
-      updateLoadingDialogField({
-        open: false,
-        message: ''
-      });
       // error message.
       console.log('no qr code found');
       updateErrorMessage(
@@ -200,6 +191,10 @@ const ReportField = props => {
       // the data in the qr code will be of the form zone_id-spot_id.
       // const [zone_id, spot_id] = code.data.split('-');
       try {
+        updateLoadingDialogField({
+          open: true,
+          message: 'Using Alien Technology To Analyze Image. Please Wait.'
+        });
         // Request the backend to read the license plate in the image.
         const url = `${apiprefix}/bounty-system`;
         const response = await makeImageAPICall('POST', url, imageURI);
@@ -268,7 +263,7 @@ const ReportField = props => {
             Is the following information correct? If not, please retake photo.
           </DialogContentText>
           <DialogContentText>
-            <Table>{popUpContent(info)}</Table>
+            <Table>{<PopUpContent info={info} />}</Table>
           </DialogContentText>
         </DialogContent>
         <DialogActions>

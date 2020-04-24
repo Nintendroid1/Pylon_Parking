@@ -230,7 +230,7 @@ const SellingMessageContent = ({
           increaseMTimeBy1Min(sellInfo.end_time) === '00:00'
             ? militaryTimeDifference(sellInfo.start_time, '24:00')
             : militaryTimeDifference(sellInfo.start_time, sellInfo.end_time);
-        const totalCost = Number(Number(cost) * (timeDiff / 15)).toFixed(3);
+        const totalCost = Number(cost) * (timeDiff / 15);
         UpdateTotalCost(totalCost);
       }
     }
@@ -356,22 +356,6 @@ const SellingParkingSpotTableBody = props => {
       e => e.spot_id === spotInfo.spot_id && e.zone_id === spotInfo.zone_id
     );
 
-    // Set the start time to be the current time if the date is today, that start time otherwise.
-    let tempStartTime = parkingSpotsInfo[index].start_time;
-    const currSpot = parkingSpotsInfo[index];
-    const currDate = new Date();
-
-    if (
-      currSpot.date.getUTCFullYear() === currDate.getFullYear() &&
-      currSpot.date.getUTCMonth() === currDate.getMonth() &&
-      currSpot.date.getUTCDate() === currDate.getDate()
-    ) {
-      // Adding one minute to the current time so that it would always be a valid time.
-      tempStartTime = roundUpToNearest15(
-        convertEpochToMilitary(Date.now() / 1000 + 60)
-      );
-    }
-
     updateSellInfo({
       ...sellInfo,
       idx: index,
@@ -400,7 +384,15 @@ const SellingParkingSpotTableBody = props => {
     setOpenConfirm(true);
   };
 
-  const initSellInfo = (startTime, endTime) => () => {
+  const initSellInfo = (startTime, endTime, spotDate) => () => {
+    const currEpoch = Date.now() / 1000 + 4 * 60 * 60;
+    const startTimeEpoch = convertMilitaryToEpoch(spotDate, startTime);
+
+    if (currEpoch >= startTimeEpoch) {
+      // Adding one minute to the current time so that it would always be a valid time.
+      startTime = roundUpToNearest15(convertEpochToMilitary(currEpoch + 60));
+    }
+
     updateSellInfo({
       ...sellInfo,
       start_time: startTime,
@@ -422,7 +414,6 @@ const SellingParkingSpotTableBody = props => {
       />
       <TableBody>
         {parkingSpotsInfo.map(parkingSpot => {
-          console.log(parkingSpot);
           return (
             <>
               <TableRow>
@@ -433,7 +424,8 @@ const SellingParkingSpotTableBody = props => {
                     requireKey={false}
                     callOnOpen={initSellInfo(
                       parkingSpot.start_time,
-                      parkingSpot.end_time
+                      parkingSpot.end_time,
+                      parkingSpot.date
                     )}
                     messageContent={
                       <SellingMessageContent
