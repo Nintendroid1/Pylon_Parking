@@ -527,7 +527,6 @@ const SellPage = ({ socket, isLoggedIn, classes }) => {
   );
   const [spotsOwned, updateSpotsOwned] = useState([]);
   const [spotsSold, updateSpotsSold] = useState([]);
-  const [hasUpdate, updateHasUpdate] = useState(false);
 
   let getUserParkingSpots = async () => {
     let url = `${apiprefix}/users/${localStorage.olivia_pid}/spots`;
@@ -637,7 +636,7 @@ const SellPage = ({ socket, isLoggedIn, classes }) => {
 
     if (response.status === 200) {
       // list storing spots that have been coagulated.
-      /*
+      
       let newList = [];
       let curr = null;
 
@@ -681,9 +680,8 @@ const SellPage = ({ socket, isLoggedIn, classes }) => {
         }
         return idx !== sellInfo.idx;
       });
-      updateSpotsOwned(tempSpotsOwned.concat(newList));
-      updateSpotsSold(spotsSold.concat(tempSpotSold));*/
-      updateHasUpdate(true);
+      updateSpotsOwned(tempSpotsOwned);
+      updateSpotsSold(spotsSold.concat(tempSpotSold));
 
       updateMessageDialogField({
         dialogTitle: 'Success',
@@ -711,8 +709,7 @@ const SellPage = ({ socket, isLoggedIn, classes }) => {
   // Need another socket event for when parking spot is sold.
   useEffect(() => {
     getUserParkingSpots();
-    updateHasUpdate(false);
-  }, [hasUpdate]);
+  }, []);
 
   useEffect(() => {
     // data = {
