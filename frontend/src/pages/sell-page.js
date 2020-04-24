@@ -675,21 +675,11 @@ const SellPage = ({ socket, isLoggedIn, classes }) => {
       let tempSpotSold = null;
       let tempSpotsOwned = spotsOwned.filter((e, idx) => {
         if (idx === sellInfo.idx) {
-          tempSpotSold = {
-            start_time: e.start_time,
-            end_time: e.end_time,
-            price: e.price,
-            spot_id: e.spot_id,
-            zone_id: e.zone_id,
-            date: e.date,
-            dateString: new Date(
-              Number(e.start_time) * 1000
-            ).toLocaleDateString('en-US', { timeZone: 'UTC' })
-          };
+          tempSpotSold = e;
         }
         return idx !== sellInfo.idx;
       });
-      //updateSpotsOwned(tempSpotsOwned.concat(newList));
+      updateSpotsOwned(spotsOwned.concat(newList));
       updateSpotsSold(spotsSold.concat(tempSpotSold));
 
       updateMessageDialogField({
