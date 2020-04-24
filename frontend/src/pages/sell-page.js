@@ -229,7 +229,10 @@ const SellingMessageContent = ({
         const timeDiff =
           increaseMTimeBy1Min(sellInfo.end_time) === '00:00'
             ? militaryTimeDifference(sellInfo.start_time, '24:00')
-            : militaryTimeDifference(sellInfo.start_time, sellInfo.end_time);
+            : militaryTimeDifference(
+                sellInfo.start_time,
+                increaseMTimeBy1Min(sellInfo.end_time)
+              );
         const totalCost = Number(cost) * (timeDiff / 15);
         UpdateTotalCost(totalCost);
       }
@@ -631,41 +634,6 @@ const SellPage = ({ socket, isLoggedIn, classes }) => {
     });
 
     if (response.status === 200) {
-      // list storing spots that have been coagulated.
-      let newList = [];
-      let curr = null;
-
-      // Coagulating neighboring spots.
-      respbody.rows.forEach(e => {
-        if (curr === null) {
-          curr = {
-            zone_name: e.zone_name,
-            spot_id: e.spot_id,
-            zone_id: e.zone_id,
-            price: e.price,
-            time_code: e.time_code
-          };
-          curr.start_time = Number(curr.time_code);
-          curr.end_time = curr.start_time + 15 * 60; // epoch time in seconds, not ms
-        } else {
-          if (curr.end_time === Number(e.time_code)) {
-            curr.end_time += 15 * 60;
-          } else {
-            // Is the end time greater than the current time, if so, then it is still
-            // rented by the current user, otherwise, not so no need to list it.
-            if (curr.end_time > Date.now() / 1000) {
-              curr.dateString = new Date(
-                Number(curr.start_time) * 1000
-              ).toLocaleDateString('en-US', { timeZone: 'UTC' });
-              curr.date = new Date(Number(curr.start_time) * 1000);
-              curr.start_time = convertEpochToMilitary(curr.start_time);
-              curr.end_time = convertEpochToMilitary(curr.end_time);
-              newList.push(curr);
-            }
-            curr = null;
-          }
-        }
-      });
 
       // Remove old stuff from the list.
       let tempSpotSold = null;
@@ -675,8 +643,79 @@ const SellPage = ({ socket, isLoggedIn, classes }) => {
         }
         return idx !== sellInfo.idx;
       });
+
+      // Update the current sell info, which is to be moved to the other table.
+      const spotSold = {
+        start_time: sellInfo.start_time,
+        end_time: sellInfo.end_time,
+        price: sellInfo.price,
+        date: sellInfo.date,
+        spot_id: sellInfo.spot_id,
+        zone_id: sellInfo.zone_id,
+        zone_name: tempSpotSold.zone_name,
+        dateString: tempSpotSold.dateString
+      };
+
+      let frontSec = null;
+      let backSec = null;
+      let newList = [];
+      // Break the spot sold into parts if only a part of it was sold off.
+      // Check if the front section can be broken off.
+      const timeDiff =
+        increaseMTimeBy1Min(tempSpotSold.end_time) === '00:00'
+          ? militaryTimeDifference(tempSpotSold.start_time, '24:00')
+          : militaryTimeDifference(
+              tempSpotSold.start_time,
+              increaseMTimeBy1Min(tempSpotSold.end_time)
+            );
+      const spotSoldPricePer15 = tempSpotSold.price / (timeDiff / 15);
+      if (
+        compareMilitaryTime(tempSpotSold.start_time, sellInfo.start_time) !== 0
+      ) {
+        // Create the front section.
+        frontSec = {
+          start_time: tempSpotSold.start_time,
+          end_time: minusOneMinMT(sellInfo.start_time),
+          date: tempSpotSold.date,
+          dateString: tempSpotSold.dateString,
+          zone_name: tempSpotSold.zone_name,
+          zone_id: tempSpotSold.zone_id,
+          spot_id: tempSpotSold.spot_id,
+          price:
+            spotSoldPricePer15 *
+            (militaryTimeDifference(
+              tempSpotSold.start_time,
+              sellInfo.start_time
+            ) /
+              15)
+        };
+
+        newList.push(frontSec);
+      }
+
+      // Check if the back section can be broken off.
+      if (compareMilitaryTime(tempSpotSold.end_time, sellInfo.end_time) !== 0) {
+        backSec = {
+          start_time: increaseMTimeBy1Min(sellInfo.end_time),
+          end_time: tempSpotSold.end_time,
+          date: tempSpotSold.date,
+          dateString: tempSpotSold.dateString,
+          zone_name: tempSpotSold.zone_name,
+          zone_id: tempSpotSold.zone_id,
+          spot_id: tempSpotSold.spot_id,
+          price:
+            spotSoldPricePer15 *
+            (militaryTimeDifference(
+              increaseMTimeBy1Min(sellInfo.end_time),
+              increaseMTimeBy1Min(tempSpotSold.end_time)
+            ) /
+              15)
+        };
+        newList.push(backSec);
+      }
+
       updateSpotsOwned(tempSpotsOwned.concat(newList));
-      updateSpotsSold(spotsSold.concat(tempSpotSold));
+      updateSpotsSold(spotsSold.concat(spotSold));
 
       updateMessageDialogField({
         dialogTitle: 'Success',
