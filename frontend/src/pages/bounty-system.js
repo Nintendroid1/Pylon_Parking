@@ -24,7 +24,7 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import Paper from '@material-ui/core/Paper';
 import { LoadingDialog } from './forms/parking-spot-components';
-import Camera from 'react-html5-camera-photo';
+import Camera, { FACING_MODES } from 'react-html5-camera-photo';
 import { PNG } from 'pngjs';
 import 'react-html5-camera-photo/build/css/index.css';
 import jsQR from 'jsqr';
@@ -45,6 +45,31 @@ const styles = theme => ({
 const CaptureImage = props => {
   const { handleCameraClick } = props;
 
+  const [cameraInfo, updateCameraInfo] = useState({
+    facingMode: FACING_MODES.ENVIRONMENT,
+    isMirrorImage: false
+  });
+
+  const checkIfEnvEnabled = async () => {
+    navigator.mediaDevices
+      .getUserMedia({
+        video: {
+          facingMode: { exact: 'environment' }
+        }
+      })
+      .then(() => console.log('Environment mode!!'))
+      .catch(() =>
+        updateCameraInfo({
+          facingMode: FACING_MODES.USER,
+          isMirrorImage: true
+        })
+      );
+  };
+
+  useEffect(() => {
+    checkIfEnvEnabled();
+  }, []);
+
   const handleTakePhoto = dataUri => {
     handleCameraClick(dataUri);
   };
@@ -52,6 +77,8 @@ const CaptureImage = props => {
   return (
     <>
       <Camera
+        idealFacingMode={cameraInfo.facingMode}
+        isImageMirror={cameraInfo.isMirrorImage}
         onTakePhoto={dataUri => {
           handleTakePhoto(dataUri);
         }}
@@ -105,7 +132,6 @@ const ReportField = props => {
     updateSnackbarOptions,
     updateLoadingDialogField
   } = props;
-
   // Used to open the dialog for confirming info.
   const [open, setOpen] = useState(false);
 

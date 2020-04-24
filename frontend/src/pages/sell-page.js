@@ -660,7 +660,7 @@ const SellPage = ({ socket, isLoggedIn, classes }) => {
             if (curr.end_time > Date.now() / 1000) {
               curr.start_time = convertEpochToMilitary(curr.start_time);
               curr.end_time = convertEpochToMilitary(curr.end_time);
-              newList.append(curr);
+              newList.push(curr);
             }
             curr = null;
           }
