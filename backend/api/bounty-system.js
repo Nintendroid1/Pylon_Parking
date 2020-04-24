@@ -8,6 +8,9 @@ const { requireLogin } = require("./auth.js");
 var multer  = require('multer')
 var upload = multer({ dest: '../public/data/uploads/' })
 const db = require("../db");
+const conf = require("./config.js");
+
+router.use(express.json());
 
 const { Api, JsonRpc, RpcError } = require('eosjs');
 const { JsSignatureProvider } = require('eosjs/dist/eosjs-jssig');      // development only
@@ -39,7 +42,7 @@ router.post("/", upload.single('image'), function (req, res) {
 });
 
 router.post("/report", requireLogin, (req, res) => {
-
+  console.log(req.body);
   //This would be a query to VT's lisence plate registration, checks to see if registered liscence plate matches with pid of spot at that time
   //For now we just use the EXAMPLE value
   let current_time = Math.floor(Date.now()/1000);
