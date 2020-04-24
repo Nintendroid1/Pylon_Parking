@@ -183,6 +183,8 @@ router.post("/", requireLogin, async function(req, res){
                     */
     
                     const respObjLastIndex = responseObject.length - 1;
+                    // Formatting and getting info to send to the zones page so that
+                    // this spot gets removed from the page.
                     const spotPurchasedInfo = {
                       isAvail: false,
                       parkingInfo: {

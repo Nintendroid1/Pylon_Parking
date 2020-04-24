@@ -42,13 +42,17 @@ router.post('/', requireLogin, (req,res) => {
                             else {
                                 res.status(200).json({message: "Success", rows: response.rows});
 
+                                // Getting the socket.
                                 const socket = req.app.settings["socket-api"];
                                 
+                                // Calculating the total price for the sold sold.
                                 const indexOfLastRow = response.rows.length - 1;
                                 const totalPrice = response.rows.reduce((acc, curr) => {
                                     return acc + Number(curr.price);
                                 }, 0);
 
+                                // Formatting the information that is to be sent to the zones page
+                                // to be displayed for sale.
                                 const zonePageData = {
                                     isAvail: true,
                                     parkingInfo: {
@@ -60,6 +64,7 @@ router.post('/', requireLogin, (req,res) => {
                                     }
                                 }
 
+                                // Sending the info to the specified namespace and event name.
                                 socketAPI.broadcastZoneInfo(
                                     socket,
                                     req.body.spot.zone_id,

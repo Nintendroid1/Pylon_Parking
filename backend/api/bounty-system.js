@@ -16,11 +16,16 @@ const { Api, JsonRpc, RpcError } = require('eosjs');
 const { JsSignatureProvider } = require('eosjs/dist/eosjs-jssig');      // development only
 const { TextEncoder, TextDecoder } = require('util');                   // node only; native TextEncoder/Decoder
 
+/*
+  Endpoint for sending the image to be processed for a license plate.
+  Uses a 3rd party machine learning api to read the license plate.
+*/
 router.post("/", upload.single('image'), function (req, res) {
   if (req.body.image) {
+    // Formatting the image.
     let body = new FormData();
     body.append('upload', req.body.image);
-    // Or body.append('upload', base64Image);
+
     body.append('regions', 'us'); // Change to your country
     fetch("https://api.platerecognizer.com/v1/plate-reader/", {
         method: 'POST',
@@ -31,6 +36,7 @@ router.post("/", upload.single('image'), function (req, res) {
     }).then(res => res.json())
     .then(json => {
       console.log(json)
+      // Sending response back to the front end.
       res.status(200).json({ ...json });
     })
     .catch((err) => {
@@ -41,6 +47,9 @@ router.post("/", upload.single('image'), function (req, res) {
   }
 });
 
+/*
+  Endpoint for submitting a report.
+*/
 router.post("/report", requireLogin, (req, res) => {
   console.log(req.body);
   //This would be a query to VT's lisence plate registration, checks to see if registered liscence plate matches with pid of spot at that time
