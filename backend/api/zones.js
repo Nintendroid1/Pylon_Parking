@@ -22,51 +22,140 @@ router.get("/all", (req, res) => {
 });
 
 router.get("/:zone_id/spot/:spot_id", (req, res) => {
+  let spotRes = {};
   if (req.query.startTime && req.query.endTime) {
-    db.query(
-      "SELECT Z.zone_name, P.*\
-        FROM spot_range P\
+      db.query(
+        "SELECT Z.zone_name, P.*\
+        FROM parking_times P\
         INNER JOIN zones Z\
         ON P.zone_id = Z.zone_id\
-        WHERE P.user_pid = $1 \
-        AND P.spot_id = $1 \
+        WHERE P.spot_id = $1 \
         AND P.zone_id = $2 \
-        AND P.start_time >= $3 \
-        AND P.end_time <= $4 \
-        ORDER BY zone_id, spot_id, start_time",
+        AND P.time_code >= $3 \
+        ORDER BY P.zone_id, spot_id, time_code",
       [
         req.params.spot_id,
         req.params.zone_id,
         req.query.startTime,
         req.query.endTime
       ]
-    ).then((err, dbres) => {
-      // AND P.start_time >= (SELECT EXTRACT(epoch FROM date_trunc('day', NOW()))) AND P.end_time <= (SELECT EXTRACT(epoch FROM date_trunc('day', NOW() + INTERVAL '1 day')))\
-      // db.query(
-      //   "SELECT * FROM parking_times WHERE spot_ID = $1 AND zone_ID = $2 AND time_code >= $3 AND time_code <= $4 AND availability = true",
-      // (err, dbres) => {
-      if (err) {
-        console.log(err.stack);
-        res.status(500).json({ message: "Internal server error" });
-      } else {
-        // console.log(dbres);
-        res.status(200).json({ parkingInfo: dbres.rows });
-      }
-    });
-  } else {
-    db.query(
-      "SELECT * FROM parking_times WHERE spot_ID = $1 AND zone_ID = $2 AND availability = true",
-      [req.params.spot_id, req.params.zone_id],
-      (err, dbres) => {
-        if (err) {
-          console.log(err.stack);
-          res.status(500).json({ message: "Internal server error" });
+      ).then(dbres => {
+        // If there are spots for the user in the zone etc.
+        if (dbres.rows[0]) {
+          let info = dbres.rows;
+          let areOnSameDay = (date1, date2) => {
+            return (
+              date1.getDate() == date2.getDate() &&
+              date1.getMonth() == date2.getMonth() &&
+              date1.getFullYear() == date2.getFullYear()
+            );
+          };
+          spotRes.parkingInfo = [{
+            zone_name: dbres.rows[0].zone_name,
+            zone_id: dbres.rows[0].zone_id,
+            spot_id: dbres.rows[0].spot_id,
+            start_time: dbres.rows[0].time_code,
+            end_time: dbres.rows[0].time_code + 899,
+            user_pid: spotRes.pid,
+            availability: dbres.rows[0].availability.toString(),
+            price: parseFloat(dbres.rows[0].price)
+          }];
+          for(let i = 1; i < dbres.rows.length; i++) {
+            let cur = dbres.rows[i].time_code;
+            let prevEnd = spotRes.parkingInfo[spotRes.parkingInfo.length -1].end_time;
+            let prevStart = spotRes.parkingInfo[spotRes.parkingInfo.length -1].start_time;
+
+            if(cur == (prevEnd + 1) && areOnSameDay(new Date(Number(cur) * 1000), new Date(Number(prevStart) * 1000))
+                                  && dbres.rows[i].availability.toString() == spotRes.parkingInfo[spotRes.parkingInfo.length -1].availability
+                                  && dbres.rows[i].spot_id == spotRes.parkingInfo[spotRes.parkingInfo.length -1].spot_id
+                                  && dbres.rows[i].zone_id == spotRes.parkingInfo[spotRes.parkingInfo.length -1].zone_id) {
+              spotRes.parkingInfo[spotRes.parkingInfo.length -1].end_time += 900;
+              spotRes.parkingInfo[spotRes.parkingInfo.length -1].price += parseFloat(dbres.rows[i].price);
+            }
+            else {
+              spotRes.parkingInfo.push({
+                zone_name: dbres.rows[i].zone_name,
+                zone_id: dbres.rows[i].zone_id,
+                spot_id: dbres.rows[i].spot_id,
+                start_time: dbres.rows[i].time_code,
+                end_time: dbres.rows[i].time_code + 899,
+                user_pid: spotRes.pid,
+                availability: dbres.rows[i].availability.toString(),
+                price: parseFloat(dbres.rows[i].price)
+              })
+            }
+          }
+
         } else {
-          // console.log(dbres);
-          res.status(200).json({ parkingInfo: dbres.rows });
+          spotRes.parkingInfo = [];
         }
-      }
-    );
+        res.status(200).json({ ...spotRes });
+      });
+  } else {
+      db.query(
+        "SELECT Z.zone_name, P.*\
+        FROM parking_times P\
+        INNER JOIN zones Z\
+        ON P.zone_id = Z.zone_id\
+        WHERE spot_id = $1\
+        AND P.zone_id = $2 \
+        ORDER BY P.zone_id, spot_id, time_code",
+      [
+        req.params.spot_id,
+        req.params.zone_id
+      ]
+      ).then(dbres => {
+        // If there are spots for the user in the zone etc.
+        if (dbres.rows[0]) {
+          let info = dbres.rows;
+          let areOnSameDay = (date1, date2) => {
+            return (
+              date1.getDate() == date2.getDate() &&
+              date1.getMonth() == date2.getMonth() &&
+              date1.getFullYear() == date2.getFullYear()
+            );
+          };
+          spotRes.parkingInfo = [{
+            zone_name: dbres.rows[0].zone_name,
+            zone_id: dbres.rows[0].zone_id,
+            spot_id: dbres.rows[0].spot_id,
+            start_time: dbres.rows[0].time_code,
+            end_time: dbres.rows[0].time_code + 899,
+            user_pid: spotRes.pid,
+            availability: dbres.rows[0].availability.toString(),
+            price: parseFloat(dbres.rows[0].price)
+          }];
+          for(let i = 1; i < dbres.rows.length; i++) {
+            let cur = dbres.rows[i].time_code;
+            let prevEnd = spotRes.parkingInfo[spotRes.parkingInfo.length -1].end_time;
+            let prevStart = spotRes.parkingInfo[spotRes.parkingInfo.length -1].start_time;
+
+            if(cur == (prevEnd + 1) && areOnSameDay(new Date(Number(cur) * 1000), new Date(Number(prevStart) * 1000))
+                                  && dbres.rows[i].availability.toString() == spotRes.parkingInfo[spotRes.parkingInfo.length -1].availability
+                                  && dbres.rows[i].spot_id == spotRes.parkingInfo[spotRes.parkingInfo.length -1].spot_id
+                                  && dbres.rows[i].zone_id == spotRes.parkingInfo[spotRes.parkingInfo.length -1].zone_id) {
+              spotRes.parkingInfo[spotRes.parkingInfo.length -1].end_time += 900;
+              spotRes.parkingInfo[spotRes.parkingInfo.length -1].price += parseFloat(dbres.rows[i].price);
+            }
+            else {
+              spotRes.parkingInfo.push({
+                zone_name: dbres.rows[i].zone_name,
+                zone_id: dbres.rows[i].zone_id,
+                spot_id: dbres.rows[i].spot_id,
+                start_time: dbres.rows[i].time_code,
+                end_time: dbres.rows[i].time_code + 899,
+                user_pid: spotRes.pid,
+                availability: dbres.rows[i].availability.toString(),
+                price: parseFloat(dbres.rows[i].price)
+              })
+            }
+          }
+
+        } else {
+          spotRes.parkingInfo = [];
+        }
+        res.status(200).json({ ...spotRes });
+      });
   }
 });
 
