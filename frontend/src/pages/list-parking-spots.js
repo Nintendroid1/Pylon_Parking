@@ -218,6 +218,12 @@ function MakeTable({
       <Table stickyHeader>
         <TableHead>
           <TableRow>
+            <TableCell>
+              <span />
+            </TableCell>
+            <TableCell>
+              <span />
+            </TableCell>
             <TableCell
               colspan={6}
               align="center"

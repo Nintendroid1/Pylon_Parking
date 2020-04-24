@@ -10,6 +10,7 @@ import { Typography, TextField } from '@material-ui/core';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import RequireAuthentication from '../RequireAuthentication';
 import apiprefix from './apiprefix';
+import Grid from '@material-ui/core/Grid';
 import {
   TimePicker,
   LoadingDialog,
@@ -87,9 +88,13 @@ const SpotsSoldTableBody = props => {
                 <TableCell>{`${e.zone_id}-${e.spot_id}`}</TableCell>
                 <TableCell>{`${e.zone_name}`}</TableCell>
                 <TableCell>{`${e.dateString}`}</TableCell>
-                <TableCell>{`${e.start_time}`}</TableCell>
-                <TableCell>{`${e.end_time}`}</TableCell>
-                <TableCell>{`${e.price}`}</TableCell>
+                <TableCell>{`${convertMilitaryTimeToNormal(
+                  e.start_time
+                )}`}</TableCell>
+                <TableCell>{`${convertMilitaryTimeToNormal(
+                  e.end_time
+                )}`}</TableCell>
+                <TableCell>{`${Number(e.price).toFixed(3)}`}</TableCell>
               </TableRow>
             </>
           );
@@ -453,7 +458,7 @@ const SellingParkingSpotTableBody = props => {
                 <TableCell>
                   {convertMilitaryTimeToNormal(parkingSpot.end_time)}
                 </TableCell>
-                <TableCell>{parkingSpot.price}</TableCell>
+                <TableCell>{Number(parkingSpot.price).toFixed(3)}</TableCell>
               </TableRow>
             </>
           );
@@ -634,7 +639,6 @@ const SellPage = ({ socket, isLoggedIn, classes }) => {
     });
 
     if (response.status === 200) {
-
       // Remove old stuff from the list.
       let tempSpotSold = null;
       let tempSpotsOwned = spotsOwned.filter((e, idx) => {
@@ -730,14 +734,6 @@ const SellPage = ({ socket, isLoggedIn, classes }) => {
         message: respbody.message
       });
       updateOpenMessageDialog(true);
-      /*
-      updateOpenMessageDialog(true);
-      updateSnackbarOptions({
-        ...snackbarOptions,
-        message:
-          'Oh no, the robbers found out you lied to them. Quick, fix the error before they find your credit card info.',
-        severity: 'error'
-      });*/
     }
   };
 
@@ -792,13 +788,24 @@ const SellPage = ({ socket, isLoggedIn, classes }) => {
           <Typography>{message}</Typography>
         ) : (
           <>
-            <Typography>Spots Currently Owned</Typography>
-            <SellingParkingSpotTable
-              parkingSpotsInfo={spotsOwned}
-              handleSellRequest={handleSellRequest}
-            />
-            <Typography>Spots Currently Being Sold</Typography>
-            <SpotsSoldTable spots={spotsSold} />
+            <Grid
+              direction="column"
+              justify="space-between"
+              alignItems="center"
+              spacing={10}
+            >
+              <Grid item>
+                <Typography>Spots Currently Owned</Typography>
+                <SellingParkingSpotTable
+                  parkingSpotsInfo={spotsOwned}
+                  handleSellRequest={handleSellRequest}
+                />
+              </Grid>
+              <Grid item>
+                <Typography>Spots Currently Being Sold</Typography>
+                <SpotsSoldTable spots={spotsSold} />
+              </Grid>
+            </Grid>
           </>
         )}
       </div>
