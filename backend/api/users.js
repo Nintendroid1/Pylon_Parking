@@ -196,7 +196,7 @@ router.get("/", (req, res) => {
 
 });
 
-router.get("/:pid/spots", requireLogin, function(req, res) {
+router.get("/:pid/spots", /*requireLogin,*/ function(req, res) {
   // let req_token = getTokenFromBearer(req);
   // if (jwt.verifyJWT(req_token, req.params.pid)) {
   let sellInfo = {};
@@ -220,13 +220,15 @@ router.get("/:pid/spots", requireLogin, function(req, res) {
         INNER JOIN zones Z\
         ON P.zone_id = Z.zone_id\
         WHERE P.user_pid = $1 \
-        AND P.start_time >= (SELECT EXTRACT(epoch FROM date_trunc('day', NOW()))) \
-        ORDER BY zone_id, spot_id, start_time",
-        [req.params.pid]
+        AND P.time_code >= $2 \
+        ORDER BY zone_id, spot_id, time_code",
+        [req.params.pid, Math.floor(Date.now()/1000)]
       ).then(dbres => {
         // If there are spots for the user in the zone etc.
         if (dbres.rows[0]) {
           let info = dbres.rows;
+          console.log(info);
+          console.log(Math.floor(Date.now()/1000));
           let areOnSameDay = (date1, date2) => {
             return (
               date1.getDate() == date2.getDate() &&
@@ -234,8 +236,39 @@ router.get("/:pid/spots", requireLogin, function(req, res) {
               date1.getFullYear() == date2.getFullYear()
             );
           };
-          // Merge data and fill parkingSpotsInfo
-          let startDate = new Date(Number(dbres.rows[0].start_time) * 1000);
+          sellInfo.parkingSpotsInfo = [{
+            zone_name: dbres.rows[0].zone_name,
+            zone_id: dbres.rows[0].zone_id,
+            spot_id: dbres.rows[0].spot_id,
+            start_time: dbres.rows[0].time_code,
+            end_time: dbres.rows[0].time_code + 899,
+            user_pid: sellInfo.pid,
+            availability: dbres.rows[0].availability.toString(),
+            price: parseFloat(dbres.rows[0].price)
+          }];
+          for(let i = 1; i < dbres.rows.length; i++) {
+            let cur = dbres.rows[i].time_code;
+            let prevEnd = sellInfo.parkingSpotsInfo[sellInfo.parkingSpotsInfo.length -1].end_time;
+            let prevStart = sellInfo.parkingSpotsInfo[sellInfo.parkingSpotsInfo.length -1].start_time;
+
+            if(cur == (prevEnd + 1) && areOnSameDay(new Date(Number(cur) * 1000), new Date(Number(prevStart) * 1000))
+                                  && dbres.rows[i].availability.toString() == sellInfo.parkingSpotsInfo[sellInfo.parkingSpotsInfo.length -1].availability) {
+              sellInfo.parkingSpotsInfo[sellInfo.parkingSpotsInfo.length -1].end_time += 900;
+              sellInfo.parkingSpotsInfo[sellInfo.parkingSpotsInfo.length -1].price += parseFloat(dbres.rows[i].price);
+            }
+            else {
+              sellInfo.parkingSpotsInfo.push({
+                zone_name: dbres.rows[i].zone_name,
+                zone_id: dbres.rows[i].zone_id,
+                spot_id: dbres.rows[i].spot_id,
+                start_time: dbres.rows[i].time_code,
+                end_time: dbres.rows[i].time_code + 899,
+                user_pid: sellInfo.pid,
+                availability: dbres.rows[i].availability.toString(),
+                price: parseFloat(dbres.rows[i].price)
+              })
+            }
+          }
 
         } else {
           sellInfo.parkingSpotsInfo = [];
