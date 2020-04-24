@@ -14,6 +14,7 @@ export async function makeAPICall(method, url, body) {
     });
     return req;
   } catch (er) {
+    console.log(er);
     throw er;
   }
 }
