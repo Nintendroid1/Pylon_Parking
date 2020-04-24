@@ -92,7 +92,9 @@ const headerCells = [
  *
  * @param {list} infoList
  */
-const popUpContent = infoList => {
+const PopUpContent = props => {
+  const { infoList } = props;
+
   return (
     <>
       <Table>
@@ -161,7 +163,7 @@ function TableData({ classes, ...props }) {
             <ConfirmationDialogFieldButton
               buttonMessage={'Buy'}
               messageTitle={'Confirmation'}
-              messageContent={popUpContent(infoList)}
+              messageContent={<PopUpContent infoList={infoList} />}
               handleOnConfirm={handleOnConfirm(requestParams)}
               buttonColor="primary"
             />

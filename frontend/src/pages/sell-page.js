@@ -112,14 +112,14 @@ const SpotsSoldTable = props => {
   );
 };
 
-const SellingMessageContent = (
+const SellingMessageContent = ({
   parkingSpotStartTime,
   parkingSpotEndTime,
   sellInfo,
   updateSellInfo,
   validTime,
   updateValidTime
-) => {
+}) => {
   const today = new Date();
   let isToday = true;
 
@@ -298,7 +298,9 @@ const SellingMessageContent = (
   );
 };
 
-const popUpContent = sellInfoList => {
+const PopUpContent = props => {
+  const { sellInfoList } = props;
+
   return (
     <>
       <Table>
@@ -414,7 +416,7 @@ const SellingParkingSpotTableBody = props => {
         buttonMessage="Confirm"
         messageTitle={`Sell Parking Spot ${sellInfo.zone_id}-${sellInfo.spot_id}`}
         requireKey={true}
-        messageContent={popUpContent(sellInfoList)}
+        messageContent={<PopUpContent sellInfoList={sellInfoList} />}
         handleOnConfirm={handleOnConfirm}
         buttonColor="secondary"
       />
@@ -433,14 +435,16 @@ const SellingParkingSpotTableBody = props => {
                       parkingSpot.start_time,
                       parkingSpot.end_time
                     )}
-                    messageContent={SellingMessageContent(
-                      parkingSpot.start_time,
-                      parkingSpot.end_time,
-                      sellInfo,
-                      updateSellInfo,
-                      validTime,
-                      updateValidTime
-                    )}
+                    messageContent={
+                      <SellingMessageContent
+                        parkingSpotStartTime={parkingSpot.start_time}
+                        parkingSpotEndTime={parkingSpot.end_time}
+                        sellInfo={sellInfo}
+                        updateSellInfo={updateSellInfo}
+                        validTime={validTime}
+                        updateValidTime={updateValidTime}
+                      />
+                    }
                     handleOnConfirm={handleSellInfo(parkingSpot)}
                     buttonColor="secondary"
                   />
