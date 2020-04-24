@@ -547,10 +547,13 @@ const SellPage = ({ socket, isLoggedIn, classes }) => {
               price: price per 15,
               start_time: epoch,
               end_time: epoch
+              availability: sold or not
             }
           ]
         }
       */
+      let spotsForSale = [];
+      let spotsNotSold = [];
       respbody.parkingSpotsInfo.forEach(e => {
         e.uniqueId = `${e.zone_id}-${e.spot_id}`;
         e.date = new Date(Number(e.start_time) * 1000);
@@ -559,9 +562,16 @@ const SellPage = ({ socket, isLoggedIn, classes }) => {
         ).toLocaleDateString('en-US', { timeZone: 'UTC' });
         e.start_time = convertEpochToMilitary(e.start_time);
         e.end_time = convertEpochToMilitary(e.end_time);
+
+        if (e.availability === 'true') {
+          spotsForSale.push(e);
+        } else {
+          spotsNotSold.push(e);
+        }
       });
 
-      updateSpotsOwned(respbody.parkingSpotsInfo);
+      updateSpotsOwned(spotsNotSold);
+      updateSpotsSold(spotsForSale);
       updateMessage(null);
     } else {
       // Error message for when an error occurs.
