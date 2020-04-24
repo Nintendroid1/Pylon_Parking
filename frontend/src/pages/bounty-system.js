@@ -347,7 +347,7 @@ const BountySystem = ({ classes, userSocket }) => {
       setOpenMessageDialog(true);*/
       updateSnackbarOptions({
         ...snackbarOptions,
-        message: 'We received your report. Thank you for your help.',
+        message: response.message,
         severity: 'success'
       });
       setOpenSnackbar(true);
