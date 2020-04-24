@@ -669,7 +669,7 @@ const SellPage = ({ socket, isLoggedIn, classes }) => {
 
       // Remove old stuff from the list.
       let tempSpotSold = null;
-      const tempSpotsOwned = spotsOwned.filter((e, idx) => {
+      let tempSpotsOwned = spotsOwned.filter((e, idx) => {
         if (idx === sellInfo.idx) {
           tempSpotSold = e;
         }
@@ -677,9 +677,9 @@ const SellPage = ({ socket, isLoggedIn, classes }) => {
       });
 
       // Adding new stuff to the list.
-      tempSpotsOwned.concat(newList);
+      const tempSO = tempSpotsOwned.concat(newList);
 
-      updateSpotsOwned(tempSpotsOwned);
+      updateSpotsOwned(tempSO);
 
       // spotsSold.push(tempSpotSold);
       const tempSpotsSold = spotsSold.concat(tempSpotSold);

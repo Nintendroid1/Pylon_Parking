@@ -795,16 +795,25 @@ const Zone = ({
 
     // Socket for handling changes to parking spots for this zone.
     socket.on(`zone-${zoneId}`, data => {
+
+      const deepCopyOfCurrentList = parkingSpotsInfo.map(e => {
+        return {
+          start_time: e.start_time,
+          end_time: e.end_time,
+          price: e.price,
+          spot_id: e.spot_id
+        }
+      });
       if (data.isAvail) {
         handleParkingSpotAvailable(
-          parkingSpotsInfo,
+          deepCopyOfCurrentList,
           updateParkingSpotsInfo,
           data.parkingInfo,
           currentTimeFilter
         );
       } else {
         handleParkingSpotUnavailable(
-          parkingSpotsInfo,
+          deepCopyOfCurrentList,
           updateParkingSpotsInfo,
           data.parkingInfo,
           currentTimeFilter
