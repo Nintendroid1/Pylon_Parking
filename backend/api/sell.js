@@ -53,7 +53,7 @@ router.post('/', requireLogin, (req,res) => {
                                     isAvail: true,
                                     parkingInfo: {
                                         start_time: Number(response.rows[0].time_code),
-                                        end_time: Number(response.rows[indexOfLastRow].time) + (15 * 60 * 1000),
+                                        end_time: Number(response.rows[indexOfLastRow].time) + (15 * 60 * 1000) - 1,
                                         zone_id: Number(response.rows[0].zone_id),
                                         spot_id: Number(response.rows[0].spot_id),
                                         price: totalPrice
