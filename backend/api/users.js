@@ -196,7 +196,7 @@ router.get("/", (req, res) => {
 
 });
 
-router.get("/:pid/spots", /*requireLogin,*/ function(req, res) {
+router.get("/:pid/spots", requireLogin, function(req, res) {
   // let req_token = getTokenFromBearer(req);
   // if (jwt.verifyJWT(req_token, req.params.pid)) {
   let sellInfo = {};
@@ -214,6 +214,7 @@ router.get("/:pid/spots", /*requireLogin,*/ function(req, res) {
       }
     })
     .then(() => {
+      console.log(Math.floor(Date.now()/1000));
       db.query(
         "SELECT Z.zone_name, P.*\
         FROM parking_times P\
@@ -227,8 +228,6 @@ router.get("/:pid/spots", /*requireLogin,*/ function(req, res) {
         // If there are spots for the user in the zone etc.
         if (dbres.rows[0]) {
           let info = dbres.rows;
-          console.log(info);
-          console.log(Math.floor(Date.now()/1000));
           let areOnSameDay = (date1, date2) => {
             return (
               date1.getDate() == date2.getDate() &&
@@ -252,7 +251,9 @@ router.get("/:pid/spots", /*requireLogin,*/ function(req, res) {
             let prevStart = sellInfo.parkingSpotsInfo[sellInfo.parkingSpotsInfo.length -1].start_time;
 
             if(cur == (prevEnd + 1) && areOnSameDay(new Date(Number(cur) * 1000), new Date(Number(prevStart) * 1000))
-                                  && dbres.rows[i].availability.toString() == sellInfo.parkingSpotsInfo[sellInfo.parkingSpotsInfo.length -1].availability) {
+                                  && dbres.rows[i].availability.toString() == sellInfo.parkingSpotsInfo[sellInfo.parkingSpotsInfo.length -1].availability
+                                  && dbres.rows[i].spot_id == sellInfo.parkingSpotsInfo[sellInfo.parkingSpotsInfo.length -1].spot_id
+                                  && dbres.rows[i].zone_id == sellInfo.parkingSpotsInfo[sellInfo.parkingSpotsInfo.length -1].zone_id) {
               sellInfo.parkingSpotsInfo[sellInfo.parkingSpotsInfo.length -1].end_time += 900;
               sellInfo.parkingSpotsInfo[sellInfo.parkingSpotsInfo.length -1].price += parseFloat(dbres.rows[i].price);
             }
