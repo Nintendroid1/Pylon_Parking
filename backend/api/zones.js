@@ -3,6 +3,9 @@ const router = express.Router();
 const db = require("../db");
 const socketAPI = require("../realtime/socket-broadcaster");
 
+/*
+ * Return all of the zones with their names from the database
+ */
 router.get("/all", (req, res) => {
   db.query("SELECT zone_id, zone_name FROM zones", (err, dbres) => {
     if (err) {
@@ -21,6 +24,10 @@ router.get("/all", (req, res) => {
   });
 });
 
+/*
+ * Return all of the continuous times a spot is available
+ * based on availability and time
+ */
 router.get("/:zone_id/spot/:spot_id", (req, res) => {
   let spotRes = {};
   if (req.query.startTime && req.query.endTime) {
@@ -159,6 +166,10 @@ router.get("/:zone_id/spot/:spot_id", (req, res) => {
   }
 });
 
+
+/*
+ * Return contiguous spot times for a given zone
+ */
 router.get("/:zone_id", (req, res) => {
   if (req.query.startTime && req.query.endTime) {
     db.query(
