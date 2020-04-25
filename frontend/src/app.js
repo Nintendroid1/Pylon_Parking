@@ -1,3 +1,9 @@
+// ========================================================
+// The main window of the web app. This renders everything
+// together on the screen and connects all the components
+// together to create a coherent user interface.
+// ========================================================
+
 import React, { useState } from 'react';
 import TabChooser from './ui/TabChooser';
 import WelcomeTab from './pages/welcome';

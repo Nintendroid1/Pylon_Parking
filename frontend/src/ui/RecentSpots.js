@@ -1,3 +1,8 @@
+// ==++==
+// Adapted from the Dashboard template:
+//    https://github.com/mui-org/material-ui/tree/master/docs/src/pages/getting-started/templates/dashboard
+// ==--==
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { withStyles, withTheme } from '@material-ui/core/styles';
@@ -21,16 +26,16 @@ const styles = theme => ({
     '&:hover': {
       textDecoration: 'underline'
     }
-  },
+  }
 });
 
-const RecentSpots = ({classes}) => {
+const RecentSpots = ({ classes }) => {
   const url = `${apiprefix}/history`;
   return (
     <React.Fragment>
       <Title>Recent Listings</Title>
       <Typography component="p" variant="h4">
-        $3,024.00
+        Spot 2-1 Derring
       </Typography>
       <Typography color="textSecondary" className={classes.depositContext}>
         on 23 April, 2020

@@ -19,9 +19,6 @@ import TableRow from '@material-ui/core/TableRow';
 import TableContainer from '@material-ui/core/TableContainer';
 import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
-import Title from '../ui/Title';
-import { sizing } from '@material-ui/system';
-// import './MainMap.css';
 
 const styles = theme => ({
   tabLink: {
@@ -104,7 +101,7 @@ const MainMap = ({ classes, userSocket, ...props }) => {
       setOpenSnackbar(true);
     });
   });
-  
+
   return (
     <>
       <CustomSnackbar
@@ -144,7 +141,14 @@ const MainMap = ({ classes, userSocket, ...props }) => {
             classes={classes.container}
             component={Paper}
           >
-            <Title align="center">Parking Zones</Title>
+            <Typography
+              component="h2"
+              variant="h6"
+              color="primary"
+              gutterBottom
+            >
+              Parking Zones
+            </Typography>
             <Table size="small" width="50%">
               <TableBody>
                 <TableHead>
