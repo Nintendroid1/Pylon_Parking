@@ -7,7 +7,6 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { withStyles, withTheme } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
-import Title from './Title';
 import apiprefix from '../pages/apiprefix.js';
 import history from '../history';
 
@@ -33,7 +32,9 @@ const RecentSpots = ({ classes }) => {
   const url = `${apiprefix}/history`;
   return (
     <React.Fragment>
-      <Title>Recent Listings</Title>
+      <Typography component="h2" variant="h6" color="primary" gutterBottom>
+        Recent Listings
+      </Typography>
       <Typography component="p" variant="h4">
         Spot 2-1 Derring
       </Typography>
