@@ -9,6 +9,7 @@ EosApi = require('eosjs-api') // Or EosApi = require('./src')
 
 eos = EosApi() // // 127.0.0.1:8888
 
+//Default history, look at all the modavil transactions that admin was a part of on the chain
 router.get('/', function(req, res) {
   let user_pid = "admin";
   console.log(user_pid);
@@ -34,10 +35,9 @@ router.get('/', function(req, res) {
         console.log(err);
         res.status(500).json({message: "Internal Server Error"});
     });
-    //res.status(200).json({"temp":[{"balance":"100.0000 VTP"}]});
-    // res.status(200).json({data: [{user: "park.vt", quantity: "10.0000 VTP",spot_id: 123, zone_id: 456, time_code: 1586401381, buyer: "alice", seller: "bob"}]});
 });
 
+//History for a specific user, find all modavail transaction the user was involved in on the chain
 router.get('/:pid', function(req, res) {
     let user_pid = req.params.pid.toLowerCase();
     console.log(user_pid);
@@ -63,8 +63,6 @@ router.get('/:pid', function(req, res) {
         console.log(err);
         res.status(500).json({message: "Internal Server Error"});
     });
-    //res.status(200).json({"temp":[{"balance":"100.0000 VTP"}]});
-    // res.status(200).json({data: [{user: "park.vt", quantity: "10.0000 VTP",spot_id: 123, zone_id: 456, time_code: 1586401381, buyer: "alice", seller: "bob"}]});
 });
 
 module.exports = router;
