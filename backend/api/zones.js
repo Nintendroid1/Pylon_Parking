@@ -23,7 +23,7 @@ router.get("/all", (req, res) => {
 
 router.get("/:zone_id/spot/:spot_id", (req, res) => {
   let spotRes = {};
-  if (req.query.startTime && req.query.endTime) {
+  if (req.query.date) {
       db.query(
         "SELECT Z.zone_name, P.*\
         FROM parking_times P\
@@ -36,8 +36,7 @@ router.get("/:zone_id/spot/:spot_id", (req, res) => {
       [
         req.params.spot_id,
         req.params.zone_id,
-        req.query.startTime,
-        req.query.endTime
+        req.query.date
       ]
       ).then(dbres => {
         // If there are spots for the user in the zone etc.
