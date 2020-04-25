@@ -8,16 +8,24 @@ const { requireLogin } = require("./auth.js");
 var multer  = require('multer')
 var upload = multer({ dest: '../public/data/uploads/' })
 const db = require("../db");
+const conf = require("./config.js");
+
+router.use(express.json());
 
 const { Api, JsonRpc, RpcError } = require('eosjs');
 const { JsSignatureProvider } = require('eosjs/dist/eosjs-jssig');      // development only
 const { TextEncoder, TextDecoder } = require('util');                   // node only; native TextEncoder/Decoder
 
+/*
+  Endpoint for sending the image to be processed for a license plate.
+  Uses a 3rd party machine learning api to read the license plate.
+*/
 router.post("/", upload.single('image'), function (req, res) {
   if (req.body.image) {
+    // Formatting the image.
     let body = new FormData();
     body.append('upload', req.body.image);
-    // Or body.append('upload', base64Image);
+
     body.append('regions', 'us'); // Change to your country
     fetch("https://api.platerecognizer.com/v1/plate-reader/", {
         method: 'POST',
@@ -28,6 +36,7 @@ router.post("/", upload.single('image'), function (req, res) {
     }).then(res => res.json())
     .then(json => {
       console.log(json)
+      // Sending response back to the front end.
       res.status(200).json({ ...json });
     })
     .catch((err) => {
@@ -38,8 +47,11 @@ router.post("/", upload.single('image'), function (req, res) {
   }
 });
 
+/*
+  Endpoint for submitting a report.
+*/
 router.post("/report", requireLogin, (req, res) => {
-
+  console.log(req.body);
   //This would be a query to VT's lisence plate registration, checks to see if registered liscence plate matches with pid of spot at that time
   //For now we just use the EXAMPLE value
   let current_time = Math.floor(Date.now()/1000);
@@ -77,7 +89,7 @@ router.post("/report", requireLogin, (req, res) => {
         })
         .then(blockres => {
           console.log(blockres);
-          res.status(200).json({message: "Bounty accepted, added 300 VTP to your account"});
+          res.status(200).json({message: "Congratulations! Bounty Accepted, Added 300 VTP To Your Account. Keep Up The Good Work! P.S. Mind Sharing The Wealth?"});
         })
         .catch(err => {
           console.log(err);

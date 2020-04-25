@@ -8,6 +8,7 @@ const { JsSignatureProvider } = require('eosjs/dist/eosjs-jssig');      // devel
 const fetch = require('node-fetch');                                    // node only; not needed in browsers
 const { TextEncoder, TextDecoder } = require('util');                   // node only; native TextEncoder/Decoder
 
+//Initiate all of the spots from the database onto the blockchain
 router.get('/parkingspots', (req,res) => {
     let keys = [conf.parkVTKey]
     const signatureProvider = new JsSignatureProvider(keys);
@@ -90,6 +91,8 @@ router.get('/parkingspots', (req,res) => {
     // const api = new Api({ rpc, signatureProvider, textDecoder: new TextDecoder(), textEncoder: new TextEncoder() });
 })
 
+
+//Remove all of the parking spots in the database from the blockchain
 router.get('/parkingspots/erase', (req,res) => {
     let keys = [conf.parkVTKey]
     const signatureProvider = new JsSignatureProvider(keys);
