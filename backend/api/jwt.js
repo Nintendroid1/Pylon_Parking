@@ -5,6 +5,7 @@ var conf = require("./config.js");
 const secret = conf.jwtSecret;
 const expiration_offset = conf.expire;
 
+//Create a jwt 
 function createJWT(userName, admin_status) {
   return jwt.sign(
     {
@@ -16,6 +17,7 @@ function createJWT(userName, admin_status) {
   );
 }
 
+//Check the token is valid
 function verifyJWT(token, userName) {
   try {
     let decoded = jwt.verify(token, secret);
