@@ -12,8 +12,13 @@ const { JsSignatureProvider } = require('eosjs/dist/eosjs-jssig');      // devel
 const fetch = require('node-fetch');                                    // node only; not needed in browsers
 const { TextEncoder, TextDecoder } = require('util');                   // node only; native TextEncoder/Decoder
 
+
+/*
+ * Send a purchase request, able to be accomplished instantly 
+ * in both the database and the chain
+ */
 router.post("/", requireLogin, async function(req, res){
-    //Talk to the blockchain here
+    //Talk to the blockchain here, Check to see the key is valid and yours
     const rpc = new JsonRpc('http://127.0.0.1:8888', { fetch });
     let stopBool = false;
     try {
@@ -35,6 +40,7 @@ router.post("/", requireLogin, async function(req, res){
       return;
     }
 
+    //Get all of the requested spots, calculate price and make sure that they are available for purchase
     console.log(req.body.spot);
     db.query(
       "SELECT availability, price, user_PID, time_code, seller_key FROM parking_times WHERE spot_ID = $1 AND zone_ID = $2 AND time_code BETWEEN $3 AND $4 ORDER BY time_code",
@@ -79,12 +85,14 @@ router.post("/", requireLogin, async function(req, res){
         }
         if (isValidReq) {
           //talk to the blockchain here
+          //Makes sure that you have enough currency for the purchase
           rpc.get_currency_balance('eosio.token', req.body.pid.toLowerCase(), 'VTP')
           .then(async function(balance) {
             if(balance < totalPrice) {
               res.status(400).json({message: "Insufficient funds"});
             }
             else {
+              //Push the modavail action to the change, to change ownership from the seller to the buyer
               let keys = [conf.parkVTKey, req.body.key];
               let actionArr = [];
               for(i in dbres.rows) {
@@ -132,6 +140,7 @@ router.post("/", requireLogin, async function(req, res){
                 return;
               }
               console.log("Success on b-chain");
+              //Update the database to reflect the change on the blockchain
               db.query(
                 "UPDATE parking_times SET user_PID = $1, availability = false, seller_key = NULL WHERE spot_ID = $2 AND zone_ID = $3 AND time_code BETWEEN $4 AND $5 RETURNING *",
                 [
