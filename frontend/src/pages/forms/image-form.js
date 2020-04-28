@@ -1,3 +1,8 @@
+/**
+ * Exports a default component that allows the user to upload their
+ * personal profile picture.
+ */
+
 import React, { useState, useEffect } from 'react';
 import { makeAPICall, makeImageAPICall } from '../../api';
 import PropTypes from 'prop-types';
@@ -14,6 +19,9 @@ import withStyles from '@material-ui/core/styles/withStyles';
 import { CircularProgress } from '@material-ui/core';
 import apiprefix from '../apiprefix';
 
+/*
+  Styling the profile picture.
+*/
 const styles = theme => ({
   main: {
     width: 'auto',
@@ -55,6 +63,9 @@ const styles = theme => ({
   }
 });
 
+/*
+  The component that is exported.
+*/
 function ImageForm({ onSubmit, message, classes, isLoading, setLoading }) {
   const [tempImage, setTempImage] = useState({
     path: '',
@@ -63,7 +74,9 @@ function ImageForm({ onSubmit, message, classes, isLoading, setLoading }) {
   });
   const [previewImage, setPreviewImage] = useState(null);
 
-  // a universal onChange handler that propagates user input to component state
+  /*
+    Handles the user uploading an image.
+  */
   const handleChange = event => {
     if (event.target.files && event.target.files[0]) {
       let { name, value, files } = event.target;
@@ -90,27 +103,36 @@ function ImageForm({ onSubmit, message, classes, isLoading, setLoading }) {
       console.log(files[0]);
     }
   };
+
+  /*
+    Handles the user submitting the uploaded image as their
+    profile picture.
+  */
   const handleSubmit = event => {
     event.preventDefault();
     onSubmit(tempImage);
   };
+
+  /*
+    Loads the image and displays it.
+  */
   let loadUserImage = async () => {
-    const url = `${apiprefix}/users/${localStorage.olivia_pid}/avatar`;
-    setLoading(true);
-    let response = await makeAPICall('GET', url);
-    if (response.status === 200) {
-      let rbody = await response.json();
-      setLoading(false);
-      setPreviewImage(
-        <img
-          src={`data:image/png;base64,${rbody.image}`}
-          className={classes.circularPreview}
-          alt="user-profile"
-        />
-      );
-    } else {
-      setLoading(false);
-    }
+    // const url = `${apiprefix}/users/${localStorage.olivia_pid}/avatar`;
+    // setLoading(true);
+    // let response = await makeAPICall('GET', url);
+    // if (response.status === 200) {
+    //   let rbody = await response.json();
+    //   setLoading(false);
+    setPreviewImage(
+      <img
+        src={`${localStorage.avatar}`}
+        className={classes.circularPreview}
+        alt="user-profile"
+      />
+    );
+    // } else {
+    //   setLoading(false);
+    // }
   };
   //const { classes } = props;
   useEffect(() => {

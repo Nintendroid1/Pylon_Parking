@@ -1,4 +1,4 @@
 {
-    "userName": "testPID",
-    "pass": "testPass"
+    "pid": "admin",
+    "password": "adminpass"
 }

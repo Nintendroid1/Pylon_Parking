@@ -1,41 +1,286 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const jwt = require('./jwt');
-const db = require('../db');
-
+const jwt = require("./jwt");
+const db = require("../db");
+const conf = require("./config.js");
+const socketAPI = require("../realtime/socket-broadcaster");
+const { requireLogin } = require("./auth.js");
 router.use(express.json());
 
-router.post('/', (req, res) => {
+const { Api, JsonRpc, RpcError } = require('eosjs');
+const { JsSignatureProvider } = require('eosjs/dist/eosjs-jssig');      // development only
+const fetch = require('node-fetch');                                    // node only; not needed in browsers
+const { TextEncoder, TextDecoder } = require('util');                   // node only; native TextEncoder/Decoder
 
-    if(jwt.verifyJWT(req.body.token, req.body.userName)) {
-        //Talk to the blockchain here
 
-        db.query('SELECT availability FROM parking_times WHERE spot_ID = $1 AND zone_ID = $2 AND time_code = $3', [req.body.spot.spot_id, req.body.spot.zone_id, req.body.spot.time_code])
-        .then(dbres => {
-            if(dbres.rows[0]) {
-                if(dbres.rows[0].availability) {
-                    db.query('UPDATE parking_times SET user_PID = $1, availability = false WHERE spot_ID = $2 AND zone_ID = $3 AND time_code = $4 RETURNING *', [req.body.userName, req.body.spot.spot_id, req.body.spot.zone_id, req.body.spot.time_code], (err,result) => {
-                        if (err) {
-                            console.log(err.stack);
-                            res.status(500).json({message: "Internal error"});
-                        }
-                        else {
-                            res.status(200).json({message: "Spot aquired", spot: result.rows});
-                        }
-                    });
-                }
-                else {
-                    res.status(403).json({message: "Spot not available"});
-                }
+/*
+ * Send a purchase request, able to be accomplished instantly 
+ * in both the database and the chain
+ */
+router.post("/", requireLogin, async function(req, res){
+    //Talk to the blockchain here, Check to see the key is valid and yours
+    const rpc = new JsonRpc('http://127.0.0.1:8888', { fetch });
+    let stopBool = false;
+    try {
+      let {PrivateKey, PublicKey, Signature, Aes, key_utils, config} = require('eosjs-ecc');
+      let pubkey = PrivateKey.fromString(req.body.key).toPublic().toString();
+      await rpc.history_get_key_accounts(pubkey).then(result => {
+        if(!result.account_names.includes(req.body.pid.toLowerCase())) {
+          res.status(400).json({message: "Bad Key"});
+          stopBool = true;
+        }
+      });
+    } catch (err) {
+      console.log(err);
+      res.status(400).json({message: "Bad Key"});
+      stopBool = true;
+    }
+
+    if(stopBool) {
+      return;
+    }
+
+    //Get all of the requested spots, calculate price and make sure that they are available for purchase
+    console.log(req.body.spot);
+    db.query(
+      "SELECT availability, price, user_PID, time_code, seller_key FROM parking_times WHERE spot_ID = $1 AND zone_ID = $2 AND time_code BETWEEN $3 AND $4 ORDER BY time_code",
+      [
+        req.body.spot.spot_id,
+        req.body.spot.zone_id,
+        req.body.spot.start_time,
+        req.body.spot.end_time - 1
+      ]
+    ).then(dbres => {
+      if (dbres.rows[0]) {
+        let isValidReq = true;
+        let totalPrice = 0.0;
+        let responseObject = [{
+          pid: dbres.rows[0].user_pid,
+          start_time: dbres.rows[0].time_code,
+          end_time: dbres.rows[0].time_code,
+          zone_id: req.body.spot.zone_id,
+          spot_id: req.body.spot.spot_id,
+          price: 0.0
+        }];
+        for (i in dbres.rows) {
+          if (!dbres.rows[i].availability) {
+            isValidReq = false;
+          }
+          //Building response object
+          if (dbres.rows[i].user_pid != responseObject[responseObject.length -1].pid) {
+            responseObject.push({
+              pid: dbres.rows[i].user_pid,
+              start_time: dbres.rows[i].time_code,
+              end_time: dbres.rows[i].time_code + 900,
+              zone_id: req.body.spot.zone_id,
+              spot_id: req.body.spot.spot_id,
+              price: parseFloat(dbres.rows[i].price)
+            });
+          }
+          else {
+            responseObject[responseObject.length -1].end_time += 900;
+            responseObject[responseObject.length -1].price += parseFloat(dbres.rows[i].price);
+          }
+          totalPrice += parseFloat(dbres.rows[i].price);
+        }
+        if (isValidReq) {
+          //talk to the blockchain here
+          //Makes sure that you have enough currency for the purchase
+          rpc.get_currency_balance('eosio.token', req.body.pid.toLowerCase(), 'VTP')
+          .then(async function(balance) {
+            if(balance < totalPrice) {
+              res.status(400).json({message: "Insufficient funds"});
             }
             else {
-                res.status(403).json({message: "Bad spot code"});
+              //Push the modavail action to the change, to change ownership from the seller to the buyer
+              let keys = [conf.parkVTKey, req.body.key];
+              let actionArr = [];
+              for(i in dbres.rows) {
+                actionArr.push({
+                  account: 'park.vt',
+                  name: 'modavail',
+                  authorization: [{
+                    actor: dbres.rows[i].user_pid.toLowerCase(),
+                    permission: 'active'
+                  },{
+                    actor: req.body.pid.toLowerCase(),
+                    permission: 'active'
+                  },
+                  {
+                    actor: 'park.vt',
+                    permission: 'active'
+                  }],
+                  data: {
+                    buyer: req.body.pid.toLowerCase(),
+                    quantity: parseFloat(dbres.rows[i].price).toFixed(4) + " VTP",
+                    spot_id: req.body.spot.spot_id,
+                    zone_id: req.body.spot.zone_id,
+                    time_code: dbres.rows[i].time_code
+                  }
+                });
+                if(!keys.includes(dbres.rows[i].seller_key)) {
+                  keys.push(dbres.rows[i].seller_key);
+                }
+              }
+              
+              const signatureProvider = new JsSignatureProvider(keys);
+              const api = new Api({ rpc, signatureProvider, textDecoder: new TextDecoder(), textEncoder: new TextEncoder() });
+
+              try {
+                const result = await api.transact({
+                  actions: actionArr
+                },
+                {
+                    blocksBehind: 3,
+                    expireSeconds: 30,
+                });
+              } catch(err) {
+                console.log(err.stack);
+                res.status(500).json({ message: "Internal error" });
+                return;
+              }
+              console.log("Success on b-chain");
+              //Update the database to reflect the change on the blockchain
+              db.query(
+                "UPDATE parking_times SET user_PID = $1, availability = false, seller_key = NULL WHERE spot_ID = $2 AND zone_ID = $3 AND time_code BETWEEN $4 AND $5 RETURNING *",
+                [
+                  req.body.pid,
+                  req.body.spot.spot_id,
+                  req.body.spot.zone_id,
+                  req.body.spot.start_time,
+                  req.body.spot.end_time - 1
+                ],
+                (err, result) => {
+                  if (err) {
+                    console.log(err.stack);
+                    res.status(500).json({ message: "Internal error" });
+                  } else {
+    
+                    zone_call = null;
+                    db.query(
+                      "SELECT * FROM parking_times WHERE spot_ID = $1 AND zone_ID = $2",
+                      [req.body.spot_id, req.body.zone_id],
+                      (err, dbres) => {
+                        if (err) {
+                          console.log(err.stack);
+                          res
+                            .status(500)
+                            .json({ message: "Internal server error" });
+                        } else {
+                          zone_call = dbres.rows;
+                        }
+                      }
+                    );
+    
+                    res
+                      .status(200)
+                      .json({
+                        message: "Spot aquired",
+                        spot: result.rows,
+                        spot_page: zone_call,
+                        receipt: {
+                          start_time: req.body.spot.start_time,
+                          end_time: req.body.spot.end_time,
+                          zone_id: req.body.spot.zone_id,
+                          spot_id: req.body.spot.spot_id,
+                          total_price: totalPrice
+                        }
+                      });
+                    
+                    /*
+                      responseObject = [{"pid":"admin","start_time":1583040600,"end_time":1583041500,"zone_id":"1","spot_id":"1","price":1}]
+                    */
+    
+                    const respObjLastIndex = responseObject.length - 1;
+                    // Formatting and getting info to send to the zones page so that
+                    // this spot gets removed from the page.
+                    const spotPurchasedInfo = {
+                      isAvail: false,
+                      parkingInfo: {
+                        start_time: responseObject[0].start_time,
+                        end_time: responseObject[respObjLastIndex].end_time - 1,
+                        zone_id: Number(responseObject[0].zone_id),
+                        spot_id: Number(responseObject[0].spot_id)
+                      }
+                    }
+    
+                    // Getting spots sold by other users.
+                    const spotsSoldByOtherUser = responseObject.filter(e => e.pid !== "admin");
+    
+                    // Getting the socket.
+                    const socket = req.app.settings["socket-api"];
+    
+                    const parkingSpotId = spotPurchasedInfo.zone_id + '-' + spotPurchasedInfo.spot_id;
+    
+                    // Updating the list parking spots page.
+                    socketAPI.broadcastZoneInfo(
+                      socket,
+                      spotPurchasedInfo.zone_id,
+                      spotPurchasedInfo
+                    );
+    
+                    // Updating the user profile, sell page, and parking spot page.
+                    // Also letting the user know that a parking spot was sold if they are
+                    // logged in.
+                    spotsSoldByOtherUser.forEach(e => {
+                      // Sending token amount to add to their balance.
+                      socketAPI.broadcastUserInfo(
+                        socket,
+                        e.pid,
+                        e.price
+                      );
+    
+                      // Info to send to the sell page for a specific user
+                      const sellPageData = {
+                        zone_id: e.zone_id,
+                        spot_id: e.spot_id,
+                        start_time: e.start_time
+                      };
+    
+                      // Sending the sell page info to the given user.
+                      socketAPI.broadcastSellPageInfo(
+                        socket,
+                        e.pid,
+                        sellPageData
+                      );
+    
+                      // Info to send to the parking spot page so that it can be updated.
+                      const parkingSpotPageData = {
+                        start_time: e.start_time,
+                        end_time: e.end_time,
+                        price: e.price
+                      };
+    
+                      // Sending the given info to the specific spot.
+                      socketAPI.broadcastParkingSpotInfo(
+                        socket,
+                        parkingSpotId,
+                        parkingSpotPageData
+                      );
+    
+                      // Telling the specific user that one of their parking spots they
+                      // are selling was sold.
+                      socketAPI.broadcastSellSuccess(
+                        socket,
+                        e.pid,
+                        `Congrats, parking spot ${parkingSpotId} was just sold for ${e.price}`
+                      )
+                    })
+                  }
+                }
+              );
             }
-        })
-    }
-    else {
-        res.status(403).json({message: "Bad login or json format"});
-    }
+          }).catch(err => {
+            console.log(err)
+            res.status(500).json({message: "Server Error"});
+          });
+        } else {
+          res.status(403).json({ message: "Spot not available" });
+        }
+      } else {
+        res.status(403).json({ message: "Bad spot code" });
+      }
+    });
 });
 
 module.exports = router;

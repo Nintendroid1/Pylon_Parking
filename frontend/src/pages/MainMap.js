@@ -1,3 +1,8 @@
+/**
+ * The component that handles the main map page. Displays the map and
+ * links to the different parking spots.
+ */
+
 import React, { useState, useEffect } from 'react';
 import { Typography, Card, CardMedia } from '@material-ui/core';
 import { Link } from 'react-router-dom';
@@ -5,7 +10,15 @@ import { withStyles, withTheme } from '@material-ui/core/styles';
 import { makeAPICall } from '../api';
 import apiprefix from './apiprefix';
 import history from '../history';
-// import './MainMap.css';
+import CustomSnackbar from '../ui/snackbars';
+import Table from '@material-ui/core/Table';
+import TableBody from '@material-ui/core/TableBody';
+import TableCell from '@material-ui/core/TableCell';
+import TableHead from '@material-ui/core/TableHead';
+import TableRow from '@material-ui/core/TableRow';
+import TableContainer from '@material-ui/core/TableContainer';
+import Paper from '@material-ui/core/Paper';
+import Grid from '@material-ui/core/Grid';
 
 const styles = theme => ({
   tabLink: {
@@ -33,28 +46,33 @@ const styles = theme => ({
   centerCol: {
     display: 'flex',
     flexgrow: 1,
-    justifyContent: 'left',
-    textAlign: 'left',
-    width: 1000,
+    justifyContent: 'center',
+    textAlign: 'center',
+    width: 1600,
     margin: '0 auto',
     marginTop: 20
   }
 });
 
-const MainMap = ({ classes, ...props }) => {
-  // Make api request to get list of available zones
-  // todo
-
-  // const zones = [
-  //   { name: 'Litton Reaves', id: 0 },
-  //   { name: 'Derring Lot', id: 1 },
-  //   { name: 'Perry Street Lot #1', id: 2 },
-  //   { name: 'Perry Street Lot #2', id: 3 },
-  //   { name: 'Perry Street Lot #3', id: 4 },
-  //   { name: 'Lower Stanger Lot', id: 5 }
-  // ];
+/**
+ * The component that is exported. Displays the map and the links to
+ * the different zones.
+ *
+ * @param {Object} param0
+ */
+const MainMap = ({ classes, userSocket, ...props }) => {
   const [zones, updateZones] = useState([]);
+  const [openSnackbar, setOpenSnackbar] = useState(false);
+  const [snackbarOptions, updateSnackbarOptions] = useState({
+    verticalPos: 'top',
+    horizontalPos: 'center',
+    message: '',
+    severity: 'info'
+  });
 
+  /*
+    Sends a GET request to the server requesting for the zones.
+  */
   const get_zones = async () => {
     const url = `${apiprefix}/zones/all`;
     let resp = await makeAPICall('GET', url);
@@ -63,32 +81,37 @@ const MainMap = ({ classes, ...props }) => {
     console.log(res_body);
     updateZones(res_body.zones);
   };
-  // useEffect(() => {
 
-  // // do anything only one time if you pass empty array []
-  // // keep in mind, that component will be rendered one time (with default values) before we get here
-  // }, [] )
   useEffect(() => {
     get_zones();
   }, []);
 
-  var zoneList = zones.map(z => (
-    <li style={{ listStyleType: 'none' }}>
-      <Link
-        className={classes.zoneLink}
-        to={{
-          pathname: `zones/${z.zone_id}`,
-          state: {
-            from: history.location
-          }
-        }}
-      >
-        {z.zone_name}
-      </Link>
-    </li>
-  ));
+  useEffect(() => {
+    // Socket for handling user personal info.
+    userSocket.on(`sell-${localStorage.olivia_pid}`, () => {
+      setOpenSnackbar(false);
+
+      // Make it so that the data variable stores the message.
+      updateSnackbarOptions({
+        ...snackbarOptions,
+        message:
+          'You Got Rich! Go To Account To See How Much Disposable Income You Have.',
+        severity: 'info'
+      });
+      setOpenSnackbar(true);
+    });
+  });
+
   return (
     <>
+      <CustomSnackbar
+        isOpen={openSnackbar}
+        updateIsOpen={setOpenSnackbar}
+        verticalPos={snackbarOptions.verticalPos}
+        horizontalPos={snackbarOptions.horizontalPos}
+        message={snackbarOptions.message}
+        severity={snackbarOptions.severity}
+      />
       <Typography align="center" variant="h5" gutterBottom>
         Parking Map
       </Typography>
@@ -104,13 +127,57 @@ const MainMap = ({ classes, ...props }) => {
           />
         </Card>
       </div>
-      <div className={classes.centerCol}>
-        <Typography color="primary" variant="h4">
-          <div style={{ display: 'flex', justifyContent: 'left' }}>
-            <ul>{zoneList}</ul>
-          </div>
-        </Typography>
-      </div>
+      <Typography color="primary" variant="h6">
+        <div
+          style={{
+            display: 'flex',
+            marginTop: '40px',
+            marginLeft: '20%',
+            marginRight: '20%'
+          }}
+        >
+          <TableContainer
+            align="center"
+            classes={classes.container}
+            component={Paper}
+          >
+            <Typography
+              component="h2"
+              variant="h6"
+              color="primary"
+              gutterBottom
+            >
+              Parking Zones
+            </Typography>
+            <Table size="small" width="50%">
+              <TableBody>
+                <TableHead>
+                  <TableRow></TableRow>
+                </TableHead>
+                {zones.map(z => (
+                  <TableRow key={z.zone_id}>
+                    <TableCell colspan={1}>{z.zone_id}</TableCell>
+                    <TableCell colspan={1}></TableCell>
+                    <TableCell colspan={1}>
+                      <Link
+                        className={classes.zoneLink}
+                        to={{
+                          pathname: `zones/${z.zone_id}`,
+                          state: {
+                            from: history.location.pathname
+                          }
+                        }}
+                      >
+                        {z.zone_name}
+                      </Link>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </div>
+      </Typography>
     </>
   );
 };

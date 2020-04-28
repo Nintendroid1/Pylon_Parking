@@ -1,3 +1,7 @@
+/**
+ * Contains components used by user components.
+ */
+
 import React, { useState } from 'react';
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
@@ -8,6 +12,11 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import TextField from '@material-ui/core/TextField';
 import CustomPassword from './update-user-form';
 
+/*
+  A component for deleting an account.
+  Asks the user if they want to delete their account through a
+  Dialog component.
+*/
 const DeleteAccount = ({
   handleDelete,
   open,

@@ -1,5 +1,11 @@
+/**
+ * The component that shows the user profile, which includes the
+ * user's pid, total number of tokens, etc.
+ */
+
 import React, { useState, useEffect } from 'react';
 import { makeAPICall } from '../api';
+import CustomSnackbar from '../ui/snackbars';
 import { withStyles } from '@material-ui/core/styles';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
@@ -7,13 +13,11 @@ import TableCell from '@material-ui/core/TableCell';
 import TableRow from '@material-ui/core/TableRow';
 import { Typography, LinearProgress } from '@material-ui/core';
 import RequireAuthentication from '../RequireAuthentication';
-import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
-import { Link } from 'react-router-dom';
-import EditIcon from '@material-ui/icons/Edit';
 import apiprefix from './apiprefix';
 import Paper from '@material-ui/core/Paper';
 import Container from '@material-ui/core/Container';
+import { MessageDialog } from './forms/parking-spot-components';
 
 const styles = theme => ({
   table: {
@@ -44,7 +48,24 @@ const styles = theme => ({
   }
 });
 
-let ProfilePage = ({ classes, socket, ...props }) => {
+/**
+ * The component that is exported. Shows the user's profile in a table.
+ *
+ * @param {Object} param0
+ */
+let ProfilePage = ({ classes, socket }) => {
+  const [openSnackbar, setOpenSnackbar] = useState(false);
+  const [snackbarOptions, updateSnackbarOptions] = useState({
+    verticalPos: 'top',
+    horizontalPos: 'center',
+    message: '',
+    severity: 'info'
+  });
+  const [openMessageDialog, updateOpenMessageDialog] = useState(false);
+  const [messageDialogField, updateMessageDialogField] = useState({
+    message: '',
+    dialogTitle: ''
+  });
   const [user, updateUser] = useState({
     pid: '',
     first_name: '',
@@ -52,7 +73,7 @@ let ProfilePage = ({ classes, socket, ...props }) => {
     email: '',
     balance: ''
   });
-  const [hasCalled, updateCall] = useState(false);
+  const [] = useState(false);
   const [isLoading, setLoading] = useState(false);
 
   let loadUser = async () => {
@@ -67,11 +88,16 @@ let ProfilePage = ({ classes, socket, ...props }) => {
         first_name: rbody.first_name,
         last_name: rbody.last_name,
         email: rbody.email,
-        balance: rbody.balance
+        balance: Number(rbody.balance).toFixed(3)
       });
       setLoading(false);
     } else {
       setLoading(false);
+      updateMessageDialogField({
+        message: rbody.message,
+        dialogTitle: 'Error'
+      });
+      updateOpenMessageDialog(true);
     }
   };
 
@@ -79,18 +105,44 @@ let ProfilePage = ({ classes, socket, ...props }) => {
     loadUser();
   }, []);
 
+  // Socket logic.
   useEffect(() => {
-    // data = {
-    //  parkingId: parking spot sold off,
-    //  money: # hokie tokens in wallet now.
-    // }
+    // Tells the user that a spot has been sold off.
+    socket.on(`sell-${localStorage.olivia_pid}`, data => {
+      setOpenSnackbar(false);
+
+      // Make it so that the data variable stores the message.
+      updateSnackbarOptions({
+        ...snackbarOptions,
+        message:
+          'You Got Rich! Go To Account To See How Much Disposable Income You Have.',
+        severity: 'info'
+      });
+      setOpenSnackbar(true);
+    });
+
+    // data = money earned
     socket.on(`user-${localStorage.olivia_pid}`, data => {
-      updateUser({ ...user, money: data.money });
+      updateUser({ ...user, money: user.money + Number(data) });
     });
   }, []);
   return (
     <>
       <div className={classes.root}>
+        <CustomSnackbar
+          isOpen={openSnackbar}
+          updateIsOpen={setOpenSnackbar}
+          verticalPos={snackbarOptions.verticalPos}
+          horizontalPos={snackbarOptions.horizontalPos}
+          message={snackbarOptions.message}
+          severity={snackbarOptions.severity}
+        />
+        <MessageDialog
+          message={messageDialogField.message}
+          dialogTitle={messageDialogField.dialogTitle}
+          open={openMessageDialog}
+          setOpen={updateOpenMessageDialog}
+        />
         <Container maxWidth="lg" className={classes.container}>
           <Grid container spacing={3}>
             <Grid item xs={12} md={8} lg={9}>

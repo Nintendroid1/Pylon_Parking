@@ -1,9 +1,10 @@
 {
-    "userName": "testPID",
-    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE1ODUyNTMyODksInVzZXIiOiJ0ZXN0UElEIiwiaWF0IjoxNTg1MjQ5Njg5fQ.Nh6A99a5jeiGwgc9EAF4ZL3Gu0xNPrkb6UUst48L7QU",
+    "pid": "admin",
+    "key": "5KY2ydXyvyrYSAZrgNXYTyrWST75ABF33VccrGen42RBdwMKcNt",
     "spot": {
         "spot_id": "1",
         "zone_id": "1",
-        "time_code": "firsttimecode"
+        "start_time": "1587611700",
+        "end_time": "1587617100"
     }
 }

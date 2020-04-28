@@ -1,3 +1,9 @@
+/*
+  Exports a default component that shows user profile and allows
+  the user to modify their personal information, such as profile 
+  picture.
+*/
+
 import React, { useState, useEffect } from 'react';
 import { makeAPICall, makeImageAPICall } from '../api';
 import { withStyles } from '@material-ui/core/styles';
@@ -16,6 +22,8 @@ import Paper from '@material-ui/core/Paper';
 import Container from '@material-ui/core/Container';
 import ImageForm from './forms/image-form';
 import { PNG } from 'pngjs';
+import { MessageDialog } from './forms/parking-spot-components';
+import CustomSnackbar from '../ui/snackbars';
 
 const styles = theme => ({
   table: {
@@ -46,7 +54,11 @@ const styles = theme => ({
   }
 });
 
-let AccountPage = ({ classes, socket, ...props }) => {
+/*
+  The component that is exported. Displays the user account information
+  and allows users to modify their profile picture.
+*/
+let AccountPage = ({ classes, history, socket, ...props }) => {
   const [user, updateUser] = useState({
     pid: '',
     first_name: '',
@@ -56,7 +68,22 @@ let AccountPage = ({ classes, socket, ...props }) => {
   });
   const [hasCalled, updateCall] = useState(false);
   const [isLoading, setLoading] = useState(false);
+  const [openMessageDialog, updateOpenMessageDialog] = useState(false);
+  const [messageDialogField, updateMessageDialogField] = useState({
+    message: '',
+    dialogTitle: ''
+  });
+  const [openSnackbar, setOpenSnackbar] = useState(false);
+  const [snackbarOptions, updateSnackbarOptions] = useState({
+    verticalPos: 'top',
+    horizontalPos: 'center',
+    message: '',
+    severity: 'info'
+  });
 
+  /*
+    Retrieves the user's information from the database.
+  */
   let loadUser = async () => {
     const url = `${apiprefix}/users/${localStorage.olivia_pid}`;
     setLoading(true);
@@ -69,20 +96,29 @@ let AccountPage = ({ classes, socket, ...props }) => {
         first_name: rbody.first_name,
         last_name: rbody.last_name,
         email: rbody.email,
-        balance: rbody.balance
+        balance: Number(rbody.balance).toFixed(3)
       });
       setLoading(false);
     } else {
       setLoading(false);
+      updateMessageDialogField({
+        dialogTitle: 'Error',
+        message: rbody.message
+      });
+      updateOpenMessageDialog(true);
     }
   };
 
+  /*
+    Handles changing the user profile picture.
+  */
   let changeUserAvatar = async imageURI => {
     try {
       const url = `${apiprefix}/users/${localStorage.olivia_pid}/avatar`;
       const response = await makeImageAPICall('POST', url, imageURI.imageData);
       if (response.status === 200) {
-        localStorage.avatar = imageURI.imageData;
+        localStorage.avatar = `/media/images/${localStorage.olivia_pid}_avatar.png`;
+        history.go(0);
       }
     } catch (err) {
       console.log(err.stack);
@@ -93,18 +129,49 @@ let AccountPage = ({ classes, socket, ...props }) => {
     loadUser();
   }, []);
 
+  /*
+    stores the sockets.
+  */
   useEffect(() => {
     // data = {
     //  parkingId: parking spot sold off,
     //  money: # hokie tokens in wallet now.
     // }
-    socket.on(`user-${localStorage.olivia_pid}`, data => {
-      updateUser({ ...user, money: data.money });
+    socket.on(`userInfo-${localStorage.olivia_pid}`, data => {
+      updateUser({ ...user, money: user.money + Number(data) });
+    });
+
+    // Socket for handling user personal info.
+    socket.on(`sell-${localStorage.olivia_pid}`, () => {
+      setOpenSnackbar(false);
+
+      // Make it so that the data variable stores the message.
+      updateSnackbarOptions({
+        ...snackbarOptions,
+        message: 'Congratulations! One Of Your Parking Spots Got Sold.',
+        severity: 'info'
+      });
+      setOpenSnackbar(true);
     });
   }, []);
+  
   return (
     <>
       <div className={classes.root}>
+        <MessageDialog
+          message={messageDialogField.message}
+          dialogTitle={messageDialogField.dialogTitle}
+          open={openMessageDialog}
+          setOpen={updateOpenMessageDialog}
+        />
+        <CustomSnackbar
+          isOpen={openSnackbar}
+          updateIsOpen={setOpenSnackbar}
+          verticalPos={snackbarOptions.verticalPos}
+          horizontalPos={snackbarOptions.horizontalPos}
+          message={snackbarOptions.message}
+          severity={snackbarOptions.severity}
+        />
         <Container maxWidth="lg" className={classes.container}>
           <Grid container spacing={3}>
             <Grid item xs={12} md={8} lg={9}>

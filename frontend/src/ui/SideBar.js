@@ -1,3 +1,7 @@
+// Used for rendering the main side bar for the app,
+// this is the main mode of navigation for the user.
+//
+// Dynamically adapts for both mobile and desktop environments.
 import React, { useState } from 'react';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
@@ -29,11 +33,7 @@ import LoginTab from '../pages/login';
 import RegisterTab from '../pages/register';
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
-import {
-  MuiThemeProvider,
-  useStyles,
-  useTheme
-} from '@material-ui/core/styles';
+import { useTheme } from '@material-ui/core/styles';
 import clsx from 'clsx';
 import { withGetScreen } from 'react-getscreen';
 import Collapse from '@material-ui/core/Collapse';
@@ -45,16 +45,6 @@ import StarBorder from '@material-ui/icons/StarBorder';
 import ClickAwayListener from '@material-ui/core/ClickAwayListener';
 
 import ListItemIcon from '@material-ui/core/ListItemIcon';
-import ListSubheader from '@material-ui/core/ListSubheader';
-import DashboardIcon from '@material-ui/icons/Dashboard';
-import ShoppingCartIcon from '@material-ui/icons/ShoppingCart';
-import PeopleIcon from '@material-ui/icons/People';
-import BarChartIcon from '@material-ui/icons/BarChart';
-import LayersIcon from '@material-ui/icons/Layers';
-import AssignmentIcon from '@material-ui/icons/Assignment';
-import MapIcon from '@material-ui/icons/Map';
-import InboxIcon from '@material-ui/icons/Inbox';
-import MailIcon from '@material-ui/icons/Mail';
 
 const drawerWidth = 240;
 
@@ -208,7 +198,7 @@ let SideBar = ({
                               pathname: group_tab.props.path,
                               key: `${index}-${gr_index}`,
                               state: {
-                                from: history.location
+                                from: history.location.pathname
                               }
                             }}
                             key={`${index}-${gr_index}`}
@@ -270,7 +260,7 @@ let SideBar = ({
                     pathname: tab.props.path,
                     key: index,
                     state: {
-                      from: history.location
+                      from: history.location.pathname
                     }
                   }}
                   key={index}

@@ -1,3 +1,8 @@
+/**
+ * Form used by the login page to capture info that the user
+ * enters.
+ */
+
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import Avatar from '@material-ui/core/Avatar';

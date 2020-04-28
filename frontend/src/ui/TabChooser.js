@@ -285,7 +285,7 @@ function TabChooser({
             to={{
               pathname: '/login',
               state: {
-                from: history.location
+                from: history.location.pathname
               }
             }}
             key={'login'}
@@ -339,6 +339,19 @@ function TabChooser({
     };
 
     function drawAccountIcon() {
+      let accountMessage = (
+        <>
+          <img
+            className={classes.circular}
+            alt="userIcon"
+            src={`${localStorage.avatar}`}
+            onError={() => {
+              localStorage.avatar = null;
+            }}
+          />
+        </>
+      );
+
       if (localStorage.getItem('avatar') === null) {
         return (
           <>
@@ -352,6 +365,9 @@ function TabChooser({
               className={classes.circular}
               alt="userIcon"
               src={`${localStorage.avatar}`}
+              onError={() => {
+                localStorage.avatar = null;
+              }}
             />
           </>
         );
@@ -372,7 +388,13 @@ function TabChooser({
             aria-haspopup="true"
             onClick={handleClick}
           >
-            {drawAccountIcon()}
+            {localStorage.avatar != null ? (
+              drawAccountIcon()
+            ) : (
+              <>
+                <AccountCircle className={classes.avatar} />
+              </>
+            )}
             <Typography
               variant="button"
               style={{ color: '#FFFFFF', fontSize: 14 }}
@@ -388,7 +410,9 @@ function TabChooser({
             onClose={handleClose}
           >
             <MenuItem onClick={() => handleClose('/Profile')}>Profile</MenuItem>
-            <MenuItem onClick={handleClose}>My account</MenuItem>
+            <MenuItem onClick={() => handleClose('/account')}>
+              My account
+            </MenuItem>
             <MenuItem onClick={() => handleClose('/my_spots')}>
               My Spots
             </MenuItem>
@@ -432,7 +456,7 @@ function TabChooser({
             to={{
               pathname: `/`,
               state: {
-                from: history.location
+                from: history.location.pathname
               }
             }}
           >
@@ -508,6 +532,7 @@ function TabChooser({
             render={() => {
               localStorage.olivia_pid = '';
               localStorage.removeItem('olivia_token');
+              localStorage.removeItem('avatar');
               updateLogin(false);
               history.replace('/');
               window.location.href = `${process.env.PUBLIC_URL}/`;

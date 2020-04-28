@@ -1,54 +1,35 @@
+/**
+ * Exports the component that handles the Bounty System.
+ *
+ * The Bounty System uses a third-party service: https://platerecognizer.com/#introduction
+ * This link is to their api: http://docs.platerecognizer.com/#introduction
+ *
+ * The Bounty System also uses a QR reader and expects the user to take
+ * a single picture containing both the QR code and the license plate.
+ */
+
 import React, { useState, useEffect } from 'react';
 import { makeAPICall, makeImageAPICall } from '../api';
-import PropTypes from 'prop-types';
 import Table from '@material-ui/core/Table';
+import CustomSnackbar from '../ui/snackbars';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
-import TableHead from '@material-ui/core/TableHead';
-import TableFooter from '@material-ui/core/TableFooter';
 import TableRow from '@material-ui/core/TableRow';
-import TablePagination from '@material-ui/core/TablePagination';
-import Check from '@material-ui/icons/Check';
-import NavigateLeftIcon from '@material-ui/icons/NavigateBefore';
-import NavigateRightIcon from '@material-ui/icons/NavigateNext';
-import { Typography, CircularProgress, TextField } from '@material-ui/core';
+import { Typography } from '@material-ui/core';
 import DialogContentText from '@material-ui/core/DialogContentText';
-import RequireAuthentication from '../RequireAuthentication';
-import queryString from 'query-string';
-import IconButton from '@material-ui/core/IconButton';
-import EditIcon from '@material-ui/icons/Edit';
-import Grid from '@material-ui/core/Grid';
-import history from '../history';
-import { Link } from 'react-router-dom';
 import apiprefix from './apiprefix';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import Paper from '@material-ui/core/Paper';
-import { TimePicker } from './forms/parking-spot-components';
-import CustomSnackbar from '../ui/snackbars';
-// import QrReader from 'react-qr-reader';
-import Camera from 'react-html5-camera-photo';
+import { LoadingDialog } from './forms/parking-spot-components';
+import Camera, { FACING_MODES } from 'react-html5-camera-photo';
 import { PNG } from 'pngjs';
 import 'react-html5-camera-photo/build/css/index.css';
 import jsQR from 'jsqr';
-import {
-  compareMilitaryTime,
-  convertMilitaryToEpoch,
-  convertEpochToMilitary,
-  convertMilitaryTimeToNormal,
-  isTimeMultipleOf15,
-  roundUpToNearest15
-} from './forms/time-filter';
-import Box from '@material-ui/core/Box';
-import { ErrorDialog } from './forms/parking-spot-components';
-import {
-  withStyles,
-  withTheme,
-  MuiThemeProvider,
-  createMuiTheme
-} from '@material-ui/core/styles';
+import { MessageDialog } from './forms/parking-spot-components';
+import { withStyles, withTheme } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 const styles = theme => ({
   root: {
@@ -59,42 +40,35 @@ const styles = theme => ({
 });
 
 /*
-Code for coverting base 64 image to unit8clampedarray
+  Component containing the camera.
 */
-const BASE64_MARKER = ';base64,';
-
-const convertDataURIToBinary = dataURI => {
-  const base64Index = dataURI.indexOf(BASE64_MARKER) + BASE64_MARKER.length;
-  const base64 = dataURI.substring(base64Index);
-  const raw = window.atob(base64);
-  const rawLength = raw.length;
-  const array = new Uint8Array(new ArrayBuffer(rawLength));
-
-  for (let i = 0; i < rawLength; i++) {
-    array[i] = raw.charCodeAt(i);
-  }
-  return array;
-};
-
-/*
-for finding the width and height of the image, use:
-
-var i = new Image(); 
-
-i.onload = function(){
- alert( i.width+", "+i.height );
-};
-
-i.src = imageData; 
-*/
-
-/*
-https://github.com/cozmo/jsQR/issues/96
-has some example code for converting base 64 image to needed for jsqr.
-*/
-
 const CaptureImage = props => {
   const { handleCameraClick } = props;
+
+  const [cameraInfo, updateCameraInfo] = useState({
+    facingMode: FACING_MODES.ENVIRONMENT,
+    isMirrorImage: true
+  });
+
+  const checkIfEnvEnabled = async () => {
+    navigator.mediaDevices
+      .getUserMedia({
+        video: {
+          facingMode: { exact: 'environment' }
+        }
+      })
+      .then(() => console.log('Environment mode!!'))
+      .catch(() =>
+        updateCameraInfo({
+          facingMode: FACING_MODES.USER,
+          isMirrorImage: false
+        })
+      );
+  };
+
+  useEffect(() => {
+    checkIfEnvEnabled();
+  }, []);
 
   const handleTakePhoto = dataUri => {
     handleCameraClick(dataUri);
@@ -103,6 +77,8 @@ const CaptureImage = props => {
   return (
     <>
       <Camera
+        idealFacingMode={cameraInfo.facingMode}
+        isImageMirror={cameraInfo.isMirrorImage}
         onTakePhoto={dataUri => {
           handleTakePhoto(dataUri);
         }}
@@ -111,7 +87,10 @@ const CaptureImage = props => {
   );
 };
 
-const popUpContent = info => {
+/*
+  The content to be displayed in the confirmation message.
+*/
+const PopUpContent = info => {
   const infoList = [
     { name: 'Zone ID', value: `${info.zone_id}` },
     { name: 'Spot ID', value: `${info.spot_id}` },
@@ -138,12 +117,34 @@ const popUpContent = info => {
   );
 };
 
-const ReportField = props => {
-  const { handleReport } = props;
+/*
+  Handles the logic for what happens after a picture is taken.
 
+  Makes an API call to our backend requesting for the license plate in the image to be read.
+  Then, displays a confirmation message for the user to confirm the info, if incorrect,
+  then expects user to retake the photo.
+*/
+const ReportField = props => {
+  const {
+    handleReport,
+    setOpenSnackbar,
+    snackbarOptions,
+    updateSnackbarOptions,
+    updateLoadingDialogField
+  } = props;
+  // Used to open the dialog for confirming info.
   const [open, setOpen] = useState(false);
+
+  // Used to open the dialog for displaying error info.
   const [openErrorDialog, setOpenErrorDialog] = useState(false);
+
+  // Used to open the dialog for giving instructions on how to use.
+  const [openInstrDialog, setOpenInstrDialog] = useState(true);
+
+  // Stores the error message.
   const [errorMessage, updateErrorMessage] = useState('');
+
+  // Stores the information read from the photo.
   const [info, updateInfo] = useState({
     zone_id: -1,
     spot_id: -1,
@@ -154,13 +155,34 @@ const ReportField = props => {
     setOpen(false);
   };
 
+  // Closes all dialogs and sends info to the backend.
   const handleSubmit = event => {
     event.preventDefault();
+    updateSnackbarOptions({
+      ...snackbarOptions,
+      message: 'Please wait while we process the information.',
+      severity: 'info'
+    });
+    setOpenSnackbar(true);
     setOpen(false);
     handleReport(info);
   };
 
+  const handleError = () => {
+    updateLoadingDialogField({
+      open: false,
+      message: ''
+    });
+    updateSnackbarOptions({
+      ...snackbarOptions,
+      message: 'An Error Occurred While Trying To Process Your Photo. Please Try Again.',
+      severity: 'error'
+    });
+  };
+
+  // Handles processing the info from the image.
   const handleOnCameraClick = async imageURI => {
+    // Attempts to read the QR code in the picture, if it exists.
     const dataUri = imageURI;
     const png = PNG.sync.read(
       Buffer.from(dataUri.slice('data:image/png;base64,'.length), 'base64')
@@ -171,7 +193,9 @@ const ReportField = props => {
     if (code === null) {
       // error message.
       console.log('no qr code found');
-      updateErrorMessage('The QR Code was invalid. Please take a better picture you pleb.');
+      updateErrorMessage(
+        'The QR Code was invalid. Please take a better picture.'
+      );
       setOpenErrorDialog(true);
     } else {
       // the data in the qr code will be of the form zone_id-spot_id.
@@ -179,35 +203,73 @@ const ReportField = props => {
       // the data in the qr code will be of the form zone_id-spot_id.
       // const [zone_id, spot_id] = code.data.split('-');
       try {
+        updateLoadingDialogField({
+          open: true,
+          message: 'Using Alien Technology To Analyze Image. Please Wait.'
+        });
+
+        // Wait for about 5 seconds for a response.
+        const tempVar = window.setTimeout(handleError, 5000);
+        // Request the backend to read the license plate in the image.
         const url = `${apiprefix}/bounty-system`;
         const response = await makeImageAPICall('POST', url, imageURI);
         const respbody = await response.json();
 
+        window.clearTimeout(tempVar);
+
+        updateLoadingDialogField({
+          open: false,
+          message: ''
+        });
+
         if (response.status === 200) {
-          // make a dialog for confirmation of the info.
-          updateInfo({
-            zone_id: 2,
-            spot_id: 1,
-            license_info: respbody.results[0].plate
-          });
+          // Checks if there exists multiple license plates and confidence level of ML model;
+          // if there are, then retake the photo.
+          if (
+            respbody.results.length !== 1 ||
+            respbody.results[0].dscore < 0.5 ||
+            respbody.results[0].score < 0.5
+          ) {
+            updateErrorMessage(
+              'Reading is hard. Please take a better picture.'
+            );
+            setOpenErrorDialog(true);
+          } else {
+            updateInfo({
+              zone_id: zone_id,
+              spot_id: spot_id,
+              license_info: respbody.results[0].plate
+            });
+            setOpen(true);
+          }
         } else {
+          updateErrorMessage(
+            'The license plate number was unable to be read. Please try again.'
+          );
           setOpenErrorDialog(true);
-          updateErrorMessage('The license plate was unable to be read. I dare u take another picture, I double dog dare you.')
         }
-        
       } catch (err) {
+        updateLoadingDialogField({
+          open: false,
+          message: ''
+        });
         console.log(err.stack);
       }
-
-      setOpen(true);
     }
   };
 
   return (
     <>
       <CaptureImage handleCameraClick={handleOnCameraClick} />
-      <ErrorDialog 
+      <MessageDialog
+        message="Please take a picture that includes the a single license plate and a single qr code."
+        dialogTitle="Instructions"
+        open={openInstrDialog}
+        setOpen={setOpenInstrDialog}
+      />
+      <MessageDialog
         message={errorMessage}
+        dialogTitle="Error"
         open={openErrorDialog}
         setOpen={setOpenErrorDialog}
       />
@@ -215,15 +277,18 @@ const ReportField = props => {
         <DialogTitle>Confirm Report Info</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            <Table>{popUpContent(info)}</Table>
+            Is the following information correct? If not, please retake photo.
+          </DialogContentText>
+          <DialogContentText>
+            <Table>{<PopUpContent info={info} />}</Table>
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleClose} color="primary">
-            Cancel
+          <Button onClick={handleClose} color="secondary">
+            No
           </Button>
           <Button onClick={handleSubmit} color="primary">
-            Confirm
+            Yes
           </Button>
         </DialogActions>
       </Dialog>
@@ -231,174 +296,117 @@ const ReportField = props => {
   );
 };
 
-// TODO
-// Delete this after we are sure it is useless
-// const QrReaderField = ({ handleCameraClick, className }) => {
-//   const handleOnScan = data => {
-//     handleCameraClick(data);
-//   };
-
-//   const handleOnError = err => {
-//     console.log(err);
-//   };
-
-//   /**
-//    * delay: the delay between scans in milliseconds, pass in false to disable.
-//    * legacyMode: default is false. Can allow user to upload photo.
-//    */
-//   return (
-//     <>
-//       <QrReader
-//         className={className}
-//         delay={300}
-//         onError={handleOnError}
-//         onScan={handleOnScan}
-//       />
-//     </>
-//   );
-// };
-
 /*
-const ReportField = ({
-  info,
-  updateInfo,
-  makeReport,
-  getInfo
-}) => {
-
-const ReportField = ({ classes, info, updateInfo, makeReport, getInfo }) => {
-  const hasInfo = info.license_info === '' ? false : true;
-
-  const [isOpen, updateIsOpen] = useState(false);
-  const [snackbarMessage, updateSnackbarMessage] = useState({
+  The component that is exported. Makes the API call to send a report.
+*/
+const BountySystem = ({ classes, userSocket }) => {
+  const [message, updateMessage] = useState({
     message: '',
+    dialogTitle: ''
+  });
+  const [openMessageDialog, setOpenMessageDialog] = useState(false);
+  const [loadingDialogField, updateLoadingDialogField] = useState({
+    open: false,
+    message: ''
+  });
+  const [openSnackbar, setOpenSnackbar] = useState(false);
+  const [snackbarOptions, updateSnackbarOptions] = useState({
     verticalPos: 'top',
-    horizontalPos: 'center'
+    horizontalPos: 'center',
+    message: '',
+    severity: 'info'
   });
 
-  const handleOnChange = prop => event => {
-    updateInfo({ ...info, [prop]: event.target.value });
-  };
-
-  const handleOnClickGetInfo = () => {
-    updateSnackbarMessage({
-      ...snackbarMessage,
-      message: 'Getting License Number'
-    });
-    updateIsOpen(true);
-    makeReport();
-  };
-
-  const handleOnClickReport = () => {
-    updateSnackbarMessage({
-      ...snackbarMessage,
-      message: 'Report Sent'
-    });
-    updateIsOpen(true);
-    getInfo();
-  };
-
-  // Default is qr reader.
-  return (
-    <>
-      <CustomSnackbar
-        isOpen={isOpen}
-        updateIsOpen={updateIsOpen}
-        verticalPos={snackbarMessage.verticalPos}
-        horizontalPos={snackbarMessage.horizontalPos}
-        message={snackbarMessage.message}
-      />
-      <QrReaderField updateData={updateInfo} className={classes.reader} />
-      <TextField
-        label="Zone ID"
-        type="number"
-        value={info.zone_id}
-        onChange={handleOnChange('zone_id')}
-        InputLabelProps={{
-          shrink: true
-        }}
-        variant="outlined"
-      />
-      <TextField
-        label="Spot ID"
-        type="number"
-        value={info.spot_id}
-        onChange={handleOnChange('spot_id')}
-        InputLabelProps={{
-          shrink: true
-        }}
-        variant="outlined"
-      />
-      <TextField
-        disabled
-        label="License Number"
-        type="text"
-        value={info.license_info}
-        variant="filled"
-      />
-      <Button
-        variant="contained"
-        color="primary"
-        onClick={handleOnClickGetInfo}
-      >
-        Get Info!
-      </Button>
-      <Button
-        disabled={!hasInfo}
-        variant="contained"
-        color="secondary"
-        onClick={handleOnClickReport}
-      >
-        Report!
-      </Button>
-    </>
-  );
-}
-*/
-const BountySystem = ({ classes, ...props }) => {
-  const [message, updateMessage] = useState(null);
-
-  /*
-  const handleRequestLicenseInfo = async () => {
-    const url = `${apiprefix}/bounty/info`;
-    const json = {
-      zone_id: info.zone_id,
-      spot_id: info.spot_id
-    };
-
-    const response = await makeAPICall('GET', url, json);
-    const respbody = await response.json();
-
-    if (response.status === 200) {
-      updateInfo({ ...info, license_info: respbody });
-    } else {
-      // Make some kind of error message.
-    }
-  };*/
-
+  // Sends the info captured by the camera to the backend for further processing.
   const handleReport = async info => {
+    updateLoadingDialogField({
+      open: true,
+      message: 'Getting Someone Fired'
+    });
     const url = `${apiprefix}/bounty-system/report`;
     const json = {
+      pid: localStorage.olivia_pid,
       zone_id: info.zone_id,
       spot_id: info.spot_id,
       license_info: info.license_info
     };
 
     const response = await makeAPICall('POST', url, json);
-    const respbody = await response.json();
+    updateLoadingDialogField({
+      open: false,
+      message: ''
+    });
 
     if (response.status === 200) {
-      // make a toaster stating that the report has been received?
+      // Let the user know that the backend has received the info.
+      /*
+      updateMessage({
+        message: 'Thank you for the extra work. We will now check if the driver is illegal',
+        dialogTitle: 'Success!!!!'
+      });
+      setOpenMessageDialog(true);*/
+      updateSnackbarOptions({
+        ...snackbarOptions,
+        message: response.message,
+        severity: 'success'
+      });
+      setOpenSnackbar(true);
     } else {
-      // there was an error in the report.
+      // Let the user know that an error has occurred.
+      updateSnackbarOptions({
+        ...snackbarOptions,
+        message: 'An error has occurred. Please try again later.',
+        severity: 'error'
+      });
+      setOpenSnackbar(true);
     }
   };
+
+  useEffect(() => {
+    // Socket used to notify the client something personal.
+    userSocket.on(`sell-${localStorage.olivia_pid}`, () => {
+      setOpenSnackbar(false);
+
+      // Make it so that the data variable stores the message.
+      updateSnackbarOptions({
+        ...snackbarOptions,
+        message:
+          'You Got Rich! Go To Account To See How Much Disposable Income You Have.',
+        severity: 'info'
+      });
+      setOpenSnackbar(true);
+    });
+  });
 
   return (
     <>
       <Typography>
+        <CustomSnackbar
+          isOpen={openSnackbar}
+          updateIsOpen={setOpenSnackbar}
+          verticalPos={snackbarOptions.verticalPos}
+          horizontalPos={snackbarOptions.horizontalPos}
+          message={snackbarOptions.message}
+          severity={snackbarOptions.severity}
+        />
+        <MessageDialog
+          open={openMessageDialog}
+          setOpen={setOpenMessageDialog}
+          message={message.message}
+          dialogTitle={message.dialogTitle}
+        />
+        <LoadingDialog
+          open={loadingDialogField.open}
+          message={loadingDialogField.message}
+        />
         <Paper>
-          <ReportField handleReport={handleReport} />
+          <ReportField
+            handleReport={handleReport}
+            setOpenSnackbar={setOpenSnackbar}
+            snackbarOptions={snackbarOptions}
+            updateSnackbarOptions={updateSnackbarOptions}
+            updateLoadingDialogField={updateLoadingDialogField}
+          />
         </Paper>
       </Typography>
     </>

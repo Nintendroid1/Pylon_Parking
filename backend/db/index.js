@@ -1,3 +1,4 @@
+//setup the queries to the database
 const { Pool } = require('pg')
 const pool = new Pool({
   user: 'postgres',
@@ -5,7 +6,7 @@ const pool = new Pool({
   password: 'superman',
 });
 module.exports = {
-  query: (text, params, callback) => {
+  query: async function(text, params, callback) {
     return pool.query(text, params, callback)
   },
 }

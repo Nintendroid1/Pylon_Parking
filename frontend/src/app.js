@@ -1,3 +1,9 @@
+// ========================================================
+// The main window of the web app. This renders everything
+// together on the screen and connects all the components
+// together to create a coherent user interface.
+// ========================================================
+
 import React, { useState } from 'react';
 import TabChooser from './ui/TabChooser';
 import WelcomeTab from './pages/welcome';
@@ -26,6 +32,7 @@ import ProfilePage from './pages/profile';
 import UserInfo from './pages/user-info';
 import UpdateUserInfo from './pages/update-user-info';
 import BountySystem from './pages/bounty-system';
+import CustomSnackbar from './ui/snackbars';
 import AccountPage from './pages/account-page';
 
 import Typography from '@material-ui/core/Typography';
@@ -106,6 +113,13 @@ let darkTheme = createMuiTheme({
 });
 
 const App = ({ classes, ...props }) => {
+  const [openSnackbar, setOpenSnackbar] = useState(false);
+  const [snackbarOptions, updateSnackbarOptions] = useState({
+    verticalPos: 'top',
+    horizontalPos: 'center',
+    message: '',
+    severity: 'info'
+  });
   let [isDark, switchThemeFunc] = useState(localStorage.isDark === false);
   let [isLoggedIn, updateLogin] = useState(localStorage.olivia_pid !== '');
   let [currentUser, updateUser] = useState(() => {
@@ -129,6 +143,7 @@ const App = ({ classes, ...props }) => {
   // Endpoint for the websocket.
   // Base url.
   const endpoint = 'http://localhost:3001';
+  // const endpoint = window.location.host;
 
   const parkingLotSocket = io(`${endpoint}/zones`); //{ path: `${endpoint}/zones` });
   const parkingSpotSocket = io(`${endpoint}/parking_spot`); //{ path: `${endpoint}/parkingSpot` });
@@ -167,7 +182,9 @@ const App = ({ classes, ...props }) => {
                 hidden={false}
                 reqAdmin={false}
                 reqLogin={false}
-                component={WelcomeTab}
+                render={() => (
+                  <WelcomeTab classes={classes} userSocket={userSocket} />
+                )}
               />
               <Route
                 exact
@@ -178,7 +195,7 @@ const App = ({ classes, ...props }) => {
                 hidden={false}
                 reqAdmin={false}
                 reqLogin={false}
-                component={MainMap}
+                render={() => <MainMap userSocket={userSocket} />}
               />
               <div
                 id="group"
@@ -199,10 +216,14 @@ const App = ({ classes, ...props }) => {
                   reqAdmin={false}
                   reqLogin={false}
                   hidden={false}
-                  component={Dashboard}
+                  render={() => (
+                    <Dashboard
+                      transactionHistorySocket={transactionHistorySocket}
+                      userSocket={userSocket}
+                    />
+                  )}
                 />
                 <Route
-                  exact
                   path="/transaction_history"
                   label="Transaction History"
                   key="/transaction_history"
@@ -214,6 +235,7 @@ const App = ({ classes, ...props }) => {
                   render={() => (
                     <TransactionHistory
                       classes={classes}
+                      userSocket={userSocket}
                       socket={transactionHistorySocket}
                     />
                   )}
@@ -241,7 +263,11 @@ const App = ({ classes, ...props }) => {
                   reqAdmin={false}
                   reqLogin={true}
                   render={() => (
-                    <AccountPage socket={userSocket} isLoggedIn={isLoggedIn} />
+                    <AccountPage
+                      socket={userSocket}
+                      history={history}
+                      isLoggedIn={isLoggedIn}
+                    />
                   )}
                 />
                 <Route
@@ -261,13 +287,13 @@ const App = ({ classes, ...props }) => {
               <Route
                 exact
                 path="/bounty"
-                label="Go To Class"
+                label="Report"
                 key="/bounty"
                 icon={<ReportIcon />}
                 hidden={false}
                 reqAdmin={false}
                 reqLogin={false}
-                component={BountySystem}
+                render={() => <BountySystem userSocket={userSocket} />}
               />
               {/*render={() => <UserInfo isLoggedIn={isLoggedIn} socket={userSocket} />}*/}
               <Route
@@ -287,7 +313,12 @@ const App = ({ classes, ...props }) => {
                 label="Spot Page"
                 reqAdmin={false}
                 reqLogin={false}
-                render={() => <ParkingSpot socket={parkingSpotSocket} />}
+                render={() => (
+                  <ParkingSpot
+                    userSocket={userSocket}
+                    socket={parkingSpotSocket}
+                  />
+                )}
               />
               <Route
                 path="/zones/:zone_id"
@@ -296,7 +327,9 @@ const App = ({ classes, ...props }) => {
                 hidden={true}
                 reqAdmin={false}
                 reqLogin={false}
-                render={() => <Zone socket={parkingLotSocket} />}
+                render={() => (
+                  <Zone userSocket={userSocket} socket={parkingLotSocket} />
+                )}
               />
             </TabChooser>
           </Router>

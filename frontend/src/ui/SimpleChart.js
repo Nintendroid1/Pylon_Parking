@@ -1,3 +1,8 @@
+// ==++==
+// Adapted from the Dashboard template:
+//    https://github.com/mui-org/material-ui/tree/master/docs/src/pages/getting-started/templates/dashboard
+// ==--==
+
 import React, { useState } from 'react';
 import Chart from 'react-apexcharts';
 import { Typography, Card, CardMedia } from '@material-ui/core';

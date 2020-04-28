@@ -1,3 +1,7 @@
+/**
+ * Contains functions and components used in manipulating time.
+ */
+
 import React, { useState } from 'react';
 import 'date-fns';
 import Grid from '@material-ui/core/Grid';
@@ -9,30 +13,14 @@ import {
 import { TimePicker } from './parking-spot-components.js';
 // import { TimePicker as TimePicker } from '@material-ui/pickers'
 import Button from '@material-ui/core/Button';
-import {
-  withStyles,
-  MuiThemeProvider,
-  createMuiTheme
-} from '@material-ui/core/styles';
-import { KeyboardTimePicker } from '@material-ui/pickers';
 import Checkbox from '@material-ui/core/Checkbox';
-import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
-import CheckBoxIcon from '@material-ui/icons/CheckBox';
-import Favorite from '@material-ui/icons/Favorite';
-import FavoriteBorder from '@material-ui/icons/FavoriteBorder';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 
-const styles = theme => ({
-  root: {
-    display: 'flex',
-    flexGrow: 1
-  }
-});
+/*
+  Finds the difference in time between the two given military times.
 
-// Number of seconds between UTC time and EST time.
-const UTCToESTInSec = 4 * 60 * 60;
-
-// returns time in minutes.
+  Returns the time in minutes.
+*/
 const militaryTimeDifference = (startTime, endTime) => {
   let [startTimeHour, startTimeMinute] = startTime
     .split(':')
@@ -43,17 +31,25 @@ const militaryTimeDifference = (startTime, endTime) => {
   startTimeMinute = 0;
   startTimeHour += 1;
 
-  timeDiff += endTimeHour - startTimeHour + (endTimeMinute - startTimeMinute);
+  timeDiff += (endTimeHour - startTimeHour) * 60 + endTimeMinute;
 
   return timeDiff;
 };
 
+/*
+  Returns true if the given military time is a multiple
+  of 15 minutes, false otherwise.
+*/
 const isTimeMultipleOf15 = time => {
   const [, minute] = time.split(':').map(e => Number(e));
 
   return minute % 15 === 0;
 };
 
+/*
+  Returns the given military time rounded up to the nearest 15
+  minutes.
+*/
 const roundUpToNearest15 = time => {
   const [hour, minute] = time.split(':').map(e => Number(e));
   const newTime =
@@ -62,13 +58,36 @@ const roundUpToNearest15 = time => {
   return newTime;
 };
 
+/*
+  Subtracts one minute from the given military time.
+  24:00 becomes 00:00.
+*/
+const minusOneMinMT = time => {
+  let [hour, minute] = time.split(':').map(e => Number(e));
+
+  if (minute === 0) {
+    minute = 59;
+    hour = hour === 0 ? 23 : hour - 1;
+  } else {
+    minute--;
+  }
+
+  return hour + ':' + minute;
+};
+
+/*
+  Converts the military time to standard US time in AM/PM.
+*/
 const convertMilitaryTimeToNormal = time => {
   let [hour, minutes] = time.split(':');
+  hour = Number(hour);
   let period = 'AM';
 
   if (hour > 12) {
     period = 'PM';
     hour -= 12;
+  } else if (hour === 0) {
+    hour = 12;
   }
 
   return hour + ':' + minutes + ' ' + period;
@@ -76,17 +95,28 @@ const convertMilitaryTimeToNormal = time => {
 
 // sortDirection === 'asc' means earliest to latest
 // sortDirection === 'desc' means latest to earliest.
+/*
+  Sorts the list of military times given the direction to sort
+  and the property in the object to sort.
+*/
 const sortByMilitaryTime = (data, sortDirection, columnToSort) => {
   const sortedData = data.sort(compareParkingSpotTimes(columnToSort));
   return sortDirection === 'asc' ? sortedData : sortedData.reverse();
 };
 
+/*
+  Compares two parking spot times based on the property to compare.
+  i.e. start_time or end_time.
+*/
 const compareParkingSpotTimes = columnToSort => (spot1, spot2) => {
   return compareMilitaryTime(spot1[columnToSort], spot2[columnToSort]);
 };
 
 // If time1 earlier than time2, then return -1.
 // If time2 earlier than time1, then return 1.
+/*
+  Compares two military times.
+*/
 const compareMilitaryTime = (time1, time2) => {
   time1 = time1.split(':').map(e => Number(e));
   time2 = time2.split(':').map(e => Number(e));
@@ -104,15 +134,10 @@ const compareMilitaryTime = (time1, time2) => {
   return 0;
 };
 
-// const convertNormalToMilitary = time => {
-//   let [hour, minute, temp] = time.split(':');
-//   const [minute, period] = temp.split(' ');
-//   if (period === 'PM') {
-//     hour = Number(hour) + 12;
-//   }
-//   return hour + ':' + minute;
-// };
-
+/*
+  Converts the given epoch time to military time.
+  If the time zone is not specified, then defaults to UTC.
+*/
 const convertEpochToMilitary = epoch => {
   const option = {
     timeZone: 'UTC',
@@ -122,14 +147,48 @@ const convertEpochToMilitary = epoch => {
   };
 
   const temp_date = new Date(epoch * 1000);
-  return temp_date.toLocaleTimeString('en-US', option);
+  const retval = temp_date.toLocaleTimeString('en-US', option);
+  return retval === '24:00' ? '00:00' : retval;
 };
 
+/*
+  Finds the number of 15 minutes intervals between the 
+  given start and end time, which are Epoch seconds.
+*/
+const timeDiffInEpoch15 = (startTime, endTime) => {
+  return (endTime - startTime) / (1000 * 60 * 15);
+};
+
+/*
+  Increases the minute of given time in military time by one
+  minute.
+*/
+const increaseMTimeBy1Min = time => {
+  let [hour, minute] = time.split(':').map(e => Number(e));
+
+  minute++;
+  if (minute === 60) {
+    minute = 0;
+    hour = hour + 1 === 24 ? 0 : hour + 1;
+  }
+
+  return hour + ':' + minute;
+};
+
+/*
+  Returns the current time in UTC time, meaning the time is UTC,
+  but read as if it was EDT.
+*/
 const getCurrentTimeInUTC = () => {
-  return new Date(Date.now() - (4 * 60 * 60 * 1000));
-}
+  // Date.now() returns UTC time.
+  return new Date(Date.now() + 4 * 60 * 60 * 1000);
+};
 
 // Expects military time.
+/*
+  Converts military time to Epoch, expects the date to be
+  UTC and the time to be correct in UTC.
+*/
 const convertMilitaryToEpoch = (date, time) => {
   const [hour, minute] = time.split(':');
   const year = date.getUTCFullYear();
@@ -139,11 +198,17 @@ const convertMilitaryToEpoch = (date, time) => {
   return new Date(Date.UTC(year, month, day, hour, minute)).getTime() / 1000;
 };
 
+/*
+  Converts Epoch to Standard US AM/PM time.
+*/
 const convertEpochToNormal = epoch => {
-  return new Date(epoch).toUTCString();
+  return convertMilitaryTimeToNormal(convertEpochToMilitary(epoch));
 };
 
-const DateFilter = ({ time, handleDateFilter, updateTime, ...props }) => {
+/*
+  Component used to filter the date.
+*/
+const DateFilter = ({ time, handleDateFilter, updateTime }) => {
   const handleOnClick = event => {
     event.preventDefault();
     handleDateFilter();
@@ -152,14 +217,22 @@ const DateFilter = ({ time, handleDateFilter, updateTime, ...props }) => {
   return (
     <>
       <CustomDatePicker time={time} updateTime={updateTime} />
-      <Button variant="contained" color="primary" onClick={handleOnClick}>
+      <Button
+        styles={{ margin: '5px' }}
+        variant="contained"
+        color="primary"
+        onClick={handleOnClick}
+      >
         Filter!
       </Button>
     </>
   );
 };
 
-const CustomDatePicker = ({ time, updateTime, handleDateChange, ...props }) => {
+/*
+  A component that displays a date component.
+*/
+const CustomDatePicker = ({ time, updateTime, handleDateChange }) => {
   return (
     <>
       <KeyboardDatePicker
@@ -181,6 +254,10 @@ const CustomDatePicker = ({ time, updateTime, handleDateChange, ...props }) => {
 
 // Used by list-parking-spots.js.
 // Filtering by date and time.
+/*
+  Component that allows for filtering by date, start time, and
+  end time.
+*/
 const TimeFilter = ({
   isDark,
   updateLogin,
@@ -190,32 +267,21 @@ const TimeFilter = ({
   updateAdmin,
   onSubmit,
   currentTimeFilter,
-  updateCurrentTimeFilter,
-  ...props
+  updateCurrentTimeFilter
 }) => {
-  /*
-  let today = new Date();
-  let timeSplit = today.toTimeString().split(':');
-  let currTime = timeSplit[0].concat(':', timeSplit[1]);
-
-  const [time, updateTime] = useState({
-    date: today,
-    startTime: currTime,
-    endTime: '24:00',
-    privateKey: '',
-    showPrivateKey: false
-  });*/
-
   const [checkBoxes, updateCheckBoxes] = useState({
     startTimeBox: false,
     endTimeBox: false
   });
 
-  const handleChangeCheckBox = (event) => {
-    updateCheckBoxes({ ...checkBoxes, [event.target.name]: event.target.checked });
+  const handleChangeCheckBox = event => {
+    updateCheckBoxes({
+      ...checkBoxes,
+      [event.target.name]: event.target.checked
+    });
   };
 
-
+  // Handles the filtering.
   const handleSubmit = event => {
     event.preventDefault();
     onSubmit(currentTimeFilter, checkBoxes);
@@ -226,6 +292,7 @@ const TimeFilter = ({
     updateCurrentTimeFilter({ ...currentTimeFilter, [name]: value });
   };
 
+  // Handles a change in date, which is an automatic filtering.
   const handleDateChange = newDate => {
     console.log(newDate);
 
@@ -233,7 +300,7 @@ const TimeFilter = ({
     const newDateObj = {
       date: newDate,
       startTime: '00:00',
-      endTime: '24:00'
+      endTime: '23:59'
     };
 
     const resetCheckBoxes = {
@@ -256,49 +323,51 @@ const TimeFilter = ({
               handleDateChange={handleDateChange}
             />
           </Grid>
-          <Grid>
-            <TimePicker
-              color="secondary"
-              handleTimeChange={handleTimeChange}
-              time={currentTimeFilter.startTime}
-              name={'startTime'}
-              label={'Start Time'}
-              variant="inline"
-            />
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={checkBoxes.startTimeBox}
-                  onChange={handleChangeCheckBox}
-                  name="startTimeBox"
-                  color="primary"
+          <Grid container spacing={2}>
+            <Grid item xs={12}>
+              <Grid>
+                <TimePicker
+                  color="secondary"
+                  handleTimeChange={handleTimeChange}
+                  time={currentTimeFilter.startTime}
+                  name={'startTime'}
+                  label={'Start Time'}
+                  variant="inline"
                 />
-              }
-              label="Exact Time"
-            />
-          </Grid>
-          <Grid>
-            <TimePicker
-              color="secondary"
-              handleTimeChange={handleTimeChange}
-              time={currentTimeFilter.endTime}
-              name={'endTime'}
-              label={'End Time'}
-              variant="inline"
-            />
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={checkBoxes.endTimeBox}
-                  onChange={handleChangeCheckBox}
-                  name="endTimeBox"
-                  color="primary"
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={checkBoxes.startTimeBox}
+                      onChange={handleChangeCheckBox}
+                      name="startTimeBox"
+                      color="primary"
+                    />
+                  }
+                  label="Exact Time"
                 />
-              }
-              label="Exact Time"
-            />
-          </Grid>
-            {/*<KeyboardTimePicker
+              </Grid>
+              <Grid>
+                <TimePicker
+                  color="secondary"
+                  handleTimeChange={handleTimeChange}
+                  time={currentTimeFilter.endTime}
+                  name={'endTime'}
+                  label={'End Time'}
+                  variant="inline"
+                />
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={checkBoxes.endTimeBox}
+                      onChange={handleChangeCheckBox}
+                      name="endTimeBox"
+                      color="primary"
+                    />
+                  }
+                  label="Exact Time"
+                />
+              </Grid>
+              {/*<KeyboardTimePicker
               color="secondary"
               handleTimeChange={handleTimeChange}
               time={currentTimeFilter.endTime}
@@ -308,10 +377,17 @@ const TimeFilter = ({
               minutesStep={15}
               placeholder="05:00 AM"
             />*/}
-          <Grid>
-            <Button variant="contained" color="primary" onClick={handleSubmit}>
-              Filter!
-            </Button>
+            </Grid>
+            <Grid xs item>
+              <Button
+                styles={{ margin: '10px' }}
+                variant="contained"
+                color="primary"
+                onClick={handleSubmit}
+              >
+                Filter!
+              </Button>
+            </Grid>
           </Grid>
         </form>
       </MuiPickersUtilsProvider>
@@ -401,67 +477,8 @@ export {
   convertEpochToNormal,
   convertMilitaryToEpoch,
   getCurrentTimeInUTC,
-  DateFilter
+  DateFilter,
+  timeDiffInEpoch15,
+  minusOneMinMT,
+  increaseMTimeBy1Min
 };
-
-/*
-
-const TimeFilter = props => {
-  const { onSubmit, popUpTitle, popUpContent } = props;
-
-  let today = new Date();
-  let timeSplit = today.toTimeString().split(':');
-  let currTime = timeSplit[0].concat(':', timeSplit[1]);
-
-  const [time, updateTime] = useState({
-    date: today,
-    startTime: currTime,
-    endTime: '24:00',
-    privateKey: '',
-    showPrivateKey: false
-  });
-
-  const handleDateChange = newDate => {
-    updateTime({ ...time, date: newDate });
-  };
-
-  const handleSubmit = () => {
-    onSubmit(time);
-  };
-
-  return (
-    <>
-      <MuiPickersUtilsProvider utils={DateFnsUtils}>
-        <form>
-          <Grid container justify="space-around">
-            <KeyboardDatePicker
-              disableToolbar
-              variant="inline"
-              format="MM/dd/yyyy"
-              margin="normal"
-              label="Date"
-              value={time.date}
-              onChange={handleDateChange}
-              KeyboardButtonProps={{
-                'aria-label': 'change date'
-              }}
-            />
-          </Grid>
-          <Grid>
-            <StartEndTime
-              time={time}
-              buttonName={'Filter'}
-              updateTime={updateTime}
-              popUpTitle={popUpTitle}
-              popUpContent={popUpContent}
-              handleOnConfirm={handleSubmit}
-            />
-          </Grid>
-        </form>
-      </MuiPickersUtilsProvider>
-    </>
-  );
-};
-
-export default TimeFilter;
-*/

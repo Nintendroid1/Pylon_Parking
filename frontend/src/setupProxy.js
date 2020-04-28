@@ -8,4 +8,5 @@ module.exports = function(app) {
     proxy('/api/socket.io', { target: `http://${api_server}:3001/`, ws: true })
   );
   app.use(proxy('/api', { target: `http://${api_server}:3001/` }));
+  app.use(proxy('/media', { target: `http://${api_server}:3001/` }));
 };
