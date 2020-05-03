@@ -9,7 +9,7 @@ today = datetime.today()
 # next_month_end = today + relativedelta(days=7)# - timedelta(days=1)
 
 start_date = datetime.strptime("%4d-%02d-%02d 00:00:00" % (today.year, today.month, today.day), "%Y-%m-%d %H:%M:%S")
-end_date = today + relativedelta(days=7)# - timedelta(days=1)
+end_date = today + relativedelta(days=14)# - timedelta(days=1)
 
 # start_datestr = "2020-04-01"
 # # end_datestr = "2020-05-31"
